@@ -3,114 +3,257 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>워크스페이스 · 아보라Edu</title>
+  <title>마이 프로젝트 · 아보라Edu</title>
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
   <link rel="stylesheet" href="edu.css" />
 </head>
-<body>
-  <div class="page page-boards">
-    <header class="site-header">
-      <div class="shell header-grid">
-        <a class="brand" href="edu.html">
-          <img src="assets/edu/avora-logo.png" alt="AVORA" class="brand-logo" />
-          <span class="brand-edu">Edu</span>
+<body class="is-app">
+  <div class="app-shell">
+    <aside class="app-rail" aria-label="작업 메뉴">
+      <a class="rail-logo" href="edu.html" title="아보라Edu" aria-label="아보라Edu 홈">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </a>
+      <a class="rail-plus" href="edu-workspace.html?board=new" title="새 프로젝트" aria-label="새 프로젝트">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      </a>
+      <nav class="rail-nav">
+        <a class="rail-item is-on" href="edu-boards.html" title="마이 프로젝트" aria-current="page">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
         </a>
-        <nav class="nav-actions">
-          <a class="btn" href="edu.html">랜딩</a>
-          <a class="btn btn-brand" href="edu-workspace.html?board=new">새 보드</a>
-        </nav>
-      </div>
-    </header>
+        <a class="rail-item" href="edu-workspace.html?board=photo" title="영상 만들기">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3z"/></svg>
+        </a>
+        <a class="rail-item" href="edu-workspace.html?board=campus" title="AI 캐릭터">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+        </a>
+      </nav>
+      <button class="rail-item rail-foot" type="button" title="설정" aria-label="설정">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </aside>
 
-    <main class="section shell boards-main">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Workspace</p>
-          <h1 class="boards-title">최근 보드</h1>
+    <div class="app-main">
+      <header class="proj-top">
+        <div class="proj-top-left">
+          <a class="proj-back" href="edu.html">‹ 뒤로</a>
+          <h1>마이 프로젝트</h1>
         </div>
-        <span>팀 스페이스 · 시나리오</span>
-      </div>
-
-      <div class="board-grid">
-        <a class="board-card board-card-new" href="edu-workspace.html?board=new">
-          <div class="board-thumb board-thumb-new">
-            <span>+</span>
-            <b>새 시나리오</b>
-          </div>
-        </a>
-
-        <a class="board-card" href="edu-workspace.html?board=photo">
-          <div class="board-thumb">
-            <img src="assets/edu/blank.svg" alt="" />
-            <img src="assets/edu/blank.svg" alt="" />
-            <img src="assets/edu/blank.svg" alt="" />
-          </div>
-          <div class="board-body">
-            <h3>광합성 실험 가이드</h3>
-            <div class="board-meta">
-              <span>샷 3 · 오늘</span>
-              <span class="avatars"><span class="a-purple">지</span><span class="a-cyan">민</span><span class="a-amber">하</span></span>
+        <div class="proj-top-right">
+          <label class="proj-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+            <input id="projSearch" type="search" placeholder="프로젝트 검색" autocomplete="off" />
+          </label>
+          <div class="proj-pop-wrap">
+            <button class="pill-btn" type="button" id="inviteBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+              팀 초대
+            </button>
+            <div class="proj-pop" id="invitePop" hidden>
+              <p class="proj-pop-title">팀 초대</p>
+              <p class="proj-pop-copy">이메일을 넣으면 같은 캔버스에 들어와 함께 편집할 수 있습니다.</p>
+              <form class="invite-row" id="inviteForm">
+                <input id="inviteEmail" type="email" placeholder="이메일" required />
+                <select id="inviteRole" aria-label="권한">
+                  <option value="edit">편집 가능</option>
+                  <option value="view">보기만</option>
+                </select>
+                <button type="submit">초대</button>
+              </form>
+              <ul class="invite-list" id="inviteList">
+                <li><span class="a-purple">지</span> 지수 · 소유자</li>
+                <li><span class="a-cyan">민</span> 민재 · 편집 가능</li>
+                <li><span class="a-amber">하</span> 하은 · 보기만</li>
+              </ul>
             </div>
           </div>
-        </a>
-
-        <a class="board-card" href="edu-workspace.html?board=campus">
-          <div class="board-thumb">
-            <img src="assets/edu/blank.svg" alt="" />
-            <img src="assets/edu/blank.svg" alt="" />
-          </div>
-          <div class="board-body">
-            <h3>캠퍼스 오리엔테이션</h3>
-            <div class="board-meta">
-              <span>샷 6 · 어제</span>
-              <span class="avatars"><span class="a-rose">유</span><span class="a-purple">지</span></span>
+          <div class="proj-pop-wrap">
+            <button class="pill-btn" type="button" id="shareBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+              공유
+            </button>
+            <div class="proj-pop proj-pop-share" id="sharePop" hidden>
+              <p class="proj-pop-title">공유</p>
+              <button class="share-opt" type="button" id="postClass">
+                <span class="share-ico">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+                </span>
+                <span>
+                  <strong>학급에 게시</strong>
+                  <em>수업 보드를 학급 스페이스에 올려 함께 보게 합니다.</em>
+                </span>
+              </button>
+              <button class="share-opt" type="button" id="copyLink">
+                <span class="share-ico">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.07 0l1.41-1.41a5 5 0 0 0-7.07-7.07L10 5.93"/><path d="M14 11a5 5 0 0 0-7.07 0L5.52 12.4a5 5 0 0 0 7.07 7.07L14 18.07"/></svg>
+                </span>
+                <span>
+                  <strong>공유 링크</strong>
+                  <em>이 링크가 있는 사람은 같은 캔버스에 들어와 함께 편집할 수 있습니다.</em>
+                </span>
+              </button>
+              <input id="shareLink" type="hidden" value="https://edu.avora.ai/p/photosynthesis" />
             </div>
           </div>
-        </a>
+        </div>
+      </header>
 
-        <a class="board-card" href="edu-workspace.html?board=sejong">
-          <div class="board-thumb">
-            <img src="assets/edu/blank.svg" alt="" />
-            <img src="assets/edu/blank.svg" alt="" />
-            <img src="assets/edu/blank.svg" alt="" />
-          </div>
-          <div class="board-body">
-            <h3>세종, 한글을 만들다</h3>
-            <div class="board-meta">
-              <span>샷 8 · 3일 전</span>
-              <span class="avatars"><span class="a-amber">하</span><span class="a-cyan">민</span></span>
+      <main class="proj-body">
+        <div class="proj-grid" id="projGrid">
+          <a class="proj-card proj-card-new" href="edu-workspace.html?board=new" data-name="새 시나리오 프로젝트 만들기 제작 시작">
+            <div class="proj-thumb proj-thumb-new">
+              <span>+</span>
+              <b>제작 시작</b>
             </div>
-          </div>
-        </a>
+            <div class="proj-meta">
+              <h3>새 시나리오 프로젝트 만들기</h3>
+            </div>
+          </a>
 
-        <a class="board-card" href="edu-workspace.html?board=math">
-          <div class="board-thumb">
-            <img src="assets/edu/blank.svg" alt="" />
-          </div>
-          <div class="board-body">
-            <h3>분수 개념 3분 컷</h3>
-            <div class="board-meta">
-              <span>샷 4 · 초안</span>
-              <span class="avatars"><span class="a-cyan">민</span></span>
+          <a class="proj-card" href="edu-workspace.html?board=photo" data-name="광합성 실험 가이드">
+            <div class="proj-thumb"><img src="assets/edu/blank.svg" alt="" /></div>
+            <div class="proj-meta">
+              <h3>광합성 실험 가이드</h3>
+              <time>2026-09-12</time>
+              <button class="more-btn" type="button" aria-label="더보기">⋯</button>
             </div>
-          </div>
-        </a>
+          </a>
 
-        <a class="board-card" href="edu-workspace.html?board=water">
-          <div class="board-thumb">
-            <img src="assets/edu/blank.svg" alt="" />
-            <img src="assets/edu/blank.svg" alt="" />
-          </div>
-          <div class="board-body">
-            <h3>물의 순환</h3>
-            <div class="board-meta">
-              <span>샷 5 · 지난주</span>
-              <span class="avatars"><span class="a-purple">지</span><span class="a-amber">하</span></span>
+          <a class="proj-card" href="edu-workspace.html?board=campus" data-name="캠퍼스 오리엔테이션">
+            <div class="proj-thumb proj-thumb-empty">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="m4 16 5-6 4 4 3-4 4 6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
             </div>
-          </div>
-        </a>
-      </div>
-    </main>
+            <div class="proj-meta">
+              <h3>캠퍼스 오리엔테이션</h3>
+              <time>2026-09-12</time>
+              <button class="more-btn" type="button" aria-label="더보기">⋯</button>
+            </div>
+          </a>
+
+          <a class="proj-card" href="edu-workspace.html?board=sejong" data-name="세종, 한글을 만들다">
+            <div class="proj-thumb"><img src="assets/edu/blank.svg" alt="" /></div>
+            <div class="proj-meta">
+              <h3>세종, 한글을 만들다</h3>
+              <time>2026-09-09</time>
+              <button class="more-btn" type="button" aria-label="더보기">⋯</button>
+            </div>
+          </a>
+
+          <a class="proj-card" href="edu-workspace.html?board=math" data-name="분수 개념 3분 컷">
+            <div class="proj-thumb"><img src="assets/edu/blank.svg" alt="" /></div>
+            <div class="proj-meta">
+              <h3>분수 개념 3분 컷</h3>
+              <time>2026-09-08</time>
+              <button class="more-btn" type="button" aria-label="더보기">⋯</button>
+            </div>
+          </a>
+
+          <a class="proj-card" href="edu-workspace.html?board=water" data-name="물의 순환">
+            <div class="proj-thumb proj-thumb-empty">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="m4 16 5-6 4 4 3-4 4 6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+            </div>
+            <div class="proj-meta">
+              <h3>물의 순환</h3>
+              <time>2026-09-05</time>
+              <button class="more-btn" type="button" aria-label="더보기">⋯</button>
+            </div>
+          </a>
+        </div>
+        <p class="proj-end" id="projEnd">더 이상 없습니다</p>
+        <p class="proj-end" id="projEmpty" hidden>검색 결과가 없습니다</p>
+      </main>
+    </div>
   </div>
+
+  <div class="more-menu" id="moreMenu" hidden>
+    <button type="button" data-more="rename">이름 변경</button>
+    <button type="button" data-more="dup">복제</button>
+    <button type="button" data-more="del">삭제</button>
+  </div>
+
+  <script>
+    (() => {
+      const search = document.getElementById("projSearch");
+      const cards = [...document.querySelectorAll(".proj-card")];
+      const empty = document.getElementById("projEmpty");
+      const end = document.getElementById("projEnd");
+      const invitePop = document.getElementById("invitePop");
+      const sharePop = document.getElementById("sharePop");
+      const moreMenu = document.getElementById("moreMenu");
+
+      const closePops = () => {
+        invitePop.hidden = true;
+        sharePop.hidden = true;
+        moreMenu.hidden = true;
+      };
+
+      search.addEventListener("input", () => {
+        const q = search.value.trim().toLowerCase();
+        let n = 0;
+        cards.forEach((c) => {
+          const on = !q || (c.dataset.name || "").toLowerCase().includes(q);
+          c.hidden = !on;
+          if (on) n += 1;
+        });
+        empty.hidden = n > 0;
+        end.hidden = n === 0;
+      });
+
+      document.getElementById("inviteBtn").onclick = (e) => {
+        e.stopPropagation();
+        sharePop.hidden = true;
+        invitePop.hidden = !invitePop.hidden;
+      };
+      document.getElementById("shareBtn").onclick = (e) => {
+        e.stopPropagation();
+        invitePop.hidden = true;
+        sharePop.hidden = !sharePop.hidden;
+      };
+
+      document.getElementById("inviteForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const email = document.getElementById("inviteEmail");
+        const role = document.getElementById("inviteRole");
+        const li = document.createElement("li");
+        const mark = document.createElement("span");
+        mark.className = "a-rose";
+        mark.textContent = (email.value[0] || "?").toUpperCase();
+        li.append(mark, document.createTextNode(` ${email.value} · ${role.selectedOptions[0].text}`));
+        document.getElementById("inviteList").appendChild(li);
+        email.value = "";
+      });
+
+      document.getElementById("copyLink").onclick = async () => {
+        const url = document.getElementById("shareLink").value;
+        try { await navigator.clipboard.writeText(url); } catch {}
+        const em = document.querySelector("#copyLink em");
+        const prev = em.textContent;
+        em.textContent = "링크를 복사했습니다. 받은 사람은 바로 들어와 함께 편집할 수 있습니다.";
+        window.setTimeout(() => { em.textContent = prev; }, 1800);
+      };
+      document.getElementById("postClass").onclick = () => {
+        const em = document.querySelector("#postClass em");
+        em.textContent = "학급 스페이스에 게시했습니다.";
+      };
+
+      document.querySelectorAll(".more-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const r = btn.getBoundingClientRect();
+          moreMenu.hidden = false;
+          moreMenu.style.left = `${r.right - 140}px`;
+          moreMenu.style.top = `${r.bottom + 6}px`;
+        });
+      });
+      moreMenu.addEventListener("click", (e) => {
+        e.stopPropagation();
+        moreMenu.hidden = true;
+      });
+
+      document.addEventListener("click", closePops);
+      invitePop.addEventListener("click", (e) => e.stopPropagation());
+      sharePop.addEventListener("click", (e) => e.stopPropagation());
+    })();
+  </script>
 </body>
 </html>

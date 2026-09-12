@@ -9,121 +9,233 @@
 </head>
 <body>
   <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="side-head">
+        <button class="play-chip" type="button" title="프로젝트" aria-label="프로젝트">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <span>▾</span>
+        </button>
+        <div class="side-title">
+          <strong id="boardName">광합성 실험 가이드</strong>
+          <span class="side-sep">|</span>
+          <button class="canvas-pick" type="button">캔버스 1 ▾</button>
+        </div>
+      </div>
+
+      <nav class="side-tabs" aria-label="사이드 패널">
+        <button type="button" data-side="kit">크리에이션 키트</button>
+        <button type="button" data-side="canvas">캔버스</button>
+        <button type="button" class="is-on" data-side="assets">자산</button>
+      </nav>
+
+      <div class="side-panel" data-side-panel="kit" hidden>
+        <button type="button" class="kit-item" data-kit="script">스크립트 생성기</button>
+        <button type="button" class="kit-item" data-kit="image">이미지</button>
+        <button type="button" class="kit-item" data-kit="video">비디오</button>
+        <button type="button" class="kit-item" data-kit="audio">오디오</button>
+        <button type="button" class="kit-item" data-kit="text">텍스트</button>
+      </div>
+
+      <div class="side-panel" data-side-panel="canvas" hidden>
+        <button type="button" class="canvas-item is-on">캔버스 1</button>
+        <button type="button" class="canvas-item">캔버스 2</button>
+        <button type="button" class="ghost-btn side-add" id="addCanvas">+ 캔버스</button>
+      </div>
+
+      <div class="side-panel is-on" data-side-panel="assets">
+        <div class="owner-toggle" role="tablist">
+          <button type="button" data-owner="personal">개인</button>
+          <button type="button" class="is-on" data-owner="agent">Agent</button>
+        </div>
+
+        <div class="owner-view" data-owner-view="personal" hidden>
+          <div class="empty-assets">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 13h6M8 9h.01"/></svg>
+            <p>소재 없음</p>
+          </div>
+        </div>
+
+        <div class="owner-view is-on" data-owner-view="agent">
+          <div class="ws-chat-card" id="agentCard">
+            <header class="ws-chat-head" id="chatHead">
+              <span class="ws-chat-mark" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+              </span>
+              <div class="ws-chat-head-copy">
+                <strong>Avora Director</strong>
+                <p>기획을 대화로 정리합니다.</p>
+              </div>
+              <span class="ws-agent-star" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.8 13.85 10.15 22.2 12 13.85 13.85 12 22.2 10.15 13.85 1.8 12 10.15 10.15Z"/></svg>
+              </span>
+            </header>
+            <div class="messages" id="agentLog">
+              <p class="empty">영상 방향을 자유롭게 말해 주세요.</p>
+            </div>
+          </div>
+          <div class="agent-chips">
+            <button type="button" data-agent="video">비디오 생성</button>
+            <button type="button" data-agent="upscale">고화질 연결</button>
+            <button type="button" data-agent="shot">다음 샷 제안</button>
+          </div>
+          <form class="ws-dock" id="agentForm">
+            <div class="ws-dock-bar">
+              <textarea id="agentInput" placeholder="무엇을 변경하거나 만들고 싶으신가요?" rows="2"></textarea>
+              <button class="ws-dock-send" type="submit" aria-label="전송">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </aside>
+
     <header class="topbar">
       <div class="topbar-left">
         <a class="brand" href="edu-boards.html" aria-label="아보라Edu 홈">
           <img src="assets/edu/avora-logo.png" alt="AVORA" class="brand-logo" />
-          <span class="brand-edu">Edu</span>
         </a>
-        <span class="crumb">/</span>
-        <a class="crumb-link" href="edu-boards.html">보드</a>
-        <span class="crumb">/</span>
-        <strong id="boardName">광합성 실험 가이드</strong>
-        <span class="pill">LIVE</span>
       </div>
-      <nav class="view-tabs" aria-label="보기">
-        <button type="button" class="view-tab is-active" data-view="flow">플로우</button>
-        <button type="button" class="view-tab" data-view="board">스토리보드</button>
-        <button type="button" class="view-tab" data-view="review">리뷰</button>
-      </nav>
       <div class="topbar-right">
-        <span class="av a-purple">지</span>
-        <span class="av a-cyan">민</span>
-        <span class="av a-amber">하</span>
-        <button class="ghost-btn" id="shareBtn" type="button">공유</button>
-        <button class="brand-btn" id="generateBtn" type="button">영상 생성</button>
+        <div class="presence" id="presence" aria-label="접속 중">
+          <button class="avatar a-cyan" type="button" title="민재 · 편집 중">민</button>
+          <button class="avatar a-amber" type="button" title="하은 · 함께 보는 중">하</button>
+          <div class="me-wrap">
+            <button class="me-btn" type="button" id="meBtn" title="지수 · 나">
+              <span class="avatar a-purple">지</span>
+              <span class="chev">▾</span>
+            </button>
+            <div class="me-pop" id="mePop" hidden>
+              <p>지수</p>
+              <span>이 캔버스에 접속 중</span>
+              <a href="edu-boards.html">마이 프로젝트</a>
+            </div>
+          </div>
+        </div>
+        <div class="present-wrap">
+          <div class="present-split" title="Present">
+            <button type="button" id="presentBtn" aria-label="프레젠트">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button type="button" id="presentMenuBtn" aria-label="프레젠트 옵션">▾</button>
+          </div>
+          <div class="present-pop" id="presentPop" hidden>
+            <button type="button" data-present="start">처음부터 재생</button>
+            <button type="button" data-present="current">현재 노드부터</button>
+          </div>
+        </div>
+        <div class="share-wrap">
+          <button class="share-cta" id="shareBtn" type="button">공유</button>
+          <div class="share-pop" id="sharePop" hidden>
+            <p class="share-pop-title">공유</p>
+            <p class="share-pop-lead">링크가 있는 사람은 지금 이 캔버스에 들어와, 같은 영상 프로세스를 함께 만들 수 있습니다.</p>
+            <form class="share-invite" id="shareInvite">
+              <input id="shareEmail" type="email" placeholder="이메일로 초대" required />
+              <select id="shareRole" aria-label="권한">
+                <option value="edit">편집 가능</option>
+                <option value="view">보기만</option>
+              </select>
+              <button type="submit">초대</button>
+            </form>
+            <ul class="share-people" id="sharePeople">
+              <li><span class="avatar a-purple">지</span> 지수 · 소유자 <em>나</em></li>
+              <li><span class="avatar a-cyan">민</span> 민재 · 편집 가능 <em class="live">접속 중</em></li>
+              <li><span class="avatar a-amber">하</span> 하은 · 편집 가능 <em class="live">접속 중</em></li>
+            </ul>
+            <div class="share-link-row">
+              <input id="shareLink" readonly value="https://edu.avora.ai/b/photosynthesis" />
+              <button type="button" id="copyLink">링크 복사</button>
+            </div>
+            <p class="share-hint">피그마처럼 동시에 들어와 노드를 붙이고 생성할 수 있습니다.</p>
+          </div>
+        </div>
       </div>
     </header>
 
-    <div class="workspace">
-      <aside class="rail">
-        <div class="tool-group">
-          <button type="button" class="tool is-active" data-tool="select" title="선택">↖</button>
-          <button type="button" class="tool" data-tool="pan" title="이동">✋</button>
-          <button type="button" class="tool" data-tool="connect" title="연결">⚭</button>
-          <button type="button" class="tool" data-tool="comment" title="코멘트">💬</button>
+    <div class="canvas" id="canvas">
+      <svg class="edges" id="edges"></svg>
+      <div class="world" id="world"></div>
+      <div class="live-cursors" id="liveCursors" aria-hidden="true">
+        <div class="live-cursor" data-peer="민" style="--peer:#0891b2; left: 360px; top: 210px">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 1 7.5 14.5 9 8.5 15 7z"/></svg>
+          <span>민재</span>
         </div>
-        <p class="rail-label">에셋</p>
-        <button type="button" class="asset-item" data-spawn="background"><span class="dot dot-bg"></span>배경</button>
-        <button type="button" class="asset-item" data-spawn="character"><span class="dot dot-char"></span>캐릭터</button>
-        <button type="button" class="asset-item" data-spawn="camera"><span class="dot dot-cam"></span>카메라 룩</button>
-        <button type="button" class="asset-item" data-spawn="shot"><span class="dot dot-shot"></span>샷</button>
-        <button type="button" class="asset-item" data-spawn="audio"><span class="dot dot-audio"></span>오디오</button>
-        <p class="rail-label">라이브러리</p>
-        <div class="lib-list" id="libraryList"></div>
-      </aside>
-
-      <section class="stage">
-        <div class="canvas-view is-active" data-view-panel="flow">
-          <div class="canvas" id="canvas">
-            <svg class="edges" id="edges"></svg>
-            <div class="world" id="world"></div>
-          </div>
-          <div class="canvas-hud">
-            <div class="zoom-bar">
-              <button type="button" id="zoomOut">−</button>
-              <span id="zoomLabel">100%</span>
-              <button type="button" id="zoomIn">+</button>
-              <button type="button" id="zoomFit">맞춤</button>
-            </div>
-            <p class="hint">드래그 이동 · 포트 클릭으로 연결 · 휠 줌</p>
-          </div>
+        <div class="live-cursor" data-peer="하" style="--peer:#d97706; left: 620px; top: 140px">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 1 7.5 14.5 9 8.5 15 7z"/></svg>
+          <span>하은</span>
         </div>
-        <div class="board-view" data-view-panel="board" hidden>
-          <div class="story-grid" id="storyGrid"></div>
-        </div>
-        <div class="review-view" data-view-panel="review" hidden>
-          <div class="player">
-            <div class="player-frame" id="playerFrame">
-              <img src="assets/edu/blank.svg" alt="" />
-              <span class="player-badge" id="playerBadge">SHOT 01</span>
-              <p class="player-title" id="playerTitle"></p>
-            </div>
-            <div class="player-shots" id="playerShots"></div>
-          </div>
-        </div>
-      </section>
-
-      <aside class="inspector">
-        <header class="insp-head">
-          <p class="insp-kicker" id="inspKicker">샷</p>
-          <h2 id="inspTitle">샷</h2>
-        </header>
-        <div class="insp-body" id="inspBody"></div>
-      </aside>
-    </div>
-
-    <footer class="timeline">
-      <div class="tl-head">
-        <strong>스토리라인</strong>
-        <span id="tlMeta">15초 · 3샷</span>
       </div>
-      <div class="tl-track" id="tlTrack"></div>
-      <button type="button" class="brand-btn" id="tlGenerate">이 라인으로 생성</button>
-    </footer>
+    </div>
+
+    <div class="add-menu" id="addMenu" hidden>
+      <p class="add-menu-title">이 노드를 참조하여 생성</p>
+      <button type="button" data-spawn="text">텍스트</button>
+      <button type="button" data-spawn="image">이미지</button>
+      <button type="button" data-spawn="video" data-tour="video">비디오</button>
+      <button type="button" data-spawn="edit">스마트 편집 <em>BETA</em></button>
+      <button type="button" data-spawn="director">디렉터 콘솔 <em>NEW</em></button>
+      <button type="button" data-spawn="analyze">스마트 분석</button>
+      <button type="button" data-spawn="audio">오디오</button>
+      <button type="button" data-spawn="script">스크립트 생성기 <em>NEW</em></button>
+      <button type="button" data-spawn="ref">참조 노드</button>
+    </div>
+
+    <aside class="coach" id="coach">
+      <p id="coachText">+로 새 노드를 추가하세요.</p>
+      <div class="coach-row">
+        <span id="coachStep">1/4</span>
+        <div class="coach-actions">
+          <button type="button" id="coachPrev" hidden>이전</button>
+          <button type="button" class="coach-next" id="coachNext">다음</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="hud">
+      <button type="button" id="zoomOut">−</button>
+      <span id="zoomLabel">80%</span>
+      <button type="button" id="zoomIn">+</button>
+    </div>
   </div>
 
-  <div class="modal" id="shareModal" hidden>
-    <div class="modal-card">
-      <h3>보드 공유</h3>
-      <p>같은 시나리오에서 함께 편집할 수 있습니다.</p>
-      <label class="share-row">
-        <input id="shareLink" readonly value="https://edu.avora.ai/b/photosynthesis" />
-        <button type="button" id="copyLink">복사</button>
-      </label>
-      <button type="button" class="ghost-btn" id="closeShare">닫기</button>
+  <div class="present-mode" id="presentMode" hidden>
+    <div class="present-bar">
+      <span>프로세스 프레젠트 · <b id="presentCount">3명</b>이 함께 보고 있습니다</span>
+      <div class="present-nav">
+        <button type="button" id="presentPrev">이전</button>
+        <span id="presentStep">1/2</span>
+        <button type="button" id="presentNext">다음</button>
+        <button type="button" id="exitPresent">나가기</button>
+      </div>
     </div>
   </div>
-  <div class="modal" id="genModal" hidden>
-    <div class="modal-card">
-      <p class="eyebrow">RENDER</p>
-      <h3>이미지 · 영상 생성</h3>
-      <p>연결된 노드 순서대로 컷을 만듭니다. UI 프리뷰입니다.</p>
-      <div class="gen-bar"><span id="genFill"></span></div>
-      <p id="genStatus">큐에 올리는 중…</p>
-      <button type="button" class="ghost-btn" id="closeGen" hidden>닫기</button>
+
+  <div class="popover" id="framePop" hidden>
+    <div class="pop-preview"></div>
+    <b>프레임 캡처</b>
+    <p>영상에서 프레임을 선택해 편집하거나 이어질 영상을 생성하세요.</p>
+    <button type="button" class="ghost-btn" id="frameOk">확인</button>
+  </div>
+
+  <div class="look-modal" id="lookModal" hidden>
+    <div class="look-sheet">
+      <header class="look-head">
+        <h2>비주얼 스타일</h2>
+        <div class="look-head-acts">
+          <button type="button" id="lookReset">모두 초기화</button>
+          <button type="button" id="lookClose" aria-label="닫기">×</button>
+        </div>
+      </header>
+      <p class="look-lead">영화처럼 먼저 톤과 장르를 고정하면, 이후 이미지가 같은 영상미로 맞춰집니다.</p>
+      <div class="look-tabs" role="tablist">
+        <button type="button" class="is-on" data-look-tab="palette">컬러 팔레트</button>
+        <button type="button" data-look-tab="light">조명</button>
+        <button type="button" data-look-tab="art">스타일링 및 미술</button>
+      </div>
+      <div class="look-grid" id="lookGrid"></div>
     </div>
   </div>
+
   <script src="edu-workspace.js"></script>
 </body>
 </html>

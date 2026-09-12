@@ -24,10 +24,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build static site
         run: |
-          mkdir -p _site/assets/edu
+          mkdir -p _site/assets
           cp edu.html _site/index.html
           cp edu.html edu-boards.html edu-workspace.html edu.css edu-workspace.css edu-workspace.js _site/
-          cp assets/edu/* _site/assets/edu/
+          cp -R assets/edu _site/assets/
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

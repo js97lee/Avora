@@ -7,7 +7,7 @@
 ## 페이지 흐름
 
 1. 랜딩 — `edu.html`
-2. 최근 보드 — `edu-boards.html`
+2. 마이 프로젝트 — `edu-boards.html`
 3. 노드 워크스페이스 — `edu-workspace.html`
 
 ## 로컬 실행
@@ -17,4 +17,9 @@ python3 -m http.server 8765 --bind 127.0.0.1
 ```
 
 - 랜딩: http://127.0.0.1:8765/edu.html
-- 보드: http://127.0.0.1:8765/edu-boards.html
+- 마이 프로젝트: http://127.0.0.1:8765/edu-boards.html
+- 워크스페이스: http://127.0.0.1:8765/edu-workspace.html?board=photo
+
+## 배포
+
+GitHub Pages: https://js97lee.github.io/AvoraEdu/
