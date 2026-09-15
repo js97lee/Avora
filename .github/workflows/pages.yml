@@ -28,7 +28,7 @@ jobs:
           cp *.html *.css *.js _site/
           cp -R assets professor-board login _site/
           for file in _site/*.html; do
-            sed -i -E 's|(href|src|action)="/|\1="|g' "$file"
+            sed -i -E 's#(href|src|action)="/#\1="#g' "$file"
           done
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
