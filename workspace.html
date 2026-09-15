@@ -5,64 +5,87 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>보드 · 아보라</title>
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
-  <link rel="stylesheet" href="workspace.css" />
+  <link rel="stylesheet" href="workspace.css?v=kit25" />
+  <link rel="stylesheet" href="auth.css" />
+  <script src="auth.js"></script>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar" id="sidebar">
       <div class="side-head">
-        <button class="play-chip" type="button" title="프로젝트" aria-label="프로젝트">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          <span>▾</span>
-        </button>
+        <a class="back-chip" href="boards.html" title="뒤로" aria-label="마이 프로젝트로 돌아가기">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6 9 12l6 6"/></svg>
+        </a>
         <div class="side-title">
-          <strong id="boardName">광합성 실험 가이드</strong>
+          <span class="rename-host board-name-host">
+            <strong id="boardName" class="item-label">프로젝트 00</strong>
+          </span>
           <span class="side-sep">|</span>
-          <button class="canvas-pick" type="button">캔버스 1 ▾</button>
+          <button class="canvas-pick" type="button">페이지 1 ▾</button>
         </div>
       </div>
 
       <nav class="side-tabs" aria-label="사이드 패널">
-        <button type="button" data-side="kit">크리에이션 키트</button>
-        <button type="button" data-side="canvas">캔버스</button>
-        <button type="button" class="is-on" data-side="assets">자산</button>
+        <button type="button" data-side="kit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><rect x="14" y="14" width="7" height="7" rx="1.2"/></svg>
+          <span class="tab-label">에셋</span>
+        </button>
+        <button type="button" data-side="canvas">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h8l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v5h5"/><path d="M9 13h8M9 17h5"/></svg>
+          <span class="tab-label">페이지</span>
+        </button>
+        <button type="button" class="is-on" data-side="assets">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2.8 13.6 9.2 20 10.8 13.6 12.4 12 18.8 10.4 12.4 4 10.8 10.4 9.2Z"/><circle cx="18.2" cy="18.2" r="2.2"/></svg>
+          <span class="tab-label">채팅</span>
+        </button>
       </nav>
 
       <div class="side-panel" data-side-panel="kit" hidden>
-        <button type="button" class="kit-item" data-kit="script">스크립트 생성기</button>
-        <button type="button" class="kit-item" data-kit="image">이미지</button>
-        <button type="button" class="kit-item" data-kit="video">비디오</button>
-        <button type="button" class="kit-item" data-kit="audio">오디오</button>
-        <button type="button" class="kit-item" data-kit="text">텍스트</button>
+        <div class="asset-toolbar">
+          <button type="button" class="asset-tool" data-asset-tool="search" title="검색" aria-label="검색">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          </button>
+          <button type="button" class="asset-tool is-on" data-asset-tool="list" title="리스트" aria-label="리스트 보기">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/></svg>
+          </button>
+          <button type="button" class="asset-tool" data-asset-tool="filter" title="필터" aria-label="필터">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16l-6 8v5l-4 2v-7z"/></svg>
+          </button>
+          <span class="asset-toolbar-grow"></span>
+          <button type="button" class="asset-tool" id="addFolder" title="새 폴더" aria-label="새 폴더">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <button type="button" class="asset-tool" data-asset-tool="pop" title="펼치기" aria-label="펼치기">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>
+          </button>
+        </div>
+        <label class="asset-search" id="assetSearchWrap" hidden>
+          <input id="assetSearch" type="search" placeholder="검색" autocomplete="off" />
+        </label>
+        <div class="asset-tree" id="assetTree"></div>
       </div>
 
       <div class="side-panel" data-side-panel="canvas" hidden>
-        <button type="button" class="canvas-item is-on">캔버스 1</button>
-        <button type="button" class="canvas-item">캔버스 2</button>
-        <button type="button" class="ghost-btn side-add" id="addCanvas">+ 캔버스</button>
+        <button type="button" class="canvas-item is-on" data-page="0">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h8l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v5h5"/></svg>
+          <span class="item-label">페이지 1</span>
+        </button>
+        <button type="button" class="canvas-item" data-page="1">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h8l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v5h5"/></svg>
+          <span class="item-label">페이지 2</span>
+        </button>
+        <button type="button" class="ghost-btn side-add" id="addCanvas">+ 페이지</button>
       </div>
 
       <div class="side-panel is-on" data-side-panel="assets">
-        <div class="owner-toggle" role="tablist">
-          <button type="button" data-owner="personal">개인</button>
-          <button type="button" class="is-on" data-owner="agent">Agent</button>
-        </div>
-
-        <div class="owner-view" data-owner-view="personal" hidden>
-          <div class="empty-assets">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 13h6M8 9h.01"/></svg>
-            <p>소재 없음</p>
-          </div>
-        </div>
-
-        <div class="owner-view is-on" data-owner-view="agent">
+        <div class="owner-view is-on" data-owner-view="chat">
           <div class="ws-chat-card" id="agentCard">
             <header class="ws-chat-head" id="chatHead">
               <span class="ws-chat-mark" aria-hidden="true">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
               </span>
-              <div class="ws-chat-head-copy">
-                <strong>Avora Director</strong>
+              <div class="ws-chat-head-copy rename-host">
+                <strong class="item-label" data-agent-name>Avora Directing</strong>
                 <p>기획을 대화로 정리합니다.</p>
               </div>
               <span class="ws-agent-star" aria-hidden="true">
@@ -74,13 +97,13 @@
             </div>
           </div>
           <div class="agent-chips">
+            <button type="button" data-agent="brief">보드 브리프</button>
             <button type="button" data-agent="video">비디오 생성</button>
-            <button type="button" data-agent="upscale">고화질 연결</button>
-            <button type="button" data-agent="shot">다음 샷 제안</button>
+            <button type="button" data-agent="shot">다음 샷</button>
           </div>
           <form class="ws-dock" id="agentForm">
             <div class="ws-dock-bar">
-              <textarea id="agentInput" placeholder="무엇을 변경하거나 만들고 싶으신가요?" rows="2"></textarea>
+              <textarea id="agentInput" placeholder="Avora Directing에 무엇을 맡길까요?" rows="2"></textarea>
               <button class="ws-dock-send" type="submit" aria-label="전송">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
               </button>
@@ -91,11 +114,7 @@
     </aside>
 
     <header class="topbar">
-      <div class="topbar-left">
-        <a class="brand" href="boards.html" aria-label="아보라 홈">
-          <img src="assets/app/avora-logo.png" alt="AVORA" class="brand-logo" />
-        </a>
-      </div>
+      <div class="topbar-left"></div>
       <div class="topbar-right">
         <div class="presence" id="presence" aria-label="접속 중">
           <button class="avatar a-cyan" type="button" title="민재 · 편집 중">민</button>
@@ -109,6 +128,7 @@
               <p>지수</p>
               <span>이 캔버스에 접속 중</span>
               <a href="boards.html">마이 프로젝트</a>
+              <button type="button" data-logout>로그아웃</button>
             </div>
           </div>
         </div>
@@ -155,6 +175,7 @@
     <div class="canvas" id="canvas">
       <svg class="edges" id="edges"></svg>
       <div class="world" id="world"></div>
+      <img class="ws-watermark" src="assets/app/avora-logo.png" alt="" aria-hidden="true" />
       <div class="live-cursors" id="liveCursors" aria-hidden="true">
         <div class="live-cursor" data-peer="민" style="--peer:#0891b2; left: 360px; top: 210px">
           <svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 1 7.5 14.5 9 8.5 15 7z"/></svg>
@@ -167,18 +188,7 @@
       </div>
     </div>
 
-    <div class="add-menu" id="addMenu" hidden>
-      <p class="add-menu-title">이 노드를 참조하여 생성</p>
-      <button type="button" data-spawn="text">텍스트</button>
-      <button type="button" data-spawn="image">이미지</button>
-      <button type="button" data-spawn="video" data-tour="video">비디오</button>
-      <button type="button" data-spawn="edit">스마트 편집 <em>BETA</em></button>
-      <button type="button" data-spawn="director">디렉터 콘솔 <em>NEW</em></button>
-      <button type="button" data-spawn="analyze">스마트 분석</button>
-      <button type="button" data-spawn="audio">오디오</button>
-      <button type="button" data-spawn="script">스크립트 생성기 <em>NEW</em></button>
-      <button type="button" data-spawn="ref">참조 노드</button>
-    </div>
+    <div class="add-menu" id="addMenu" hidden></div>
 
     <aside class="coach" id="coach">
       <p id="coachText">+로 새 노드를 추가하세요.</p>
@@ -191,10 +201,29 @@
       </div>
     </aside>
 
-    <div class="hud">
-      <button type="button" id="zoomOut">−</button>
-      <span id="zoomLabel">80%</span>
-      <button type="button" id="zoomIn">+</button>
+    <div class="canvas-dock" id="canvasDock">
+      <div class="canvas-dock-bar">
+        <div class="canvas-dock-cluster" id="canvasDockCluster">
+          <div class="canvas-dock-list" id="canvasDockList"></div>
+          <div class="canvas-dock-tabs" role="tablist" aria-label="하단 탭">
+            <button type="button" class="canvas-dock-tab is-on" data-dock-tab="canvas" role="tab" aria-selected="true">캔버스</button>
+            <button type="button" class="canvas-dock-tab" data-dock-tab="node" role="tab" aria-selected="false">노드</button>
+          </div>
+          <button type="button" class="canvas-dock-add canvas-dock-add-item" id="canvasDockAdd" data-add-canvas="1" aria-label="캔버스 추가">
+            <b>+</b><span class="item-label">캔버스</span>
+          </button>
+        </div>
+        <button type="button" class="canvas-dock-overview" id="stackCanvases" aria-pressed="false" title="캔버스 전체보기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="3" width="16" height="5" rx="1"/><rect x="4" y="10" width="16" height="5" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg>
+          전체보기
+        </button>
+        <span class="canvas-dock-sep" aria-hidden="true"></span>
+        <div class="hud">
+          <button type="button" id="zoomOut">−</button>
+          <span id="zoomLabel">80%</span>
+          <button type="button" id="zoomIn">+</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -236,6 +265,31 @@
     </div>
   </div>
 
-  <script src="workspace.js"></script>
+  <div class="ctx-menu" id="ctxMenu" hidden>
+    <button type="button" data-ctx="rename">이름 변경</button>
+    <button type="button" data-ctx="delete">삭제</button>
+  </div>
+
+  <div class="asset-inspect" id="assetInspect" hidden>
+    <p class="asset-inspect-kicker" id="assetInspectKicker">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 16 5-6 4 4 3-4 4 6"/></svg>
+      <span>이미지 노드 1</span>
+    </p>
+    <div class="asset-inspect-card">
+      <button class="asset-inspect-close" type="button" id="assetInspectClose" aria-label="닫기">×</button>
+      <div class="asset-inspect-media" id="assetInspectMedia"></div>
+      <div class="asset-inspect-body">
+        <h3 id="assetInspectTitle"></h3>
+        <dl class="asset-inspect-meta">
+          <div><dt>제작자</dt><dd id="assetInspectAuthor"></dd></div>
+          <div><dt>생성 시간</dt><dd id="assetInspectWhen"></dd></div>
+        </dl>
+        <button class="asset-inspect-primary" type="button" id="assetAddCanvas">캔버스에 추가</button>
+        <button class="asset-inspect-secondary" type="button" id="assetAddAgent">채팅에 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="workspace.js?v=kit25"></script>
 </body>
 </html>

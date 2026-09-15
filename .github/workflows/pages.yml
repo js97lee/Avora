@@ -26,7 +26,7 @@ jobs:
         run: |
           mkdir -p _site/assets
           cp home.html _site/index.html
-          cp home.html boards.html workspace.html site.css workspace.css workspace.js _site/
+          cp home.html boards.html videos.html characters.html workspace.html site.css workspace.css workspace.js auth.js auth.css app.js _site/
           cp -R assets/app _site/assets/
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3

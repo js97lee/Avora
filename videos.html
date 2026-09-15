@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>영상 · 아보라</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
+  <link rel="stylesheet" href="site.css?v=nav4" />
+  <link rel="stylesheet" href="auth.css" />
+  <script src="auth.js"></script>
+</head>
+<body class="is-app">
+  <div class="app-shell">
+    <aside data-app-rail="videos" aria-label="작업 메뉴"></aside>
+
+    <div class="app-main">
+      <header class="proj-top">
+        <div class="proj-top-left">
+          <a class="proj-brand" href="home.html" aria-label="아보라 홈">
+            <img src="assets/app/avora-logo.png" alt="AVORA" />
+          </a>
+          <a class="proj-back" href="boards.html">‹ 뒤로</a>
+          <div>
+            <h1>영상</h1>
+            <p class="lib-kicker">캔버스에서 만든 클립. 카드를 누르면 해당 보드의 비디오 노드로 갑니다.</p>
+          </div>
+        </div>
+        <div class="proj-top-right">
+          <label class="proj-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+            <input id="libSearch" type="search" placeholder="영상 검색" autocomplete="off" />
+          </label>
+          <a class="pill-btn pill-btn-brand" href="workspace.html?board=new">+ 새 영상</a>
+          <div class="account-chip proj-me" id="accountMenu">
+            <button type="button" id="accountBtn" data-account-title title="내 계정">
+              <span class="avatar a-purple" data-account-mark>A</span>
+            </button>
+            <div class="account-pop" id="accountPop" hidden>
+              <p data-account-name>계정</p>
+              <span data-account-email></span>
+              <em>로그인됨</em>
+              <button type="button" data-logout>로그아웃</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="proj-body">
+        <div class="lib-filters" data-filter-group="kind" role="tablist" aria-label="영상 유형">
+          <button type="button" class="chip is-on" data-filter="all">전체</button>
+          <button type="button" class="chip" data-filter="story">스토리보드</button>
+          <button type="button" class="chip" data-filter="hq">고화질</button>
+        </div>
+
+        <div class="video-grid" id="videoGrid">
+          <a class="video-card" href="workspace.html?board=photo" data-name="광합성 실험 가이드 오프닝 샷" data-kind="story">
+            <div class="video-thumb">
+              <img src="assets/app/shots/open.png" alt="" />
+              <span class="play-fab" aria-hidden="true">▶</span>
+              <b>0:08</b>
+            </div>
+            <div class="video-meta">
+              <h3>오프닝 · 창가 질문</h3>
+              <p>광합성 실험 가이드 · 스토리보드</p>
+            </div>
+          </a>
+          <a class="video-card" href="workspace.html?board=photo" data-name="광합성 실험 가이드 고화질" data-kind="hq">
+            <div class="video-thumb">
+              <img src="assets/app/shots/wide.png" alt="" />
+              <span class="play-fab" aria-hidden="true">▶</span>
+              <b>0:14</b>
+            </div>
+            <div class="video-meta">
+              <h3>고화질 · 실험실 와이드</h3>
+              <p>광합성 실험 가이드 · 고화질</p>
+            </div>
+          </a>
+          <a class="video-card" href="workspace.html?board=campus" data-name="캠퍼스 오리엔테이션 복도" data-kind="story">
+            <div class="video-thumb">
+              <img src="assets/app/shots/class.png" alt="" />
+              <span class="play-fab" aria-hidden="true">▶</span>
+              <b>0:12</b>
+            </div>
+            <div class="video-meta">
+              <h3>복도 와이드</h3>
+              <p>캠퍼스 오리엔테이션 · 스토리보드</p>
+            </div>
+          </a>
+          <a class="video-card" href="workspace.html?board=sejong" data-name="세종 한글을 만들다" data-kind="hq">
+            <div class="video-thumb">
+              <img src="assets/app/shots/idea.png" alt="" />
+              <span class="play-fab" aria-hidden="true">▶</span>
+              <b>0:20</b>
+            </div>
+            <div class="video-meta">
+              <h3>한글을 만들다</h3>
+              <p>세종 · 고화질</p>
+            </div>
+          </a>
+          <a class="video-card" href="workspace.html?board=math" data-name="분수 개념 3분 컷" data-kind="story">
+            <div class="video-thumb">
+              <img src="assets/app/shots/leaf.png" alt="" />
+              <span class="play-fab" aria-hidden="true">▶</span>
+              <b>0:18</b>
+            </div>
+            <div class="video-meta">
+              <h3>분수 개념 컷</h3>
+              <p>3분 컷 · 스토리보드</p>
+            </div>
+          </a>
+          <a class="video-card" href="workspace.html?board=water" data-name="물의 순환" data-kind="hq">
+            <div class="video-thumb">
+              <img src="assets/app/shots/cutaway.png" alt="" />
+              <span class="play-fab" aria-hidden="true">▶</span>
+              <b>0:11</b>
+            </div>
+            <div class="video-meta">
+              <h3>물의 순환</h3>
+              <p>과학 · 고화질</p>
+            </div>
+          </a>
+        </div>
+        <p class="proj-end" id="libEnd">더 이상 없습니다</p>
+        <p class="proj-end" id="libEmpty" hidden>검색 결과가 없습니다</p>
+      </main>
+    </div>
+  </div>
+  <script src="app.js?v=nav7"></script>
+</body>
+</html>

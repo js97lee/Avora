@@ -4,61 +4,127 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>아보라 | 스토리보드를 잇고, 영상을 만든다</title>
-  <meta name="description" content="배경·캐릭터·카메라 룩을 노드로 연결해 교육 영상을 협업 제작하는 아보라." />
+  <meta name="description" content="노드 캔버스에서 배경·캐릭터·카메라 룩을 이어 영상을 협업 제작하는 아보라." />
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
-  <link rel="stylesheet" href="site.css" />
+  <link rel="stylesheet" href="site.css?v=inspire1" />
+  <link rel="stylesheet" href="auth.css" />
+  <script src="auth.js"></script>
 </head>
 <body>
-  <div class="page">
-    <header class="site-header">
+  <div class="page page-stitch">
+    <header class="site-header site-header-glass">
       <div class="shell header-grid">
-        <a class="brand" href="home.html">
-          <img src="assets/app/avora-logo.png" alt="AVORA" class="brand-logo" />
+        <a class="brand-link" href="home.html">
+          <img src="assets/app/avora-logo.png" alt="AVORA" class="logo logo-sm logo-invert" />
         </a>
-        <nav class="nav-actions">
-          <a class="btn" href="boards.html">워크스페이스</a>
-          <a class="btn btn-brand" href="boards.html">시작하기</a>
+        <nav class="nav-actions" aria-label="계정">
+          <a class="btn-on-dark btn-on-dark-ghost" id="workspaceBtn" href="boards.html">마이워크스페이스</a>
+          <button class="btn-on-dark btn-on-dark-brand" type="button" id="loginBtn">로그인</button>
+          <div class="account-chip" id="accountMenu" hidden>
+            <button type="button" id="accountBtn">
+              <span class="avatar" data-account-mark>A</span>
+              <span data-account-email></span>
+            </button>
+            <div class="account-pop" id="accountPop" hidden>
+              <a href="boards.html">마이 프로젝트</a>
+              <button type="button" id="logoutBtn">로그아웃</button>
+            </div>
+          </div>
         </nav>
       </div>
     </header>
 
     <main>
-      <section class="hero shell">
-        <p class="eyebrow">Collaborative Storyboard Workspace</p>
-        <h1>수업을 <span class="accent">영상</span>으로,<br />보드 위에서 함께.</h1>
-        <p>시나리오 보드를 고르고, 배경·캐릭터·카메라 룩을 노드로 이어 이미지를 만듭니다.</p>
-        <div class="hero-cta">
-          <a class="btn btn-brand" href="boards.html">워크스페이스 열기</a>
+      <section class="stitch-hero">
+        <div class="aurora-stage" aria-hidden="true">
+          <div class="aurora-glow"></div>
+          <div class="aurora-veil"></div>
         </div>
-      </section>
 
-      <section class="section shell">
-        <div class="how" style="margin-top:0">
-          <article class="how-card">
-            <b>01 · LANDING</b>
-            <h3>아보라 시작</h3>
-            <p>브랜드 랜딩에서 워크스페이스로 들어갑니다.</p>
-          </article>
-          <article class="how-card">
-            <b>02 · PROJECTS</b>
-            <h3>마이 프로젝트</h3>
-            <p>스튜디오처럼 프로젝트를 고르고, 링크로 함께 들어옵니다.</p>
-          </article>
-          <article class="how-card">
-            <b>03 · FLOW</b>
-            <h3>노드 워크스페이스</h3>
-            <p>보드를 열면 노드를 연결해 이미지를 생성합니다.</p>
-          </article>
+        <div class="stitch-hero-inner">
+          <p class="stitch-eyebrow">NODE CANVAS</p>
+          <h1 class="stitch-title" aria-label="어떤 스토리의 영상을 만들고 싶으세요?">
+            <span class="stitch-title-line">어떤 스토리의 <span class="stitch-title-accent">영상</span>을</span>
+            <span class="stitch-title-line">만들고 싶으세요?</span>
+          </h1>
+          <p class="stitch-sub">로그인 뒤 노드 캔버스에서 샷을 잇습니다.<br /><span class="stitch-sub-ko">스크립트 · 이미지 · 비디오를 한 보드에서 만듭니다.</span></p>
+
+          <form id="storyPromptForm" class="prompt-shell" action="workspace.html" method="get">
+            <input type="hidden" name="board" id="storyBoard" value="new" />
+            <textarea
+              id="storyPrompt"
+              name="prompt"
+              rows="3"
+              placeholder="예: 25초 제품 숏츠. 밝고 친근한 여성 캐릭터가 등장했으면 좋겠어."
+              required
+            ></textarea>
+            <div class="prompt-toolbar">
+              <div class="prompt-tools-left">
+                <span class="tool-pill">노드 캔버스</span>
+                <span class="tool-pill is-on">스토리보드</span>
+              </div>
+              <button class="prompt-send" type="submit" aria-label="노드 캔버스 열기">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+              </button>
+            </div>
+          </form>
         </div>
+
+        <section class="shell inspire-block" aria-label="Inspire">
+          <p class="inspire-label">Inspire</p>
+          <div class="inspire-row">
+            <button class="inspire-card" type="button" data-board="new" data-fill-prompt="브랜드 성격에 맞는 AI 아바타 페르소나와 정면샷을 채널 단위로 구성해줘.">
+              <img src="assets/app/inspire/inspire-01-character.png" alt="" />
+              <span>브랜드 캐릭터 설계<em>Avatar</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="sejong" data-fill-prompt="KEEPET처럼 브랜드 실사용 장면을 중심으로 채널형 숏폼 릴스를 만들어줘.">
+              <img src="assets/app/inspire/inspire-02-shorts.png" alt="" />
+              <span>채널형 숏폼<em>Reels</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="new" data-fill-prompt="제품 포스터 느낌의 브랜드 아바타 광고 컷. 카피 한 줄이 크게 들어가게 해줘.">
+              <img src="assets/app/inspire/inspire-03-poster.png" alt="" />
+              <span>제품 포스터<em>Still</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="math" data-fill-prompt="일상 브이로그 톤의 UGC 광고. 손으로 제품을 집어 리뷰하는 컷으로 시작해줘.">
+              <img src="assets/app/inspire/inspire-04-ugc.png" alt="" />
+              <span>UGC 리뷰<em>UGC</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="campus" data-fill-prompt="브랜드 톤에 맞춘 상업용 비디오 광고를 25초로 만들어줘. 첫 샷은 제품 히어로 컷.">
+              <img src="assets/app/inspire/inspire-05-commercial.png" alt="" />
+              <span>상업용 광고<em>Ad</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="water" data-fill-prompt="시네마틱한 브랜드 아바타 비디오 클립. 슬로우 푸시인과 필름 그레인을 넣어줘.">
+              <img src="assets/app/inspire/inspire-06-cinematic.png" alt="" />
+              <span>시네마틱 클립<em>Film</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="photo" data-fill-prompt="봄 시즌 룩북. 창가에서 옷을 고르는 클로즈업으로 시작해 와이드 피팅룸 샷으로 이어줘.">
+              <img src="assets/app/shots/open.png" alt="" />
+              <span>봄 시즌 룩북<em>Lookbook</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="new" data-fill-prompt="제품 텍스처 매크로. 잎맥이나 원단이 선명히 보이는 클로즈업 인서트를 3컷 이어줘.">
+              <img src="assets/app/shots/insert.png" alt="" />
+              <span>매크로 텍스처<em>Macro</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="new" data-fill-prompt="프렌즈 리액션 숏폼. 두 사람이 속삭이다 카메라를 보는 리액션 컷으로 시작해줘.">
+              <img src="assets/app/shots/cutaway.png" alt="" />
+              <span>프렌즈 리액션<em>Duo</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="new" data-fill-prompt="역광 무드 필름. 실루엣 캐릭터가 창을 바라보는 슬로우 샷으로 시작해줘.">
+              <img src="assets/app/shots/backlight.png" alt="" />
+              <span>역광 무드 필름<em>Mood</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="sejong" data-fill-prompt="클래스 하이라이트. 창가 책상에서 아이디어를 정리하는 미디엄 샷으로 스토리를 열어줘.">
+              <img src="assets/app/shots/idea.png" alt="" />
+              <span>클래스 하이라이트<em>Class</em></span>
+            </button>
+            <button class="inspire-card" type="button" data-board="new" data-fill-prompt="공간 와이드 오프닝. 창가 실내를 천천히 밀어 들어가며 채널 인트로를 만들어줘.">
+              <img src="assets/app/shots/wide.png" alt="" />
+              <span>공간 와이드<em>Wide</em></span>
+            </button>
+          </div>
+        </section>
       </section>
     </main>
-
-    <footer class="site-footer">
-      <div class="shell footer-grid">
-        <span>아보라 · AVORA 스토리보드 워크스페이스</span>
-        <span>UI prototype</span>
-      </div>
-    </footer>
   </div>
 </body>
 </html>

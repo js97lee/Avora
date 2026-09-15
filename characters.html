@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI 캐릭터 · 아보라</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
+  <link rel="stylesheet" href="site.css?v=nav4" />
+  <link rel="stylesheet" href="auth.css" />
+  <script src="auth.js"></script>
+</head>
+<body class="is-app">
+  <div class="app-shell">
+    <aside data-app-rail="characters" aria-label="작업 메뉴"></aside>
+
+    <div class="app-main char-shell">
+      <header class="proj-top">
+        <div class="proj-top-left">
+          <a class="proj-brand" href="home.html" aria-label="아보라 홈">
+            <img src="assets/app/avora-logo.png" alt="AVORA" />
+          </a>
+          <a class="proj-back" href="boards.html">‹ 뒤로</a>
+          <div>
+            <h1>AI 캐릭터</h1>
+            <p class="lib-kicker">정면샷과 페르소나를 고정한 뒤, 캔버스에서 같은 얼굴로 씁니다.</p>
+          </div>
+        </div>
+        <div class="proj-top-right">
+          <label class="proj-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+            <input id="libSearch" type="search" placeholder="캐릭터 검색" autocomplete="off" />
+          </label>
+          <button class="pill-btn pill-btn-brand" type="button" id="newCharBtn" data-open-studio="new">+ 새 캐릭터</button>
+          <div class="account-chip proj-me" id="accountMenu">
+            <button type="button" id="accountBtn" data-account-title title="내 계정">
+              <span class="avatar a-purple" data-account-mark>A</span>
+            </button>
+            <div class="account-pop" id="accountPop" hidden>
+              <p data-account-name>계정</p>
+              <span data-account-email></span>
+              <em>로그인됨</em>
+              <button type="button" data-logout>로그아웃</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="char-layout">
+        <main class="proj-body char-list">
+          <div class="lib-filters" data-filter-group="role" role="tablist" aria-label="캐릭터 유형">
+            <button type="button" class="chip is-on" data-filter="all">전체</button>
+            <button type="button" class="chip" data-filter="teacher">진행자</button>
+            <button type="button" class="chip" data-filter="student">학생</button>
+          </div>
+
+          <div class="char-grid" id="charGrid">
+            <button class="char-card is-on" type="button" data-char="arin" data-name="아린 선생님 진행자" data-role="teacher">
+              <img src="assets/app/shots/open.png" alt="" />
+              <span>
+                <strong>아린</strong>
+                <em>선생님 · 광합성 실험</em>
+              </span>
+            </button>
+            <button class="char-card" type="button" data-char="haeun" data-name="하은 학생" data-role="student">
+              <img src="assets/app/shots/class.png" alt="" />
+              <span>
+                <strong>하은</strong>
+                <em>학생 · 호기심</em>
+              </span>
+            </button>
+            <button class="char-card" type="button" data-char="minjae" data-name="민재 학생" data-role="student">
+              <img src="assets/app/shots/backlight.png" alt="" />
+              <span>
+                <strong>민재</strong>
+                <em>학생 · 캠퍼스</em>
+              </span>
+            </button>
+            <button class="char-card char-card-new" type="button" id="newCharTile" data-char="new" data-name="새 캐릭터">
+              <span class="char-new-mark">+</span>
+              <b>새 캐릭터</b>
+            </button>
+          </div>
+          <p class="proj-end" id="libEnd">더 이상 없습니다</p>
+          <p class="proj-end" id="libEmpty" hidden>검색 결과가 없습니다</p>
+        </main>
+
+        <aside class="char-studio" id="charStudio">
+          <div class="studio-view" data-studio="arin">
+            <div class="studio-hero">
+              <img src="assets/app/shots/open.png" alt="" />
+            </div>
+            <div class="studio-copy">
+              <p class="studio-badge">진행자</p>
+              <h2>아린</h2>
+              <p>실험실 창가에서 잎을 들어 질문을 던지는 선생님. 실사형 시네마틱, 따뜻한 자연광.</p>
+              <dl class="studio-meta">
+                <div><dt>스타일</dt><dd>실사형 시네마틱</dd></div>
+                <div><dt>아키타입</dt><dd>사람 캐릭터</dd></div>
+                <div><dt>사용 보드</dt><dd>광합성 실험 가이드</dd></div>
+              </dl>
+            <div class="studio-looks">
+                <button type="button" class="is-on" data-look="assets/app/shots/open.png">정면</button>
+                <button type="button" data-look="assets/app/shots/wide.png">와이드</button>
+                <button type="button" data-look="assets/app/shots/leaf.png">클로즈업</button>
+              </div>
+              <div class="studio-actions">
+                <a class="pill-btn pill-btn-brand" href="workspace.html?board=photo&amp;prompt=아린 선생님을 주인공으로 창가 장면을 이어줘.">캔버스에 넣기</a>
+                <a class="pill-btn" href="videos.html">이 캐릭터 영상</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="studio-view" data-studio="haeun" hidden>
+            <div class="studio-hero">
+              <img src="assets/app/shots/class.png" alt="" />
+            </div>
+            <div class="studio-copy">
+              <p class="studio-badge">학생</p>
+              <h2>하은</h2>
+              <p>창가 화분의 잎을 관찰하다가 빛이 양분이 되는 순간을 발견하는 학생.</p>
+              <dl class="studio-meta">
+                <div><dt>스타일</dt><dd>실사형 시네마틱</dd></div>
+                <div><dt>아키타입</dt><dd>사람 캐릭터</dd></div>
+                <div><dt>사용 보드</dt><dd>광합성 실험 가이드</dd></div>
+              </dl>
+              <div class="studio-looks">
+                <button type="button" class="is-on" data-look="assets/app/shots/class.png">정면</button>
+                <button type="button" data-look="assets/app/shots/leaf.png">반응</button>
+                <button type="button" data-look="assets/app/shots/insert.png">클로즈업</button>
+              </div>
+              <div class="studio-actions">
+                <a class="pill-btn pill-btn-brand" href="workspace.html?board=photo&amp;prompt=하은이 잎을 관찰하는 클로즈업부터 시작해줘.">캔버스에 넣기</a>
+                <a class="pill-btn" href="videos.html">이 캐릭터 영상</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="studio-view" data-studio="minjae" hidden>
+            <div class="studio-hero">
+              <img src="assets/app/shots/backlight.png" alt="" />
+            </div>
+            <div class="studio-copy">
+              <p class="studio-badge">학생</p>
+              <h2>민재</h2>
+              <p>새 학기 복도를 걷는 캠퍼스 가이드의 친구. 역광, 부드러운 모션.</p>
+              <dl class="studio-meta">
+                <div><dt>스타일</dt><dd>실사형 시네마틱</dd></div>
+                <div><dt>아키타입</dt><dd>사람 캐릭터</dd></div>
+                <div><dt>사용 보드</dt><dd>캠퍼스 오리엔테이션</dd></div>
+              </dl>
+              <div class="studio-looks">
+                <button type="button" class="is-on" data-look="assets/app/shots/backlight.png">정면</button>
+                <button type="button" data-look="assets/app/shots/wide.png">역광</button>
+                <button type="button" data-look="assets/app/shots/class.png">와이드</button>
+              </div>
+              <div class="studio-actions">
+                <a class="pill-btn pill-btn-brand" href="workspace.html?board=campus&amp;prompt=민재가 캠퍼스 복도를 걷는 장면으로 시작해줘.">캔버스에 넣기</a>
+                <a class="pill-btn" href="videos.html">이 캐릭터 영상</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="studio-view" data-studio="new" hidden>
+            <div class="studio-hero studio-hero-empty">
+              <span>정면샷이 아직 없습니다</span>
+            </div>
+            <form class="studio-form" id="charForm">
+              <p class="studio-badge">새 캐릭터</p>
+              <h2>페르소나 만들기</h2>
+              <label class="field">
+                <span>이름</span>
+                <input name="name" placeholder="예: 아린" required />
+              </label>
+              <label class="field">
+                <span>외형 / 의상 / 설정</span>
+                <input name="look" placeholder="예: 흰 가운, 창가 자연광, 차분한 표정" required />
+              </label>
+              <div class="field-row">
+                <label class="field">
+                  <span>스타일</span>
+                  <select name="style">
+                    <option>실사형 시네마틱</option>
+                    <option>3D 애니메이션</option>
+                    <option>2D 일러스트</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>아키타입</span>
+                  <select name="archetype">
+                    <option>사람 캐릭터</option>
+                    <option>동물 마스코트</option>
+                    <option>역사 인물</option>
+                  </select>
+                </label>
+              </div>
+              <div class="studio-actions">
+                <button class="pill-btn pill-btn-brand" type="submit">정면샷 생성</button>
+              </div>
+              <p class="studio-hint" id="charHint">외형을 정하면 정면샷이 이 패널에 붙습니다. 그다음 캔버스에 넣을 수 있습니다.</p>
+            </form>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <script src="app.js?v=nav7"></script>
+  <script>
+    (() => {
+      const show = (id) => {
+        document.querySelectorAll(".char-card[data-char]").forEach((c) => c.classList.toggle("is-on", c.dataset.char === id));
+        document.querySelectorAll(".studio-view").forEach((v) => {
+          v.hidden = v.getAttribute("data-studio") !== id;
+        });
+      };
+
+      document.getElementById("charGrid").addEventListener("click", (e) => {
+        const card = e.target.closest("[data-char]");
+        if (card) show(card.dataset.char);
+      });
+
+      document.addEventListener("click", (e) => {
+        const open = e.target.closest("[data-open-studio]");
+        if (open) show(open.getAttribute("data-open-studio"));
+      });
+
+      document.getElementById("charForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = new FormData(e.target).get("name") || "새 캐릭터";
+        const hint = document.getElementById("charHint");
+        const hero = document.querySelector('[data-studio="new"] .studio-hero');
+        hero.classList.remove("studio-hero-empty");
+        hero.innerHTML = `<img src="assets/app/shots/open.png" alt="" />`;
+        hint.textContent = `${name} 정면샷을 붙였습니다. 아래 캔버스에 넣기로 보드에 쓸 수 있습니다.`;
+        const actions = e.target.querySelector(".studio-actions");
+        if (!actions.querySelector("[data-go-canvas]")) {
+          const a = document.createElement("a");
+          a.className = "pill-btn";
+          a.dataset.goCanvas = "1";
+          a.href = `workspace.html?board=new&prompt=${encodeURIComponent(name + " 캐릭터로 스토리보드를 시작해줘.")}`;
+          a.textContent = "캔버스에 넣기";
+          actions.appendChild(a);
+        }
+      });
+
+      document.querySelectorAll(".studio-looks").forEach((row) => {
+        row.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-look]");
+          if (!btn) return;
+          row.querySelectorAll("button").forEach((b) => b.classList.toggle("is-on", b === btn));
+          const img = row.closest(".studio-view")?.querySelector(".studio-hero img");
+          if (img) img.src = btn.getAttribute("data-look");
+        });
+      });
+
+      if (new URLSearchParams(location.search).get("new") === "1") show("new");
+    })();
+  </script>
+</body>
+</html>

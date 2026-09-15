@@ -6,10 +6,15 @@
 !.github/workflows/**
 !home.html
 !boards.html
+!videos.html
+!characters.html
 !workspace.html
+!app.js
 !site.css
 !workspace.css
 !workspace.js
+!auth.js
+!auth.css
 !assets/
 !assets/app/
 !assets/app/**

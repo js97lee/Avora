@@ -5,52 +5,49 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>마이 프로젝트 · 아보라</title>
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
-  <link rel="stylesheet" href="site.css" />
+  <link rel="stylesheet" href="site.css?v=nav10" />
+  <link rel="stylesheet" href="auth.css?v=nav4" />
+  <script src="auth.js"></script>
 </head>
 <body class="is-app">
   <div class="app-shell">
-    <aside class="app-rail" aria-label="작업 메뉴">
-      <a class="rail-logo" href="home.html" title="아보라" aria-label="아보라 홈">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-      </a>
-      <a class="rail-plus" href="workspace.html?board=new" title="새 프로젝트" aria-label="새 프로젝트">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-      </a>
-      <nav class="rail-nav">
-        <a class="rail-item is-on" href="boards.html" title="마이 프로젝트" aria-current="page">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-        </a>
-        <a class="rail-item" href="workspace.html?board=photo" title="영상 만들기">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3z"/></svg>
-        </a>
-        <a class="rail-item" href="workspace.html?board=campus" title="AI 캐릭터">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
-        </a>
-      </nav>
-      <button class="rail-item rail-foot" type="button" title="설정" aria-label="설정">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
-      </button>
-    </aside>
+    <aside data-app-rail="boards" aria-label="작업 메뉴"></aside>
 
     <div class="app-main">
       <header class="proj-top">
         <div class="proj-top-left">
-          <a class="proj-back" href="home.html">‹ 뒤로</a>
-          <h1>마이 프로젝트</h1>
+          <a class="proj-brand" href="home.html" aria-label="아보라 홈">
+            <img src="assets/app/avora-logo.png" alt="AVORA" />
+          </a>
+          <a class="proj-back" id="projBack" href="boards.html" hidden>‹ 뒤로</a>
+          <span class="proj-crumb-sep" id="projSep" hidden>/</span>
+          <h1 id="projTitle" hidden></h1>
         </div>
         <div class="proj-top-right">
           <label class="proj-search">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
-            <input id="projSearch" type="search" placeholder="프로젝트 검색" autocomplete="off" />
+            <input id="libSearch" type="search" placeholder="검색" autocomplete="off" />
           </label>
+          <button class="pill-btn" type="button" id="invitePill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+            팀 초대
+          </button>
           <div class="proj-pop-wrap">
-            <button class="pill-btn" type="button" id="inviteBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
-              팀 초대
+            <button class="pill-btn" type="button" id="shareBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+              공유
             </button>
-            <div class="proj-pop" id="invitePop" hidden>
-              <p class="proj-pop-title">팀 초대</p>
-              <p class="proj-pop-copy">이메일을 넣으면 같은 캔버스에 들어와 함께 편집할 수 있습니다.</p>
+            <div class="proj-pop proj-pop-share" id="sharePop" hidden>
+              <p class="proj-pop-title">공유</p>
+              <button class="share-opt" type="button" id="inviteBtn">
+                <span class="share-ico">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+                </span>
+                <span>
+                  <strong>팀 초대</strong>
+                  <em>이메일을 넣으면 같은 캔버스에 들어와 함께 편집할 수 있습니다.</em>
+                </span>
+              </button>
               <form class="invite-row" id="inviteForm">
                 <input id="inviteEmail" type="email" placeholder="이메일" required />
                 <select id="inviteRole" aria-label="권한">
@@ -64,24 +61,6 @@
                 <li><span class="a-cyan">민</span> 민재 · 편집 가능</li>
                 <li><span class="a-amber">하</span> 하은 · 보기만</li>
               </ul>
-            </div>
-          </div>
-          <div class="proj-pop-wrap">
-            <button class="pill-btn" type="button" id="shareBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
-              공유
-            </button>
-            <div class="proj-pop proj-pop-share" id="sharePop" hidden>
-              <p class="proj-pop-title">공유</p>
-              <button class="share-opt" type="button" id="postClass">
-                <span class="share-ico">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
-                </span>
-                <span>
-                  <strong>학급에 게시</strong>
-                  <em>수업 보드를 학급 스페이스에 올려 함께 보게 합니다.</em>
-                </span>
-              </button>
               <button class="share-opt" type="button" id="copyLink">
                 <span class="share-ico">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.07 0l1.41-1.41a5 5 0 0 0-7.07-7.07L10 5.93"/><path d="M14 11a5 5 0 0 0-7.07 0L5.52 12.4a5 5 0 0 0 7.07 7.07L14 18.07"/></svg>
@@ -94,121 +73,602 @@
               <input id="shareLink" type="hidden" value="https://app.avora.ai/p/photosynthesis" />
             </div>
           </div>
+          <div class="proj-presence" aria-label="접속 중">
+            <button class="avatar a-cyan" type="button" title="민재 · 접속 중">민</button>
+            <button class="avatar a-amber" type="button" title="하은 · 접속 중">하</button>
+            <div class="account-chip proj-me" id="accountMenu">
+              <button type="button" id="accountBtn" data-account-title title="내 계정">
+                <span class="avatar a-purple" data-account-mark>A</span>
+              </button>
+              <div class="account-pop" id="accountPop" hidden>
+                <p data-account-name>계정</p>
+                <span data-account-email></span>
+                <em>이 워크스페이스에 접속 중</em>
+                <button type="button" data-logout>로그아웃</button>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
-      <main class="proj-body">
-        <div class="proj-grid" id="projGrid">
-          <a class="proj-card proj-card-new" href="workspace.html?board=new" data-name="새 시나리오 프로젝트 만들기 제작 시작">
-            <div class="proj-thumb proj-thumb-new">
-              <span>+</span>
-              <b>제작 시작</b>
+      <main class="proj-body fig-body">
+        <div class="fig-toolbar" id="figToolbar">
+          <div class="fig-toolbar-right">
+            <div class="drive-view-toggle" id="driveViewToggle" role="group" aria-label="보기 방식">
+              <button type="button" class="drive-view-btn is-active" data-view="grid" aria-label="그리드 보기">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </button>
+              <button type="button" class="drive-view-btn" data-view="list" aria-label="리스트 보기">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="4" width="18" height="3" rx="1"/><rect x="3" y="10.5" width="18" height="3" rx="1"/><rect x="3" y="17" width="18" height="3" rx="1"/></svg>
+              </button>
             </div>
-            <div class="proj-meta">
-              <h3>새 시나리오 프로젝트 만들기</h3>
-            </div>
-          </a>
-
-          <a class="proj-card" href="workspace.html?board=photo" data-name="광합성 실험 가이드">
-            <div class="proj-thumb"><img src="assets/app/blank.svg" alt="" /></div>
-            <div class="proj-meta">
-              <h3>광합성 실험 가이드</h3>
-              <time>2026-09-12</time>
-              <button class="more-btn" type="button" aria-label="더보기">⋯</button>
-            </div>
-          </a>
-
-          <a class="proj-card" href="workspace.html?board=campus" data-name="캠퍼스 오리엔테이션">
-            <div class="proj-thumb proj-thumb-empty">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="m4 16 5-6 4 4 3-4 4 6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
-            </div>
-            <div class="proj-meta">
-              <h3>캠퍼스 오리엔테이션</h3>
-              <time>2026-09-12</time>
-              <button class="more-btn" type="button" aria-label="더보기">⋯</button>
-            </div>
-          </a>
-
-          <a class="proj-card" href="workspace.html?board=sejong" data-name="세종, 한글을 만들다">
-            <div class="proj-thumb"><img src="assets/app/blank.svg" alt="" /></div>
-            <div class="proj-meta">
-              <h3>세종, 한글을 만들다</h3>
-              <time>2026-09-09</time>
-              <button class="more-btn" type="button" aria-label="더보기">⋯</button>
-            </div>
-          </a>
-
-          <a class="proj-card" href="workspace.html?board=math" data-name="분수 개념 3분 컷">
-            <div class="proj-thumb"><img src="assets/app/blank.svg" alt="" /></div>
-            <div class="proj-meta">
-              <h3>분수 개념 3분 컷</h3>
-              <time>2026-09-08</time>
-              <button class="more-btn" type="button" aria-label="더보기">⋯</button>
-            </div>
-          </a>
-
-          <a class="proj-card" href="workspace.html?board=water" data-name="물의 순환">
-            <div class="proj-thumb proj-thumb-empty">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="m4 16 5-6 4 4 3-4 4 6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
-            </div>
-            <div class="proj-meta">
-              <h3>물의 순환</h3>
-              <time>2026-09-05</time>
-              <button class="more-btn" type="button" aria-label="더보기">⋯</button>
-            </div>
-          </a>
+            <button class="drive-add-btn" id="createFolderButton" type="button" hidden title="새 프로젝트" aria-label="새 프로젝트 만들기">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            </button>
+          </div>
         </div>
-        <p class="proj-end" id="projEnd">더 이상 없습니다</p>
-        <p class="proj-end" id="projEmpty" hidden>검색 결과가 없습니다</p>
+        <nav class="drive-breadcrumb" id="driveBreadcrumb" aria-label="폴더 경로" hidden></nav>
+        <div id="driveFolderGrid" class="fig-grid" data-view="grid" aria-live="polite"></div>
+        <p id="driveEmpty" class="drive-empty" hidden>이 위치에 항목이 없습니다.</p>
+        <p id="libEmpty" class="drive-empty" hidden>검색 결과가 없습니다</p>
+        <p class="proj-end" id="libEnd" hidden>더 이상 없습니다</p>
       </main>
     </div>
   </div>
 
   <div class="more-menu" id="moreMenu" hidden>
+    <button type="button" data-more="open">열기</button>
     <button type="button" data-more="rename">이름 변경</button>
-    <button type="button" data-more="dup">복제</button>
     <button type="button" data-more="del">삭제</button>
   </div>
 
   <script>
     (() => {
-      const search = document.getElementById("projSearch");
-      const cards = [...document.querySelectorAll(".proj-card")];
-      const empty = document.getElementById("projEmpty");
-      const end = document.getElementById("projEnd");
-      const invitePop = document.getElementById("invitePop");
-      const sharePop = document.getElementById("sharePop");
+      const STORAGE_KEY = "avora.protoFlatCanvas";
+      const grid = document.getElementById("driveFolderGrid");
+      const empty = document.getElementById("driveEmpty");
+      const searchEmpty = document.getElementById("libEmpty");
+      const breadcrumb = document.getElementById("driveBreadcrumb");
+      const createBtn = document.getElementById("createFolderButton");
+      const search = document.getElementById("libSearch");
       const moreMenu = document.getElementById("moreMenu");
+      const sharePop = document.getElementById("sharePop");
+      const titleEl = document.getElementById("projTitle");
+      const projBack = document.getElementById("projBack");
+      const projSep = document.getElementById("projSep");
+      const figToolbar = document.getElementById("figToolbar");
+      const libEnd = document.getElementById("libEnd");
+      const invitePill = document.getElementById("invitePill");
+      const shareBtn = document.getElementById("shareBtn");
+      const viewBtns = [...document.querySelectorAll("#driveViewToggle .drive-view-btn")];
+
+      const ICO = {
+        canvas: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>`,
+        folder: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`,
+        more: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>`,
+      };
+
+      const seed = () => ({
+        folders: [
+          { id: "f-main", parentId: "root", name: "새 프로젝트", board: "new", updatedAt: Date.now(), shared: false },
+          { id: "f-blank", parentId: "root", name: "Blank", board: "blank", updatedAt: Date.now() - 1000, shared: false },
+        ],
+        files: [],
+      });
+
+      const load = () => {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            const initial = seed();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+            return initial;
+          }
+          const parsed = JSON.parse(raw);
+          if (!parsed || !Array.isArray(parsed.folders) || !Array.isArray(parsed.files)) return seed();
+          return parsed;
+        } catch (_) {
+          return seed();
+        }
+      };
+
+      const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+
+      let store = load();
+      let currentFolderId = "root";
+      let selectedId = "";
+      let viewMode = "grid";
+      let isTrash = new URLSearchParams(location.search).get("tab") === "trash";
+      let menuTarget = null;
+      const startFolder = new URLSearchParams(location.search).get("folder");
+      const startCreate = new URLSearchParams(location.search).get("create") === "1";
+      if (startFolder && store.folders.some((f) => f.id === startFolder)) {
+        const folder = store.folders.find((f) => f.id === startFolder);
+        location.replace(`workspace.html?board=${encodeURIComponent(folder.board || "new")}&folder=${encodeURIComponent(folder.id)}`);
+        return;
+      }
+
+      const syncTabUrl = () => {
+        const params = new URLSearchParams();
+        if (isTrash) params.set("tab", "trash");
+        if (currentFolderId !== "root") params.set("folder", currentFolderId);
+        const qs = params.toString();
+        history.replaceState(null, "", qs ? `boards.html?${qs}` : "boards.html");
+      };
+
+      const fmtAgo = (ts) => {
+        const d = Math.max(0, Date.now() - ts);
+        const min = Math.floor(d / 60000);
+        if (min < 60) return `${Math.max(1, min)}분 전`;
+        const h = Math.floor(min / 60);
+        if (h < 24) return `${h}시간 전`;
+        const days = Math.floor(h / 24);
+        if (days < 30) return `${days}일 전`;
+        return `${Math.floor(days / 30)}개월 전`;
+      };
+
+      const findFolder = (id) => store.folders.find((f) => f.id === id);
+      const findFile = (id) => store.files.find((f) => f.id === id);
+      const findItem = (id) => findFolder(id) || findFile(id);
+
+      const childrenOf = (parentId) => {
+        const folders = store.folders
+          .filter((f) => f.parentId === parentId)
+          .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+        const files = store.files
+          .filter((f) => f.parentId === parentId)
+          .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+        return { folders, files };
+      };
+
+      const collectDescendants = (id) => {
+        const ids = new Set([id]);
+        let grew = true;
+        while (grew) {
+          grew = false;
+          store.folders.forEach((f) => {
+            if (ids.has(f.parentId) && !ids.has(f.id)) {
+              ids.add(f.id);
+              grew = true;
+            }
+          });
+        }
+        return ids;
+      };
+
+      const pathTo = (id) => {
+        if (id === "root") return [];
+        const stack = [];
+        let cur = findFolder(id);
+        while (cur) {
+          stack.unshift({ id: cur.id, name: cur.name });
+          cur = cur.parentId === "root" ? null : findFolder(cur.parentId);
+        }
+        return stack;
+      };
+
+      const openCanvas = (file) => {
+        location.href = `workspace.html?board=${encodeURIComponent(file.board || "new")}`;
+      };
+
+      const openFolderCanvas = (folder) => {
+        if (!folder) return;
+        location.href = `workspace.html?board=${encodeURIComponent(folder.board || "new")}&folder=${encodeURIComponent(folder.id)}`;
+      };
+
+      const fmtDay = (ts) => {
+        try {
+          return new Date(ts).toISOString().slice(0, 10);
+        } catch (_) {
+          return "";
+        }
+      };
+
+      const enterFolder = (id) => {
+        currentFolderId = id || "root";
+        selectedId = "";
+        if (search) search.value = "";
+        syncTabUrl();
+        render();
+      };
+
+      const deleteItem = (id) => {
+        const folder = findFolder(id);
+        const file = findFile(id);
+        if (folder) {
+          const childCount = [...collectDescendants(id)].length - 1 + store.files.filter((f) => collectDescendants(id).has(f.parentId) || f.parentId === id).length;
+          const msg = childCount > 0
+            ? `「${folder.name}」 폴더와 안의 항목을 삭제할까요?`
+            : `「${folder.name}」 폴더를 삭제할까요?`;
+          if (!window.confirm(msg)) return;
+          const removeIds = collectDescendants(id);
+          store.folders = store.folders.filter((f) => !removeIds.has(f.id));
+          store.files = store.files.filter((f) => !removeIds.has(f.parentId) && f.parentId !== id);
+          if (selectedId && (removeIds.has(selectedId) || selectedId === id)) selectedId = "";
+          if (currentFolderId !== "root" && removeIds.has(currentFolderId)) {
+            currentFolderId = folder.parentId || "root";
+          }
+        } else if (file) {
+          if (!window.confirm(`「${file.name}」을 삭제할까요?`)) return;
+          store.files = store.files.filter((f) => f.id !== id);
+          if (selectedId === id) selectedId = "";
+        } else {
+          return;
+        }
+        save();
+        render();
+      };
+
+      const renameItem = (id) => {
+        const item = findItem(id);
+        if (!item) return;
+        const next = window.prompt("이름 변경", item.name);
+        if (!next || !next.trim() || next.trim() === item.name) return;
+        item.name = next.trim();
+        item.updatedAt = Date.now();
+        save();
+        render();
+      };
+
+      const createFolder = () => {
+        const count = store.folders.filter((f) => f.parentId === "root").length;
+        const fallback = count === 0 ? "새 프로젝트" : `새 프로젝트 ${count + 1}`;
+        const name = window.prompt("새 폴더 이름", fallback);
+        if (!name || !name.trim()) return;
+        const item = {
+          id: `f-${Date.now()}`,
+          parentId: "root",
+          name: name.trim(),
+          board: "new",
+          updatedAt: Date.now(),
+          shared: false,
+        };
+        store.folders.push(item);
+        selectedId = item.id;
+        currentFolderId = "root";
+        isTrash = false;
+        if (search) search.value = "";
+        save();
+        syncTabUrl();
+        render();
+      };
+      window.avoraCreateFolder = createFolder;
+
+      const coverOf = (folderId) => {
+        const folder = findFolder(folderId);
+        if (folder?.cover) return folder.cover;
+        const direct = store.files.find((f) => f.parentId === folderId && f.thumb);
+        if (direct) return direct.thumb;
+        const desc = collectDescendants(folderId);
+        return store.files.find((f) => desc.has(f.parentId) && f.thumb)?.thumb || "";
+      };
+
+      const renderBreadcrumb = () => {
+        const path = pathTo(currentFolderId);
+        const show = currentFolderId === "root" && !isTrash && !!(search?.value || "").trim();
+        breadcrumb.innerHTML = "";
+        breadcrumb.hidden = !show;
+        if (!show) return;
+
+        const rootBtn = document.createElement("button");
+        rootBtn.type = "button";
+        rootBtn.className = `drive-crumb${currentFolderId === "root" ? " is-active" : ""}`;
+        rootBtn.textContent = "폴더";
+        rootBtn.addEventListener("click", () => enterFolder("root"));
+        breadcrumb.appendChild(rootBtn);
+
+        path.forEach((crumb) => {
+          const sep = document.createElement("span");
+          sep.className = "drive-crumb-sep";
+          sep.textContent = "/";
+          breadcrumb.appendChild(sep);
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = `drive-crumb${crumb.id === currentFolderId ? " is-active" : ""}`;
+          btn.textContent = crumb.name;
+          btn.addEventListener("click", () => enterFolder(crumb.id));
+          breadcrumb.appendChild(btn);
+        });
+      };
+
+      const MOUNTAIN = `<svg class="proj-empty-ico" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m3 20 6.5-9 3.5 5 3-4L21 20z"/><circle cx="8" cy="7" r="1.6"/></svg>`;
+
+      const innerFolderCard = (folder) => {
+        const cover = coverOf(folder.id);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "proj-card";
+        btn.dataset.id = folder.id;
+        btn.dataset.kind = "folder";
+        btn.dataset.name = folder.name;
+        btn.innerHTML = `
+          <div class="proj-thumb${cover ? "" : " proj-thumb-empty"}">${cover ? `<img src="${cover}" alt="" />` : MOUNTAIN}</div>
+          <div class="proj-meta">
+            <h3>${folder.name}</h3>
+            <time>${fmtDay(folder.updatedAt)}</time>
+            <button class="more-btn" type="button" aria-label="더보기">⋯</button>
+          </div>
+        `;
+        btn.querySelector(".more-btn")?.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openMenu(event, folder.id, "folder");
+        });
+        btn.addEventListener("click", (event) => {
+          if (event.target.closest(".more-btn")) return;
+          enterFolder(folder.id);
+        });
+        btn.addEventListener("contextmenu", (event) => openMenu(event, folder.id, "folder"));
+        return btn;
+      };
+
+      const innerFileCard = (file) => {
+        const a = document.createElement("a");
+        a.href = `workspace.html?board=${encodeURIComponent(file.board || "new")}`;
+        a.className = "proj-card";
+        a.dataset.id = file.id;
+        a.dataset.kind = "file";
+        a.dataset.name = file.name;
+        const emptyClass = file.tone === "black" ? " proj-thumb-black" : " proj-thumb-empty";
+        a.innerHTML = `
+          <div class="proj-thumb${file.thumb ? "" : emptyClass}">${file.thumb ? `<img src="${file.thumb}" alt="" />` : (file.tone === "black" ? "" : MOUNTAIN)}</div>
+          <div class="proj-meta">
+            <h3>${file.name}</h3>
+            <time>${fmtDay(file.updatedAt)}</time>
+            <button class="more-btn" type="button" aria-label="더보기">⋯</button>
+          </div>
+        `;
+        a.querySelector(".more-btn")?.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openMenu(event, file.id, "file");
+        });
+        a.addEventListener("contextmenu", (event) => openMenu(event, file.id, "file"));
+        return a;
+      };
+
+      const newCanvasCard = () => {
+        const a = document.createElement("a");
+        a.className = "proj-card proj-card-new";
+        a.href = `workspace.html?board=new&folder=${encodeURIComponent(currentFolderId)}`;
+        a.dataset.name = "제작 시작 새 비디오 프로젝트 만들기";
+        a.innerHTML = `
+          <div class="proj-thumb proj-thumb-new">
+            <span>+</span>
+            <b>제작 시작</b>
+          </div>
+          <div class="proj-meta">
+            <h3>새 비디오 프로젝트 만들기</h3>
+          </div>
+        `;
+        return a;
+      };
+
+      const startCardMarkup = () => `
+        <div class="proj-thumb proj-thumb-new">
+          <span>+</span>
+          <b>제작 시작</b>
+        </div>
+        <div class="proj-meta">
+          <h3>새 비디오 프로젝트 만들기</h3>
+        </div>
+      `;
+
+      const blankCanvasCard = () => {
+        const a = document.createElement("a");
+        a.className = "proj-card proj-card-new";
+        a.href = `workspace.html?board=blank&folder=${encodeURIComponent(currentFolderId)}`;
+        a.dataset.name = "제작 시작 새 비디오 프로젝트 만들기";
+        a.innerHTML = startCardMarkup();
+        return a;
+      };
+
+      const matchesQuery = (name, q) => !q || name.toLowerCase().includes(q);
+
+      const bindCard = (el, id, kind) => {
+        el.querySelector(".fig-more")?.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openMenu(event, id, kind);
+        });
+        el.addEventListener("contextmenu", (event) => openMenu(event, id, kind));
+      };
+
+      const folderCard = (folder) => {
+        const cover = coverOf(folder.id);
+        const isBlank = folder.board === "blank";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.dataset.id = folder.id;
+        btn.dataset.kind = "folder";
+        if (isBlank) {
+          btn.className = `proj-card proj-card-new fig-card-start${folder.id === selectedId ? " is-selected" : ""}`;
+          btn.dataset.name = "제작 시작 새 비디오 프로젝트 만들기";
+          btn.innerHTML = startCardMarkup();
+          btn.addEventListener("click", () => {
+            selectedId = folder.id;
+            openFolderCanvas(folder);
+          });
+          btn.addEventListener("contextmenu", (event) => openMenu(event, folder.id, "folder"));
+          return btn;
+        }
+        btn.className = `fig-card${folder.id === selectedId ? " is-selected" : ""}`;
+        btn.dataset.name = folder.name;
+        btn.innerHTML = `
+          <span class="fig-thumb">${cover ? `<img src="${cover}" alt="" />` : `<span class="fig-thumb-empty">${ICO.folder}</span>`}</span>
+          <span class="fig-meta">
+            <span class="fig-type is-folder" aria-hidden="true">${ICO.folder}</span>
+            <span class="fig-copy">
+              <strong>${folder.name}</strong>
+              <em>${fmtAgo(folder.updatedAt)} 수정</em>
+            </span>
+            <span class="fig-more" role="button" tabindex="0" title="더보기" aria-label="${folder.name} 더보기">${ICO.more}</span>
+          </span>
+        `;
+        btn.addEventListener("click", (event) => {
+          if (event.target.closest(".fig-more")) return;
+          selectedId = folder.id;
+          openFolderCanvas(folder);
+        });
+        bindCard(btn, folder.id, "folder");
+        return btn;
+      };
+
+      const fileCard = (file) => {
+        const a = document.createElement("a");
+        a.href = `workspace.html?board=${encodeURIComponent(file.board || "new")}`;
+        a.className = `fig-card${file.id === selectedId ? " is-selected" : ""}`;
+        a.dataset.id = file.id;
+        a.dataset.kind = "file";
+        a.dataset.name = file.name;
+        a.innerHTML = `
+          <span class="fig-thumb">${file.thumb ? `<img src="${file.thumb}" alt="" />` : ""}</span>
+          <span class="fig-meta">
+            <span class="fig-type" aria-hidden="true">${ICO.canvas}</span>
+            <span class="fig-copy">
+              <strong>${file.name}</strong>
+              <em>${fmtAgo(file.updatedAt)} 수정</em>
+            </span>
+            ${file.shared ? `<span class="fig-share" title="공유됨" aria-label="공유됨"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></span>` : ""}
+            <span class="fig-more" role="button" tabindex="0" title="더보기" aria-label="${file.name} 더보기">${ICO.more}</span>
+          </span>
+        `;
+        a.addEventListener("click", (event) => {
+          if (event.target.closest(".fig-more")) {
+            event.preventDefault();
+            return;
+          }
+          selectedId = file.id;
+        });
+        bindCard(a, file.id, "file");
+        return a;
+      };
+
+      const render = () => {
+        const q = (search?.value || "").trim().toLowerCase();
+        const inner = currentFolderId !== "root";
+        document.body.classList.toggle("is-inner", inner);
+        grid.dataset.view = viewMode;
+        grid.className = inner ? "proj-grid" : `fig-grid${viewMode === "list" ? " is-list" : ""}`;
+        grid.innerHTML = "";
+
+        if (projBack) {
+          projBack.hidden = !inner;
+          projBack.onclick = (e) => {
+            e.preventDefault();
+            enterFolder("root");
+          };
+        }
+        if (projSep) projSep.hidden = !inner;
+        if (figToolbar) figToolbar.hidden = inner || isTrash;
+        if (createBtn) createBtn.hidden = true;
+        if (invitePill) invitePill.hidden = !inner;
+        if (shareBtn) shareBtn.hidden = !inner;
+        if (titleEl) {
+          if (inner) {
+            titleEl.hidden = false;
+            titleEl.textContent = findFolder(currentFolderId)?.name || "";
+          } else if (isTrash) {
+            titleEl.hidden = false;
+            titleEl.textContent = "휴지통";
+          } else {
+            titleEl.hidden = true;
+            titleEl.textContent = "";
+          }
+        }
+
+        const rootFolders = (predicate) => store.folders
+          .filter((f) => f.parentId === "root" && (!predicate || predicate(f)))
+          .sort((a, b) => b.updatedAt - a.updatedAt);
+
+        let folders = [];
+        let files = [];
+        if (inner) {
+          const ids = collectDescendants(currentFolderId);
+          folders = [];
+          files = store.files
+            .filter((f) => ids.has(f.parentId))
+            .sort((a, b) => b.updatedAt - a.updatedAt);
+          if (q) files = files.filter((f) => matchesQuery(f.name, q));
+        } else if (isTrash) {
+          folders = [];
+          files = [];
+        } else {
+          folders = rootFolders(q ? (f) => matchesQuery(f.name, q) : null);
+        }
+
+        if (inner) {
+          grid.appendChild(newCanvasCard());
+          grid.appendChild(blankCanvasCard());
+          files.forEach((file) => grid.appendChild(innerFileCard(file)));
+        } else {
+          folders.forEach((folder) => grid.appendChild(folderCard(folder)));
+        }
+
+        const listed = folders.length + files.length;
+        if (inner) {
+          empty.hidden = true;
+          if (libEnd) libEnd.hidden = false;
+          if (searchEmpty) searchEmpty.hidden = !q || listed > 0;
+        } else {
+          if (libEnd) libEnd.hidden = true;
+          empty.hidden = listed > 0;
+          empty.textContent = isTrash
+            ? "휴지통이 비어 있습니다."
+            : "프로젝트가 없습니다.";
+          if (searchEmpty) searchEmpty.hidden = !q || listed > 0;
+        }
+
+        renderBreadcrumb();
+      };
+
+      const openMenu = (event, id, kind) => {
+        event.preventDefault();
+        selectedId = id;
+        menuTarget = { id, kind };
+        moreMenu.hidden = false;
+        moreMenu.style.left = `${Math.min(event.clientX, window.innerWidth - 150)}px`;
+        moreMenu.style.top = `${event.clientY}px`;
+        [...grid.children].forEach((el) => el.classList.toggle("is-selected", el.dataset.id === id));
+      };
+
+      createBtn?.addEventListener("click", createFolder);
+      viewBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          viewMode = btn.getAttribute("data-view") || "grid";
+          viewBtns.forEach((el) => el.classList.toggle("is-active", el === btn));
+          render();
+        });
+      });
+      search?.addEventListener("input", render);
+
+      moreMenu.addEventListener("click", (e) => {
+        const act = e.target.closest("[data-more]")?.dataset.more;
+        if (!act || !menuTarget) return;
+        if (act === "open") {
+          const folder = findFolder(menuTarget.id);
+          const file = findFile(menuTarget.id);
+          if (folder) openFolderCanvas(folder);
+          else if (file) openCanvas(file);
+        }
+        if (act === "rename") renameItem(menuTarget.id);
+        if (act === "del") deleteItem(menuTarget.id);
+        moreMenu.hidden = true;
+        menuTarget = null;
+      });
 
       const closePops = () => {
-        invitePop.hidden = true;
         sharePop.hidden = true;
         moreMenu.hidden = true;
       };
-
-      search.addEventListener("input", () => {
-        const q = search.value.trim().toLowerCase();
-        let n = 0;
-        cards.forEach((c) => {
-          const on = !q || (c.dataset.name || "").toLowerCase().includes(q);
-          c.hidden = !on;
-          if (on) n += 1;
-        });
-        empty.hidden = n > 0;
-        end.hidden = n === 0;
-      });
-
-      document.getElementById("inviteBtn").onclick = (e) => {
-        e.stopPropagation();
-        sharePop.hidden = true;
-        invitePop.hidden = !invitePop.hidden;
-      };
       document.getElementById("shareBtn").onclick = (e) => {
         e.stopPropagation();
-        invitePop.hidden = true;
         sharePop.hidden = !sharePop.hidden;
       };
-
+      invitePill?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        sharePop.hidden = !sharePop.hidden;
+      });
       document.getElementById("inviteForm").addEventListener("submit", (e) => {
         e.preventDefault();
         const email = document.getElementById("inviteEmail");
@@ -221,7 +681,6 @@
         document.getElementById("inviteList").appendChild(li);
         email.value = "";
       });
-
       document.getElementById("copyLink").onclick = async () => {
         const url = document.getElementById("shareLink").value;
         try { await navigator.clipboard.writeText(url); } catch {}
@@ -230,30 +689,18 @@
         em.textContent = "링크를 복사했습니다. 받은 사람은 바로 들어와 함께 편집할 수 있습니다.";
         window.setTimeout(() => { em.textContent = prev; }, 1800);
       };
-      document.getElementById("postClass").onclick = () => {
-        const em = document.querySelector("#postClass em");
-        em.textContent = "학급 스페이스에 게시했습니다.";
-      };
-
-      document.querySelectorAll(".more-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const r = btn.getBoundingClientRect();
-          moreMenu.hidden = false;
-          moreMenu.style.left = `${r.right - 140}px`;
-          moreMenu.style.top = `${r.bottom + 6}px`;
-        });
-      });
-      moreMenu.addEventListener("click", (e) => {
-        e.stopPropagation();
-        moreMenu.hidden = true;
-      });
 
       document.addEventListener("click", closePops);
-      invitePop.addEventListener("click", (e) => e.stopPropagation());
       sharePop.addEventListener("click", (e) => e.stopPropagation());
+      moreMenu.addEventListener("click", (e) => e.stopPropagation());
+
+      render();
+      if (startCreate) {
+        history.replaceState(null, "", "boards.html");
+        createFolder();
+      }
     })();
   </script>
+  <script src="app.js?v=nav7"></script>
 </body>
 </html>

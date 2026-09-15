@@ -20,9 +20,166 @@
     edit: "스마트 편집",
     director: "디렉터 콘솔",
     analyze: "스마트 분석",
-    script: "스크립트 생성기",
+    script: "스크립트",
     ref: "참조 노드",
     upscale: "고화질",
+  };
+  const ico = (paths) =>
+    `<svg class="node-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+  const NODE_ICO = {
+    image: ico(`<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m21 15.5-4.8-4.8a1.6 1.6 0 0 0-2.2 0L7 18"/>`),
+    video: ico(`<rect x="2.5" y="6" width="14" height="12" rx="2"/><path d="m16.5 10 5-2.5v9l-5-2.5z"/>`),
+    audio: ico(`<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 10v4"/>`),
+    text: ico(`<path d="M5 6h14M12 6v12M8 18h8"/>`),
+    edit: ico(`<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6.2 6.2l2.1 2.1M15.7 15.7l2.1 2.1M17.8 6.2l-2.1 2.1M8.3 15.7l-2.1 2.1"/>`),
+    director: ico(`<path d="M3 9h18v11H3z"/><path d="m3 9 4-5h14l-4 5"/><path d="M8 4 12 9M16 4l4 5"/>`),
+    analyze: ico(`<path d="M4 19V5M4 19h16"/><path d="M8 15v-4M12 15V8M16 15v-7"/>`),
+    script: ico(`<path d="M7 3h8l5 5v13H7z"/><path d="M15 3v5h5M10 13h6M10 17h4"/>`),
+    ref: ico(`<path d="M7 4h10v16l-5-3-5 3z"/>`),
+    upscale: ico(`<path d="M4 14v6h6M20 10V4h-6M14 4l6 6M10 20 4 14"/>`),
+  };
+  const kicker = (type, label) => `<span class="node-kicker">${NODE_ICO[type] || NODE_ICO.image}${label}</span>`;
+  const NODE_STACKS = {
+    text: [
+      { id: "plain", label: "일반 텍스트", hint: "프롬프트 / 메모 / 카피 입력" },
+      { id: "write", label: "AI 작성", hint: "LLM으로 내용 생성" },
+      { id: "prompt", label: "프롬프트 생성", hint: "이미지·영상용 프롬프트 변환" },
+      { id: "summarize", label: "요약", hint: "긴 텍스트 압축" },
+      { id: "expand", label: "확장", hint: "아이디어 → 상세 묘사" },
+      { id: "translate", label: "번역", hint: "다국어 변환" },
+      { id: "rewrite", label: "재작성", hint: "톤·문체·길이 변경" },
+      { id: "story", label: "스토리", hint: "로그라인 / 시놉시스 / 트리트먼트" },
+      { id: "structure", label: "구조화", hint: "JSON / Shot List / Scene 데이터" },
+    ],
+    image: [
+      { id: "t2i", label: "Text → Image", hint: "텍스트로 이미지 생성" },
+      { id: "i2i", label: "Image → Image", hint: "이미지 기반 재생성" },
+      { id: "multi", label: "Multi Reference", hint: "여러 이미지 조합" },
+      { id: "character", label: "Character", hint: "캐릭터 일관성 생성" },
+      { id: "style", label: "Style Reference", hint: "화풍/룩 유지" },
+      { id: "edit", label: "Edit", hint: "부분 수정 / Inpaint" },
+      { id: "expand", label: "Expand", hint: "Outpaint" },
+      { id: "remove", label: "Remove", hint: "객체/배경 제거" },
+      { id: "upscale", label: "Upscale", hint: "해상도 향상" },
+      { id: "variation", label: "Variation", hint: "베리에이션 생성" },
+    ],
+    video: [
+      { id: "t2v", label: "Text → Video", hint: "텍스트 기반 영상" },
+      { id: "i2v", label: "Image → Video", hint: "이미지 애니메이션" },
+      { id: "startend", label: "Start → End", hint: "시작/끝 프레임 영상" },
+      { id: "r2v", label: "Reference → Video", hint: "캐릭터/영상 참조" },
+      { id: "v2v", label: "Video → Video", hint: "스타일/내용 변환" },
+      { id: "extend", label: "Extend", hint: "영상 길이 확장" },
+      { id: "motion", label: "Motion Control", hint: "움직임 참조" },
+      { id: "camera", label: "Camera Motion", hint: "Dolly/Pan/Tilt/Orbit" },
+      { id: "lipsync", label: "Lip Sync", hint: "음성 기반 립싱크" },
+      { id: "upscale", label: "Upscale", hint: "영상 화질 개선" },
+    ],
+    edit: [
+      { id: "remove", label: "Remove", hint: "객체 삭제" },
+      { id: "replace", label: "Replace", hint: "객체 교체" },
+      { id: "background", label: "Background", hint: "배경 제거/교체" },
+      { id: "relight", label: "Relight", hint: "조명 변경" },
+      { id: "reframe", label: "Reframe", hint: "16:9 → 9:16 등" },
+      { id: "extend", label: "Extend", hint: "화면 확장" },
+      { id: "style", label: "Style Transfer", hint: "스타일 변경" },
+      { id: "character", label: "Face/Character", hint: "캐릭터 수정" },
+      { id: "composite", label: "Composite", hint: "여러 이미지 합성" },
+      { id: "cleanup", label: "Cleanup", hint: "아티팩트 제거" },
+    ],
+    director: [
+      { id: "camera", label: "Camera", hint: "Shot Size / Angle" },
+      { id: "lens", label: "Lens", hint: "18/24/35/50/85mm" },
+      { id: "movement", label: "Movement", hint: "Pan/Tilt/Dolly/Truck/Crane" },
+      { id: "composition", label: "Composition", hint: "중앙/삼분할/대칭" },
+      { id: "subject", label: "Subject", hint: "인물 위치·방향" },
+      { id: "lighting", label: "Lighting", hint: "Key/Fill/Rim/시간대" },
+      { id: "color", label: "Color", hint: "Color Science / LUT / Tone" },
+      { id: "depth", label: "Depth", hint: "DOF / Focus" },
+      { id: "blocking", label: "Blocking", hint: "인물·오브젝트 배치" },
+      { id: "continuity", label: "Continuity", hint: "이전 샷 설정 유지" },
+    ],
+    analyze: [
+      { id: "img-desc", label: "Image Describe", hint: "이미지 → 설명" },
+      { id: "vid-desc", label: "Video Describe", hint: "영상 → 설명" },
+      { id: "prompt", label: "Prompt Extract", hint: "이미지 → 생성 프롬프트" },
+      { id: "scene", label: "Scene Detect", hint: "영상 씬 분리" },
+      { id: "shot", label: "Shot Detect", hint: "샷 분리" },
+      { id: "character", label: "Character Detect", hint: "등장인물 분석" },
+      { id: "object", label: "Object Detect", hint: "사물 분석" },
+      { id: "composition", label: "Composition", hint: "구도 분석" },
+      { id: "camera", label: "Camera Analysis", hint: "렌즈/앵글/카메라워크 추론" },
+      { id: "color", label: "Color Analysis", hint: "컬러 팔레트 분석" },
+      { id: "audio", label: "Audio Analysis", hint: "음성/BGM/SFX 분석" },
+    ],
+    audio: [
+      { id: "tts", label: "Text → Speech", hint: "TTS" },
+      { id: "clone", label: "Voice Clone", hint: "보이스 참조" },
+      { id: "s2s", label: "Speech → Speech", hint: "목소리 변환" },
+      { id: "music", label: "Music", hint: "BGM 생성" },
+      { id: "sfx", label: "SFX", hint: "효과음 생성" },
+      { id: "ambience", label: "Ambience", hint: "환경음 생성" },
+      { id: "dubbing", label: "Dubbing", hint: "자동 더빙" },
+      { id: "separate", label: "Separate", hint: "Voice/Music 분리" },
+      { id: "cleanup", label: "Cleanup", hint: "노이즈 제거" },
+      { id: "mastering", label: "Mastering", hint: "음량/음질 정리" },
+    ],
+    script: [
+      { id: "logline", label: "Idea → Logline", hint: "아이디어 한 줄 정리" },
+      { id: "synopsis", label: "Synopsis", hint: "시놉시스" },
+      { id: "treatment", label: "Treatment", hint: "트리트먼트" },
+      { id: "character", label: "Character", hint: "캐릭터 설정" },
+      { id: "world", label: "World", hint: "세계관 설정" },
+      { id: "act", label: "Act", hint: "Act 구조" },
+      { id: "sequence", label: "Sequence", hint: "시퀀스 분할" },
+      { id: "scene", label: "Scene", hint: "씬 생성" },
+      { id: "shot", label: "Shot", hint: "샷 생성" },
+      { id: "dialogue", label: "Dialogue", hint: "대사" },
+      { id: "narration", label: "Narration", hint: "내레이션" },
+      { id: "storyboard", label: "Storyboard", hint: "스토리보드 변환" },
+    ],
+    ref: [
+      { id: "character", label: "Character", hint: "캐릭터 Reference" },
+      { id: "face", label: "Face", hint: "얼굴 Reference" },
+      { id: "product", label: "Product", hint: "제품 Reference" },
+      { id: "object", label: "Object", hint: "오브젝트 Reference" },
+      { id: "location", label: "Location", hint: "장소 Reference" },
+      { id: "style", label: "Style", hint: "스타일 Reference" },
+      { id: "color", label: "Color", hint: "컬러 Reference" },
+      { id: "camera", label: "Camera", hint: "촬영 Reference" },
+      { id: "motion", label: "Motion", hint: "모션 Reference" },
+      { id: "voice", label: "Voice", hint: "음성 Reference" },
+      { id: "music", label: "Music", hint: "음악 Reference" },
+    ],
+  };
+  const STACK_DEFAULT = {
+    text: "plain",
+    image: "t2i",
+    video: "i2v",
+    edit: "remove",
+    director: "camera",
+    analyze: "img-desc",
+    audio: "tts",
+    script: "storyboard",
+    ref: "style",
+  };
+  const MODE_ALIAS = { teacher: "tts", student: "tts", remake: "replace", caption: "cleanup", bg: "location" };
+  const stackIdOf = (n) => {
+    const list = NODE_STACKS[n.type];
+    if (!list?.length) return "";
+    const raw = MODE_ALIAS[n.mode] || n.mode || STACK_DEFAULT[n.type];
+    return list.some((s) => s.id === raw) ? raw : (STACK_DEFAULT[n.type] || list[0].id);
+  };
+  const stackOf = (n) => {
+    const list = NODE_STACKS[n.type] || [];
+    const id = stackIdOf(n);
+    return list.find((s) => s.id === id) || list[0] || { id: "", label: NODE_TITLE[n.type] || n.type, hint: "" };
+  };
+  const stackPick = (n) => {
+    const list = NODE_STACKS[n.type];
+    if (!list?.length) return "";
+    const cur = stackIdOf(n);
+    return `<select class="stack-pick${n.compact ? " is-sm" : ""}" data-stack="${n.id}" aria-label="${NODE_TITLE[n.type] || n.type} 세부 기능">${list.map((s) => `<option value="${s.id}"${s.id === cur ? " selected" : ""}>${s.label}</option>`).join("")}</select>`;
   };
   const TITLES = {
     photo: "광합성 실험 가이드",
@@ -31,7 +188,9 @@
     math: "분수 개념 3분 컷",
     water: "물의 순환",
     new: "새 시나리오",
+    blank: "Blank",
   };
+  const landingPrompt = (new URLSearchParams(location.search).get("prompt") || "").trim();
   const boardId = new URLSearchParams(location.search).get("board") || "photo";
   document.getElementById("boardName").textContent = TITLES[boardId] || TITLES.photo;
   document.title = `${TITLES[boardId] || TITLES.photo} · 아보라`;
@@ -104,15 +263,33 @@
     insert: "assets/app/shots/insert.png",
   };
 
+  const isBlank = boardId === "blank";
+  const isFresh = boardId === "new" || isBlank;
   const state = {
-    selectedId: "sc-01",
+    selectedId: isBlank ? "" : "sc-01",
     plusFrom: null,
-    cam: { x: boardId === "new" ? 48 : 24, y: boardId === "new" ? 72 : 48, scale: boardId === "new" ? 0.78 : 0.42 },
+    cam: { x: isFresh ? 48 : 24, y: isFresh ? 72 : 48, scale: isFresh ? 0.78 : 0.42 },
     dragging: null,
     panning: false,
-    coach: boardId === "new" ? -1 : 0,
+    coach: isFresh ? -1 : 0,
     look: { tab: "palette", palette: null, light: null, art: null },
-    groups: boardId === "new" ? [
+    folderNames: { new: "새 폴더", audio: "음향 효과", character: "캐릭터", scene: "장면", prop: "소품", style: "스타일" },
+    folderOpen: { new: false, audio: false, character: true, scene: true, prop: false, style: false },
+    folders: ["new", "audio", "character", "scene", "prop", "style"],
+    assetQuery: "",
+    inspect: null,
+    library: [
+      { id: "lib-char-1", folder: "character", name: "스크린샷 2026-09-13 오후 4.41.27", src: "assets/app/inspire/inspire-01-character.png", author: "Jisu Lee", createdAt: "2026-09-15 05:32" },
+    ],
+    crewOn: { writer: true, cd: true },
+    crewOpen: "writer",
+    selectedGroup: "",
+    frameEdit: false,
+    stackView: false,
+    dockTab: "canvas",
+    movingGroup: null,
+    resizing: null,
+    groups: isBlank ? [] : boardId === "new" ? [
       { id: "g1", no: "01", title: "기획 · 톤과 장르", x: 8, y: 0, w: 560, h: 700 },
     ] : [
       { id: "g1", no: "01", title: "기획 · 톤과 장르", x: 8, y: 0, w: 560, h: 700 },
@@ -120,21 +297,21 @@
       { id: "g3", no: "03", title: "샷 변형", x: 1308, y: 0, w: 520, h: 900 },
       { id: "g4", no: "04", title: "영상", x: 1860, y: 0, w: 720, h: 700 },
     ],
-    nodes: boardId === "new" ? [
-      { id: "sc-01", type: "script", title: "스크립트 생성기", x: 40, y: 48, ready: false, prompt: "" },
+    nodes: isBlank ? [] : boardId === "new" ? [
+      { id: "sc-01", type: "script", title: "스크립트", x: 40, y: 48, ready: false, prompt: landingPrompt, folder: "new", group: "g1" },
     ] : [
-      { id: "sc-01", type: "script", title: "스크립트 생성기", x: 40, y: 48, ready: false, prompt: "" },
-      { id: "img-s1", type: "image", compact: true, title: "이미지", x: 624, y: 48, ready: true, shot: "오프닝", src: "assets/app/shots/open.png", prompt: IMG_PROMPT },
-      { id: "img-s2", type: "image", compact: true, title: "이미지", x: 772, y: 48, ready: true, shot: "핵심 클로즈업", src: "assets/app/shots/leaf.png", prompt: "잎에 빛이 닿는 클로즈업" },
-      { id: "img-s3", type: "image", compact: true, title: "이미지", x: 920, y: 48, ready: true, shot: "반응", src: "assets/app/shots/class.png", prompt: "학생들이 대답한다" },
-      { id: "img-s4", type: "image", compact: true, title: "이미지", x: 1068, y: 48, ready: true, shot: "정리", src: "assets/app/shots/idea.png", prompt: "빛·잎·양분 한 컷" },
-      { id: "img-v1", type: "image", compact: true, title: "이미지", x: 1344, y: 48, ready: true, shot: "와이드", src: "assets/app/shots/wide.png", prompt: "같은 장면 와이드" },
-      { id: "img-v2", type: "image", compact: true, title: "이미지", x: 1492, y: 48, ready: true, shot: "역광", src: "assets/app/shots/backlight.png", prompt: "역광 실루엣" },
-      { id: "img-v3", type: "image", compact: true, title: "이미지", x: 1344, y: 228, ready: true, shot: "컷어웨이", src: "assets/app/shots/cutaway.png", prompt: "학생 컷어웨이" },
-      { id: "img-v4", type: "image", compact: true, title: "이미지", x: 1492, y: 228, ready: true, shot: "인서트", src: "assets/app/shots/insert.png", prompt: "개념 인서트" },
-      { id: "vid-01", type: "video", title: "비디오", x: 1896, y: 48, ready: false, prompt: PROMPT },
+      { id: "sc-01", type: "script", title: "스크립트", x: 40, y: 48, ready: false, prompt: landingPrompt, folder: "new", group: "g1" },
+      { id: "img-s1", type: "image", compact: true, title: "이미지", x: 624, y: 48, ready: true, shot: "오프닝", src: "assets/app/shots/open.png", prompt: IMG_PROMPT, folder: "scene", group: "g2" },
+      { id: "img-s2", type: "image", compact: true, title: "이미지", x: 772, y: 48, ready: true, shot: "핵심 클로즈업", src: "assets/app/shots/leaf.png", prompt: "잎에 빛이 닿는 클로즈업", folder: "scene", group: "g2" },
+      { id: "img-s3", type: "image", compact: true, title: "이미지", x: 920, y: 48, ready: true, shot: "반응", src: "assets/app/shots/class.png", prompt: "학생들이 대답한다", folder: "scene", group: "g2" },
+      { id: "img-s4", type: "image", compact: true, title: "이미지", x: 1068, y: 48, ready: true, shot: "정리", src: "assets/app/shots/idea.png", prompt: "빛·잎·양분 한 컷", folder: "scene", group: "g2" },
+      { id: "img-v1", type: "image", compact: true, title: "이미지", x: 1344, y: 48, ready: true, shot: "와이드", src: "assets/app/shots/wide.png", prompt: "같은 장면 와이드", folder: "scene", group: "g3" },
+      { id: "img-v2", type: "image", compact: true, title: "이미지", x: 1492, y: 48, ready: true, shot: "역광", src: "assets/app/shots/backlight.png", prompt: "역광 실루엣", folder: "scene", group: "g3" },
+      { id: "img-v3", type: "image", compact: true, title: "이미지", x: 1344, y: 228, ready: true, shot: "컷어웨이", src: "assets/app/shots/cutaway.png", prompt: "학생 컷어웨이", folder: "prop", group: "g3" },
+      { id: "img-v4", type: "image", compact: true, title: "이미지", x: 1492, y: 228, ready: true, shot: "인서트", src: "assets/app/shots/insert.png", prompt: "개념 인서트", folder: "prop", group: "g3" },
+      { id: "vid-01", type: "video", title: "비디오", x: 1896, y: 48, ready: false, prompt: PROMPT, folder: "scene", group: "g4" },
     ],
-    edges: boardId === "new" ? [] : [
+    edges: isBlank || boardId === "new" ? [] : [
       { from: "sc-01", to: "img-s1" },
       { from: "sc-01", to: "img-s2" },
       { from: "sc-01", to: "img-s3" },
@@ -157,9 +334,240 @@
   const nodeById = (id) => state.nodes.find((n) => n.id === id);
   const uid = (p) => `${p}-${Math.random().toString(36).slice(2, 6)}`;
   const sizeOf = (n) => {
-    if (n.compact && (n.type === "image" || n.type === "ref")) return { w: 132, h: 158, portY: 68 };
+    if (n.compact && (n.type === "image" || n.type === "ref")) return { w: 132, h: 186, portY: 68 };
     return SIZE[n.type] || SIZE.image;
   };
+  const GROUP_PAD = 32;
+  const RESIZE = {
+    n: { x: 0, y: 1, w: 0, h: -1 },
+    s: { x: 0, y: 0, w: 0, h: 1 },
+    e: { x: 0, y: 0, w: 1, h: 0 },
+    w: { x: 1, y: 0, w: -1, h: 0 },
+    ne: { x: 0, y: 1, w: 1, h: -1 },
+    nw: { x: 1, y: 1, w: -1, h: -1 },
+    se: { x: 0, y: 0, w: 1, h: 1 },
+    sw: { x: 1, y: 0, w: -1, h: 1 },
+  };
+  const groupById = (id) => (state.groups || []).find((g) => g.id === id);
+  const nodesInGroup = (gid) => state.nodes.filter((n) => n.group === gid);
+  const originOf = (n) => {
+    const g = n?.group ? groupById(n.group) : null;
+    return g ? { x: g.x, y: g.y } : { x: 0, y: 0 };
+  };
+  const worldOf = (n) => {
+    const o = originOf(n);
+    return { x: o.x + n.x, y: o.y + n.y };
+  };
+  const worldFromEvent = (e) => {
+    const r = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - r.left - state.cam.x) / state.cam.scale,
+      y: (e.clientY - r.top - state.cam.y) / state.cam.scale,
+    };
+  };
+  const groupAtWorld = (wx, wy) => {
+    const gs = state.groups || [];
+    for (let i = gs.length - 1; i >= 0; i -= 1) {
+      const g = gs[i];
+      if (wx >= g.x && wy >= g.y && wx <= g.x + g.w && wy <= g.y + g.h) return g;
+    }
+    return null;
+  };
+  const sequenceNodes = (gid) => {
+    const kids = nodesInGroup(gid);
+    if (kids.length < 2) return kids.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+    const inGroup = new Set(kids.map((n) => n.id));
+    const incoming = new Map(kids.map((n) => [n.id, 0]));
+    state.edges.forEach((e) => {
+      if (inGroup.has(e.from) && inGroup.has(e.to)) incoming.set(e.to, (incoming.get(e.to) || 0) + 1);
+    });
+    const starts = kids.filter((n) => !incoming.get(n.id)).sort((a, b) => a.x - b.x || a.y - b.y);
+    const seen = new Set();
+    const out = [];
+    const walk = (n) => {
+      if (!n || seen.has(n.id)) return;
+      seen.add(n.id);
+      out.push(n);
+      state.edges
+        .filter((e) => e.from === n.id && inGroup.has(e.to))
+        .map((e) => nodeById(e.to))
+        .filter(Boolean)
+        .sort((a, b) => a.y - b.y || a.x - b.x)
+        .forEach(walk);
+    };
+    starts.forEach(walk);
+    kids.filter((n) => !seen.has(n.id)).sort((a, b) => a.x - b.x || a.y - b.y).forEach((n) => out.push(n));
+    return out;
+  };
+  const SEQ_GAP = 36;
+  const SEQ_TOP = 40;
+  const layoutSlotInGroup = (g, n) => {
+    const sz = sizeOf(n);
+    const others = nodesInGroup(g.id).filter((x) => x.id !== n.id);
+    const innerR = g.w - GROUP_PAD;
+    if (!others.length) return { x: GROUP_PAD, y: SEQ_TOP };
+    const lowest = Math.max(...others.map((o) => o.y));
+    const row = others.filter((o) => Math.abs(o.y - lowest) < 28);
+    const right = row.reduce((acc, o) => (o.x + sizeOf(o).w > acc.x + sizeOf(acc).w ? o : acc));
+    const rs = sizeOf(right);
+    let x = right.x + rs.w + SEQ_GAP;
+    let y = right.y;
+    if (x + sz.w > innerR) {
+      x = GROUP_PAD;
+      y = Math.max(...row.map((o) => o.y + sizeOf(o).h)) + SEQ_GAP;
+    }
+    return { x: Math.round(x), y: Math.round(y) };
+  };
+  const clampNodeInGroup = (n, g) => {
+    if (!g) return;
+    const sz = sizeOf(n);
+    const maxX = Math.max(GROUP_PAD, g.w - GROUP_PAD - sz.w);
+    const maxY = Math.max(GROUP_PAD, g.h - GROUP_PAD - sz.h);
+    n.x = Math.min(Math.max(GROUP_PAD, n.x), maxX);
+    n.y = Math.min(Math.max(GROUP_PAD, n.y), maxY);
+  };
+  const unlinkFromGroup = (n, gid) => {
+    const members = new Set(nodesInGroup(gid).map((x) => x.id));
+    state.edges = state.edges.filter((e) => {
+      const a = members.has(e.from);
+      const b = members.has(e.to);
+      if (e.from === n.id && a && b) return false;
+      if (e.to === n.id && a && b) return false;
+      return true;
+    });
+  };
+  const linkIntoSequence = (n, gid) => {
+    const others = nodesInGroup(gid).filter((x) => x.id !== n.id);
+    if (!others.length) return;
+    const linked = state.edges.some((e) =>
+      (e.from === n.id && others.some((o) => o.id === e.to)) ||
+      (e.to === n.id && others.some((o) => o.id === e.from))
+    );
+    if (linked) return;
+    const last = sequenceNodes(gid).filter((x) => x.id !== n.id).pop();
+    if (last) state.edges.push({ from: last.id, to: n.id });
+  };
+  const placeIntoGroup = (n, gid) => {
+    if (!n) return false;
+    const at = worldOf(n);
+    const prev = n.group || "";
+    const next = gid || "";
+    if (prev === next) {
+      if (next) {
+        const g = groupById(next);
+        clampNodeInGroup(n, g);
+        expandGroupToFit(g);
+      }
+      return false;
+    }
+    if (prev) unlinkFromGroup(n, prev);
+    const g = next ? groupById(next) : null;
+    n.group = next;
+    if (!g) {
+      n.x = Math.round(at.x);
+      n.y = Math.round(at.y);
+      return false;
+    }
+    const slot = layoutSlotInGroup(g, n);
+    n.x = slot.x;
+    n.y = slot.y;
+    linkIntoSequence(n, g.id);
+    expandGroupToFit(g);
+    return true;
+  };
+  const paintDropTarget = (gid, n) => {
+    world.querySelectorAll(".board-group").forEach((el) => {
+      const on = !!(gid && el.dataset.group === gid);
+      el.classList.toggle("is-drop", on);
+      let ghost = el.querySelector(".seq-ghost");
+      const joining = on && n && (n.group || "") !== gid;
+      if (!joining) {
+        ghost?.remove();
+        return;
+      }
+      const g = groupById(gid);
+      const slot = layoutSlotInGroup(g, n);
+      const sz = sizeOf(n);
+      if (!ghost) {
+        ghost = document.createElement("div");
+        ghost.className = "seq-ghost";
+        el.appendChild(ghost);
+      }
+      ghost.style.left = `${slot.x}px`;
+      ghost.style.top = `${slot.y}px`;
+      ghost.style.width = `${sz.w}px`;
+      ghost.style.height = `${Math.min(sz.h, 240)}px`;
+    });
+  };
+  const paintNode = (n) => {
+    const el = world.querySelector(`[data-id="${n.id}"]`);
+    if (el) { el.style.left = `${n.x}px`; el.style.top = `${n.y}px`; }
+  };
+  const paintGroup = (g) => {
+    if (!g) return;
+    const el = world.querySelector(`[data-group="${g.id}"]`);
+    if (!el) return;
+    el.style.left = `${g.x}px`;
+    el.style.top = `${g.y}px`;
+    el.style.width = `${g.w}px`;
+    el.style.height = `${g.h}px`;
+  };
+  const kidBounds = (g) => {
+    const kids = nodesInGroup(g.id);
+    if (!kids.length) return null;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    kids.forEach((n) => {
+      const s = sizeOf(n);
+      minX = Math.min(minX, n.x);
+      minY = Math.min(minY, n.y);
+      maxX = Math.max(maxX, n.x + s.w);
+      maxY = Math.max(maxY, n.y + s.h);
+    });
+    return { minX, minY, maxX, maxY, kids };
+  };
+  const expandGroupToFit = (g) => {
+    if (!g) return;
+    const box = kidBounds(g);
+    if (!box) return;
+    if (box.minX < GROUP_PAD) {
+      const dx = GROUP_PAD - box.minX;
+      g.x -= dx;
+      g.w += dx;
+      box.kids.forEach((n) => { n.x += dx; });
+      box.maxX += dx;
+    }
+    if (box.minY < GROUP_PAD) {
+      const dy = GROUP_PAD - box.minY;
+      g.y -= dy;
+      g.h += dy;
+      box.kids.forEach((n) => { n.y += dy; });
+      box.maxY += dy;
+    }
+    g.w = Math.max(Number(g.w) || 0, box.maxX + GROUP_PAD);
+    g.h = Math.max(Number(g.h) || 0, box.maxY + GROUP_PAD);
+  };
+  const clampGroupResize = (g, next) => {
+    let { x, y, w, h } = next;
+    w = Math.max(240, w);
+    h = Math.max(180, h);
+    const dx = x - g.x;
+    const dy = y - g.y;
+    const kids = nodesInGroup(g.id);
+    if (dx || dy) kids.forEach((n) => { n.x -= dx; n.y -= dy; });
+    g.x = x;
+    g.y = y;
+    g.w = w;
+    g.h = h;
+    expandGroupToFit(g);
+    kids.forEach(paintNode);
+  };
+  state.nodes.forEach((n) => {
+    const g = n.group ? groupById(n.group) : null;
+    if (!g) return;
+    n.x -= g.x;
+    n.y -= g.y;
+  });
+  (state.groups || []).forEach(expandGroupToFit);
   const veil = (n) => n.busy ? `<div class="busy-veil"><span class="spin"></span><p>${n.busy}</p></div>` : "";
   const sendBtn = (n) => `
     <button class="send-btn" type="button" data-run="generate" data-id="${n.id}" ${n.busy ? "disabled" : ""}>
@@ -228,12 +636,21 @@
 
   const portWorld = (n, which) => {
     const s = sizeOf(n);
-    return { x: which === "out" ? n.x + s.w : n.x, y: n.y + s.portY };
+    const w = worldOf(n);
+    return { x: which === "out" ? w.x + s.w : w.x, y: w.y + s.portY };
   };
 
-  const bezier = (x1, y1, x2, y2) => {
-    const dx = Math.max(40, Math.abs(x2 - x1) * 0.45);
-    return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+  const ortho = (x1, y1, x2, y2) => {
+    const mid = x1 + Math.max(36, (x2 - x1) * 0.5);
+    const r = Math.min(16, Math.abs(y2 - y1) / 2, Math.max(8, Math.abs(x2 - mid) / 2));
+    if (Math.abs(y2 - y1) < 3) return { d: `M ${x1} ${y1} H ${x2}`, mx: (x1 + x2) / 2, my: y1 };
+    const s = y2 >= y1 ? 1 : -1;
+    if (r < 3) return { d: `M ${x1} ${y1} H ${mid} V ${y2} H ${x2}`, mx: mid, my: (y1 + y2) / 2 };
+    return {
+      d: `M ${x1} ${y1} H ${mid - r} Q ${mid} ${y1} ${mid} ${y1 + s * r} V ${y2 - s * r} Q ${mid} ${y2} ${mid + r} ${y2} H ${x2}`,
+      mx: mid,
+      my: (y1 + y2) / 2,
+    };
   };
 
   const drawEdges = () => {
@@ -244,39 +661,54 @@
       if (!a || !b) return "";
       const p1 = portWorld(a, "out");
       const p2 = portWorld(b, "in");
-      const d = bezier(p1.x * scale + x, p1.y * scale + y, p2.x * scale + x, p2.y * scale + y);
+      const x1 = p1.x * scale + x;
+      const y1 = p1.y * scale + y;
+      const x2 = p2.x * scale + x;
+      const y2 = p2.y * scale + y;
+      const { d, mx, my } = ortho(x1, y1, x2, y2);
       const live = !!(a.busy || b.busy);
-      return `<path class="edge${live ? " is-live" : ""}" d="${d}" />`;
+      return `
+        <path class="edge${live ? " is-live" : ""}" d="${d}" />
+        <g class="edge-cut" data-cut-edge="1" data-from="${e.from}" data-to="${e.to}" transform="translate(${mx} ${my})">
+          <circle class="edge-cut-hit" r="14" />
+          <circle class="edge-cut-disk" r="11" />
+          <path class="edge-cut-mark" d="M-5 0 H5" />
+        </g>`;
     }).join("");
     edgesSvg.innerHTML = paths;
   };
+  const cutEdge = (from, to) => {
+    state.edges = state.edges.filter((ed) => !(ed.from === from && ed.to === to));
+    renderAll();
+  };
 
   const imageHTML = (n) => n.compact ? `
-    <article class="node node-thumb" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-thumb" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
       <div class="media media-thumb ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
         ${n.ready ? `<img src="${n.src || BLANK}" alt=""><span class="look-wash"></span>` : ""}
       </div>
-      <span class="thumb-label">${n.shot || n.title || "이미지"}</span>
+      <span class="thumb-label">${kicker("image", n.shot || n.title || stackOf(n).label)}</span>
+      ${stackPick(n)}
       <button class="plus-btn" type="button" data-plus="${n.id}">+</button>
     </article>` : `
-    <article class="node node-image" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>이미지${n.shot ? ` · ${n.shot}` : ""}</span><span>${n.size || "350 × 350"}</span></div>
+    <article class="node node-image" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("image", "이미지")}${stackPick(n)}</div>
       <div class="media media-sq ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
-        ${n.ready ? `<img src="${n.src || BLANK}" alt=""><span class="look-wash"></span>` : `<span>프롬프트로 이미지 생성</span>`}
+        ${n.ready ? `<img src="${n.src || BLANK}" alt=""><span class="look-wash"></span>` : `<span>${stackOf(n).hint}</span>`}
       </div>
       ${lookLine() ? `<div class="look-strip"><span class="look-dots">${palDots(lookBy("palette", state.look.palette) || lookBy("light", state.look.light))}</span><em>${lookLine()}</em></div>` : ""}
       <div class="prompt-dock narrow">
-        <textarea data-prompt="${n.id}" placeholder="이미지 설명">${n.prompt || ""}</textarea>
-        <div class="prompt-foot"><span>이미지 · 1:1</span>${sendBtn(n)}</div>
+        <textarea data-prompt="${n.id}" placeholder="${stackOf(n).hint}">${n.prompt || ""}</textarea>
+        <div class="prompt-foot"><span>${stackOf(n).label}</span>${sendBtn(n)}</div>
       </div>
       <button class="plus-btn" type="button" data-plus="${n.id}">+</button>
     </article>`;
 
   const videoHTML = (n) => `
-    <article class="node node-video" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>▶ 비디오 ${n.ready ? "노드 1" : ""}</span></div>
+    <article class="node node-video" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("video", "비디오")}${stackPick(n)}</div>
       ${n.ready ? `
         <div class="toolbar" data-bar="${n.id}">
           <button type="button" data-run="enhance" data-id="${n.id}">고화질</button>
@@ -301,10 +733,10 @@
         </div>
         <div class="prompt-body">
           <div class="ref-thumb"><img src="${BLANK}" alt=""></div>
-          <textarea data-prompt="${n.id}">${n.prompt || ""}</textarea>
+          <textarea data-prompt="${n.id}" placeholder="${stackOf(n).hint}">${n.prompt || ""}</textarea>
         </div>
         <div class="prompt-foot">
-          <span>MiniMax H3 · 올인원 참조 · 16:9 · 5s</span>
+          <span>${stackOf(n).label} · ${stackOf(n).hint}</span>
           ${sendBtn(n)}
         </div>
       </div>
@@ -312,8 +744,8 @@
     </article>`;
 
   const upscaleHTML = (n) => `
-    <article class="node node-upscale" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>▶ 고화질${n.ready ? "(완료)" : "(1080P)"}</span></div>
+    <article class="node node-upscale" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("upscale", `고화질${n.ready ? "(완료)" : "(1080P)"}`)}</div>
       <div class="media media-up ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
         ${n.ready ? `<img src="${BLANK}" alt=""><span class="ai-tag">4K</span>` : "파라미터를 설정해 고화질 비디오 생성"}
@@ -340,59 +772,50 @@
     </article>`;
 
   const textHTML = (n) => `
-    <article class="node node-tool" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>텍스트</span><span>타이틀 카드</span></div>
+    <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("text", "텍스트")}${stackPick(n)}</div>
       <div class="media media-text ${n.ready ? "is-ready" : "media-empty"}">
         ${veil(n)}
-        ${n.ready ? `<p class="title-card">${n.prompt || TEXT_PROMPT}</p>` : `<span>수업 타이틀을 생성합니다</span>`}
+        ${n.ready ? `<p class="title-card">${n.prompt || TEXT_PROMPT}</p>` : `<span>${stackOf(n).hint}</span>`}
       </div>
       <div class="prompt-dock narrow">
-        <textarea data-prompt="${n.id}" placeholder="화면에 올릴 문장">${n.prompt || TEXT_PROMPT}</textarea>
-        <div class="prompt-foot"><span>자막 · 타이틀</span>${sendBtn(n)}</div>
+        <textarea data-prompt="${n.id}" placeholder="${stackOf(n).hint}">${n.prompt || TEXT_PROMPT}</textarea>
+        <div class="prompt-foot"><span>${stackOf(n).label}</span>${sendBtn(n)}</div>
       </div>
       <button class="plus-btn" type="button" data-plus="${n.id}">+</button>
     </article>`;
 
   const audioHTML = (n) => `
-    <article class="node node-tool" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>오디오</span><span>${n.ready ? "0:12" : "TTS"}</span></div>
+    <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("audio", "오디오")}${stackPick(n)}</div>
       <div class="media media-audio ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
-        ${n.ready ? `<span class="wave"></span><span>▶ 선생님 보이스 · 0:12</span>` : `<span>내레이션을 생성합니다</span>`}
-      </div>
-      <div class="tool-chips">
-        <button type="button" data-mode="teacher" data-node="${n.id}" class="${(n.mode || "teacher") === "teacher" ? "is-on" : ""}">선생님</button>
-        <button type="button" data-mode="student" data-node="${n.id}" class="${n.mode === "student" ? "is-on" : ""}">학생</button>
+        ${n.ready ? `<span class="wave"></span><span>▶ ${stackOf(n).label} · 0:12</span>` : `<span>${stackOf(n).hint}</span>`}
       </div>
       <div class="prompt-dock narrow">
-        <textarea data-prompt="${n.id}" placeholder="읽을 문장">${n.prompt || AUDIO_PROMPT}</textarea>
-        <div class="prompt-foot"><span>보이스 · 한국어</span>${sendBtn(n)}</div>
+        <textarea data-prompt="${n.id}" placeholder="${stackOf(n).hint}">${n.prompt || AUDIO_PROMPT}</textarea>
+        <div class="prompt-foot"><span>${stackOf(n).label}</span>${sendBtn(n)}</div>
       </div>
       <button class="plus-btn" type="button" data-plus="${n.id}">+</button>
     </article>`;
 
   const editHTML = (n) => `
-    <article class="node node-tool" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>스마트 편집 <em>BETA</em></span></div>
+    <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("edit", "스마트 편집 <em>BETA</em>")}${stackPick(n)}</div>
       <div class="media media-sq ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
-        ${n.ready ? `<span class="ai-tag">EDIT</span><img src="${BLANK}" alt="">` : `<span>원본을 편집합니다</span>`}
-      </div>
-      <div class="tool-chips">
-        <button type="button" data-mode="remake" data-node="${n.id}" class="${(n.mode || "remake") === "remake" ? "is-on" : ""}">구간 리메이크</button>
-        <button type="button" data-mode="remove" data-node="${n.id}" class="${n.mode === "remove" ? "is-on" : ""}">피사체 제거</button>
-        <button type="button" data-mode="caption" data-node="${n.id}" class="${n.mode === "caption" ? "is-on" : ""}">자막 정리</button>
+        ${n.ready ? `<span class="ai-tag">EDIT</span><img src="${BLANK}" alt="">` : `<span>${stackOf(n).hint}</span>`}
       </div>
       <div class="prompt-dock narrow">
-        <textarea data-prompt="${n.id}">${n.prompt || EDIT_PROMPT}</textarea>
-        <div class="prompt-foot"><span>편집 적용</span>${sendBtn(n)}</div>
+        <textarea data-prompt="${n.id}" placeholder="${stackOf(n).hint}">${n.prompt || EDIT_PROMPT}</textarea>
+        <div class="prompt-foot"><span>${stackOf(n).label}</span>${sendBtn(n)}</div>
       </div>
       <button class="plus-btn" type="button" data-plus="${n.id}">+</button>
     </article>`;
 
   const directorHTML = (n) => `
-    <article class="node node-tool" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>디렉터 콘솔 <em>NEW</em></span><span>3샷</span></div>
+    <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("director", "디렉터 콘솔 <em>NEW</em>")}${stackPick(n)}</div>
       <ol class="shot-list">
         ${(n.shots || SHOTS).map((s, i) => `
           <li class="shot-row">
@@ -401,7 +824,7 @@
           </li>`).join("")}
       </ol>
       <div class="prompt-foot dock-pad">
-        <span>시퀀스 구성</span>
+        <span>${stackOf(n).label} · ${stackOf(n).hint}</span>
         <button class="go-btn" type="button" data-run="sequence" data-id="${n.id}" ${n.busy ? "disabled" : ""}>
           ${n.busy ? `<span class="spin spin-sm"></span>` : "생성"}
         </button>
@@ -411,18 +834,18 @@
     </article>`;
 
   const analyzeHTML = (n) => `
-    <article class="node node-tool" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>스마트 분석</span></div>
+    <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("analyze", "스마트 분석")}${stackPick(n)}</div>
       <div class="analyze-box">
         ${veil(n)}
         ${n.ready ? `
           <p><b>5.0s</b> · 16:9 · 클로즈업</p>
           <p>핵심 동작: 잎을 들어 질문</p>
           <p>시선: 카메라 → 잎 → 학생</p>
-          <p>권장 다음 샷: 실험 클로즈업</p>` : `<p class="muted-copy">연결된 노드를 읽고 샷 리듬을 제안합니다.</p>`}
+          <p>권장 다음 샷: 실험 클로즈업</p>` : `<p class="muted-copy">${stackOf(n).hint}</p>`}
       </div>
       <div class="prompt-foot dock-pad">
-        <span>장면 리포트</span>
+        <span>${stackOf(n).label}</span>
         <button class="go-btn" type="button" data-run="analyze" data-id="${n.id}" ${n.busy ? "disabled" : ""}>
           ${n.busy ? `<span class="spin spin-sm"></span>` : "분석"}
         </button>
@@ -431,8 +854,8 @@
     </article>`;
 
   const scriptHTML = (n) => `
-    <article class="node node-script node-tool" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>스크립트 생성기</span><span>${lookLine() || "톤 · 장르"}</span></div>
+    <article class="node node-script node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("script", "스크립트")}${stackPick(n)}</div>
       <div class="script-card ${n.ready ? "is-ready" : "is-empty"}">
         ${veil(n)}
         ${n.ready ? `
@@ -456,9 +879,9 @@
           <button class="chip" type="button">+ 참조 이미지</button>
           <button class="chip look-chip" type="button" data-open-look="1">${state.look.palette || state.look.light || state.look.art ? lookLine() : "비주얼 스타일"}</button>
         </div>
-        <textarea data-prompt="${n.id}" placeholder="스토리 단편, 이야기를 설명하면 스토리보드 이미지를 만들어 드립니다">${n.prompt || ""}</textarea>
+        <textarea data-prompt="${n.id}" placeholder="${stackOf(n).hint}">${n.prompt || ""}</textarea>
         <div class="story-dock-foot">
-          <span class="model-chip">✦ Avora Director</span>
+          <span class="model-chip">✦ Avora Directing</span>
           <button class="bolt-btn" type="button" data-run="script" data-id="${n.id}" ${n.busy ? "disabled" : ""} aria-label="생성">
             ${n.busy ? `<span class="spin spin-sm"></span>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h7l-1 8 10-14h-7z"/></svg>`}
           </button>
@@ -468,16 +891,11 @@
     </article>`;
 
   const refHTML = (n) => `
-    <article class="node node-image" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>참조 노드</span><span>${n.mode || "스타일"}</span></div>
+    <article class="node node-image" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("ref", "참조 노드")}${stackPick(n)}</div>
       <div class="media media-sq ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
-        ${n.ready ? `<img src="${BLANK}" alt=""><span class="ai-tag">REF</span>` : `<span>캐릭터·배경·스타일 참조</span>`}
-      </div>
-      <div class="tool-chips">
-        <button type="button" data-mode="character" data-node="${n.id}" class="${n.mode === "character" ? "is-on" : ""}">캐릭터</button>
-        <button type="button" data-mode="bg" data-node="${n.id}" class="${n.mode === "bg" ? "is-on" : ""}">배경</button>
-        <button type="button" data-mode="style" data-node="${n.id}" class="${(n.mode || "style") === "style" ? "is-on" : ""}">스타일</button>
+        ${n.ready ? `<img src="${BLANK}" alt=""><span class="ai-tag">REF</span>` : `<span>${stackOf(n).hint}</span>`}
       </div>
       <div class="prompt-foot dock-pad">
         <span>이 보드의 참조로 사용</span>
@@ -489,49 +907,125 @@
     </article>`;
 
   const simpleHTML = (n) => `
-    <article class="node" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta"><span>${n.title}</span></div>
+    <article class="node" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker(n.type, n.title)}</div>
       <div class="media media-sq media-empty"><span>${n.title}</span></div>
       <button class="plus-btn" type="button" data-plus="${n.id}">+</button>
     </article>`;
 
-  const renderGroups = () => (state.groups || []).map((g) => `
-    <section class="board-group" data-group="${g.id}" style="left:${g.x}px;top:${g.y}px;width:${g.w}px;height:${g.h}px">
-      <header>${g.no}: ${g.title}</header>
-    </section>`).join("");
-
-  const renderNodes = () => {
-    world.innerHTML = renderGroups() + state.nodes.map((n) => {
-      if (n.type === "image") return imageHTML(n);
-      if (n.type === "video") return videoHTML(n);
-      if (n.type === "upscale") return upscaleHTML(n);
-      if (n.type === "text") return textHTML(n);
-      if (n.type === "audio") return audioHTML(n);
-      if (n.type === "edit") return editHTML(n);
-      if (n.type === "director") return directorHTML(n);
-      if (n.type === "analyze") return analyzeHTML(n);
-      if (n.type === "script") return scriptHTML(n);
-      if (n.type === "ref") return refHTML(n);
-      return simpleHTML(n);
-    }).join("");
+  const nodeHTML = (n) => {
+    if (n.type === "image") return imageHTML(n);
+    if (n.type === "video") return videoHTML(n);
+    if (n.type === "upscale") return upscaleHTML(n);
+    if (n.type === "text") return textHTML(n);
+    if (n.type === "audio") return audioHTML(n);
+    if (n.type === "edit") return editHTML(n);
+    if (n.type === "director") return directorHTML(n);
+    if (n.type === "analyze") return analyzeHTML(n);
+    if (n.type === "script") return scriptHTML(n);
+    if (n.type === "ref") return refHTML(n);
+    return simpleHTML(n);
   };
 
+  const renderGroups = () => (state.groups || []).map((g) => {
+    const kids = nodesInGroup(g.id);
+    const on = state.frameEdit && state.selectedGroup === g.id;
+    return `
+    <section class="board-group${on ? " is-on" : ""}" data-group="${g.id}" aria-label="작은 캔버스 ${g.title}" style="left:${g.x}px;top:${g.y}px;width:${g.w}px;height:${g.h}px">
+      <header class="board-tag" data-group-drag="${g.id}" role="button" tabindex="0" aria-label="${g.title} 작은 캔버스 이동"><b>${g.no}</b><span class="item-label">${g.title}</span></header>
+      <div class="board-nodes">${kids.map(nodeHTML).join("")}</div>
+      ${["nw", "n", "ne", "w", "e", "sw", "s", "se"].map((dir) => `<i class="mini-handle" data-resize="${dir}" data-group="${g.id}" role="slider" aria-label="${dir} 크기 조절"></i>`).join("")}
+    </section>`;
+  }).join("");
+
+  const renderNodes = () => {
+    const nested = new Set();
+    (state.groups || []).forEach((g) => nodesInGroup(g.id).forEach((n) => nested.add(n.id)));
+    world.innerHTML = renderGroups() + state.nodes.filter((n) => !nested.has(n.id)).map(nodeHTML).join("");
+  };
+
+  const ADD_TYPES = ["text", "image", "video", "edit", "director", "analyze", "audio", "script", "ref"];
+  const ADD_BADGE = { edit: "BETA", director: "NEW", script: "NEW" };
+  const renderAddMenu = () => {
+    addMenu.innerHTML = `
+      <p class="add-menu-title">이 노드를 참조하여 생성</p>
+      <div class="add-menu-cols">
+        <div class="add-menu-main">
+          ${ADD_TYPES.map((type) => `
+            <button type="button" data-spawn-type="${type}"${type === "video" ? ' data-tour="video"' : ""}>
+              ${NODE_ICO[type] || ""}${NODE_TITLE[type]}${ADD_BADGE[type] ? `<em>${ADD_BADGE[type]}</em>` : ""}
+              <span class="add-chevron">›</span>
+            </button>`).join("")}
+        </div>
+        <div class="add-menu-stack" id="addMenuStack" hidden></div>
+      </div>`;
+  };
+  const showAddStacks = (type) => {
+    const panel = addMenu.querySelector("#addMenuStack");
+    if (!panel) return;
+    addMenu.querySelectorAll("[data-spawn-type]").forEach((b) => {
+      if (!b.dataset.spawnStack) b.classList.toggle("is-on", b.dataset.spawnType === type);
+    });
+    const list = NODE_STACKS[type] || [];
+    panel.hidden = !list.length;
+    panel.innerHTML = list.map((s) => `
+      <button type="button" data-spawn-type="${type}" data-spawn-stack="${s.id}">
+        <b>${s.label}</b>
+        <small>${s.hint}</small>
+      </button>`).join("");
+  };
+
+  const setAddMenuTitle = () => {
+    const title = addMenu.querySelector(".add-menu-title");
+    if (title) title.textContent = state.plusFrom ? "이 노드를 참조하여 생성" : "보드에 노드 추가";
+  };
   const openMenu = (id, btn) => {
     state.plusFrom = id;
     addMenu.hidden = false;
-    const r = btn.getBoundingClientRect();
-    addMenu.style.left = `${r.right + 10}px`;
-    addMenu.style.top = `${r.top - 24}px`;
-    addMenu.querySelectorAll("button").forEach((b) => b.classList.toggle("is-hot", b.dataset.spawn === "video" && state.coach === 1));
-  };
-
-  const placeMenu = () => {
-    if (addMenu.hidden || !state.plusFrom) return;
-    const btn = world.querySelector(`[data-plus="${state.plusFrom}"]`);
-    if (!btn) return;
+    setAddMenuTitle();
     const r = btn.getBoundingClientRect();
     addMenu.style.left = `${r.right + 10}px`;
     addMenu.style.top = `${Math.max(60, r.top - 24)}px`;
+    addMenu.querySelectorAll("[data-spawn-type]").forEach((b) => {
+      if (b.dataset.spawnStack) return;
+      b.classList.toggle("is-hot", b.dataset.spawnType === "video" && state.coach === 1);
+    });
+    if (state.coach === 1) showAddStacks("video");
+    else {
+      const panel = addMenu.querySelector("#addMenuStack");
+      if (panel) panel.hidden = true;
+      addMenu.querySelectorAll("[data-spawn-type]").forEach((b) => b.classList.remove("is-on"));
+    }
+  };
+  const openDockAddMenu = (btn) => {
+    state.plusFrom = "";
+    addMenu.hidden = false;
+    setAddMenuTitle();
+    const r = btn.getBoundingClientRect();
+    addMenu.style.left = `${Math.min(r.left, window.innerWidth - 460)}px`;
+    addMenu.style.top = `${Math.max(60, r.top - 360)}px`;
+    const panel = addMenu.querySelector("#addMenuStack");
+    if (panel) panel.hidden = true;
+    addMenu.querySelectorAll("[data-spawn-type]").forEach((b) => {
+      b.classList.remove("is-hot", "is-on");
+    });
+  };
+
+  const placeMenu = () => {
+    if (addMenu.hidden) return;
+    if (state.plusFrom) {
+      const btn = world.querySelector(`[data-plus="${state.plusFrom}"]`);
+      if (!btn) return;
+      const r = btn.getBoundingClientRect();
+      addMenu.style.left = `${r.right + 10}px`;
+      addMenu.style.top = `${Math.max(60, r.top - 24)}px`;
+      return;
+    }
+    const btn = document.querySelector("[data-add-node]");
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    addMenu.style.left = `${Math.min(r.left, window.innerWidth - 460)}px`;
+    addMenu.style.top = `${Math.max(60, r.top - 360)}px`;
   };
 
   const placeCoach = () => {
@@ -561,10 +1055,329 @@
     coachEl.style.top = `${Math.max(70, r.top - 10)}px`;
   };
 
+  const CORE_TYPES = ["script", "image", "video", "audio", "text"];
+  const FOLDER_KIND = { new: "image", audio: "audio", character: "image", scene: "image", prop: "image", style: "ref" };
+  const folderOf = (n) => {
+    if (n.folder && state.folders.includes(n.folder)) return n.folder;
+    if (n.type === "audio") return "audio";
+    if (n.type === "script" || n.type === "text" || n.type === "director") return "new";
+    if (n.type === "ref" && n.mode === "character") return "character";
+    if (n.type === "ref" || n.type === "upscale" || n.type === "analyze") return "style";
+    if (n.type === "image" || n.type === "video" || n.type === "edit") return "scene";
+    return "new";
+  };
+  const fileLabel = (n) => n.shot || n.title || NODE_TITLE[n.type] || n.type;
+  const ICO = {
+    chev: `<svg class="folder-chev" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>`,
+    folder: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`,
+    image: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 16 5-6 4 4 3-4 4 6"/></svg>`,
+  };
+  const libById = (id) => state.library.find((a) => a.id === id);
+  const inspectOn = () => {
+    const cur = state.inspect;
+    if (!cur) return { lib: null, node: null };
+    if (cur.kind === "lib") {
+      const lib = libById(cur.id);
+      return { lib, node: lib?.nodeId ? nodeById(lib.nodeId) : null };
+    }
+    return { lib: null, node: nodeById(cur.id) };
+  };
+  const fileActive = (libId, nodeId) => {
+    const cur = state.inspect;
+    if (!cur) return nodeId && nodeId === state.selectedId;
+    if (cur.kind === "lib") return cur.id === libId;
+    return cur.id === nodeId;
+  };
+  const thumbOf = (src, fallback) => src
+    ? `<img class="asset-thumb" src="${src}" alt="" />`
+    : `<span class="asset-thumb" aria-hidden="true">${fallback || ICO.image}</span>`;
+
+  const renderInspect = () => {
+    const el = document.getElementById("assetInspect");
+    if (!el) return;
+    const kitOn = document.querySelector("[data-side-panel='kit']")?.classList.contains("is-on");
+    const { lib, node } = inspectOn();
+    const item = lib || node;
+    if (!kitOn || !item) {
+      el.hidden = true;
+      return;
+    }
+    const title = lib ? lib.name : fileLabel(node);
+    const src = lib?.src || node?.src || "";
+    const author = lib?.author || "Jisu Lee";
+    const when = lib?.createdAt || new Date().toISOString().slice(0, 16).replace("T", " ");
+    const kind = node?.type || "image";
+    const kicker = kind === "video" ? "비디오 노드" : kind === "audio" ? "오디오 노드" : kind === "script" ? "스크립트 노드" : "이미지 노드 1";
+    document.getElementById("assetInspectKicker").querySelector("span").textContent = kicker;
+    document.getElementById("assetInspectTitle").textContent = title;
+    document.getElementById("assetInspectAuthor").textContent = author;
+    document.getElementById("assetInspectWhen").textContent = when;
+    document.getElementById("assetInspectMedia").innerHTML = src ? `<img src="${src}" alt="" />` : ICO.image;
+    document.getElementById("assetAddCanvas").textContent = (lib?.nodeId || node) ? "캔버스에서 보기" : "캔버스에 추가";
+    el.hidden = false;
+  };
+
+  const renderAssetTree = () => {
+    const tree = document.getElementById("assetTree");
+    if (!tree) return;
+    const q = (state.assetQuery || "").trim().toLowerCase();
+    const linked = new Set(state.library.map((a) => a.nodeId).filter(Boolean));
+    tree.innerHTML = state.folders.map((id) => {
+      const libs = state.library.filter((a) => a.folder === id && (!q || a.name.toLowerCase().includes(q)));
+      const nodes = state.nodes.filter((n) => folderOf(n) === id && !linked.has(n.id) && (!q || fileLabel(n).toLowerCase().includes(q)));
+      const open = state.folderOpen[id];
+      const files = [
+        ...libs.map((a) => `
+          <button type="button" class="asset-file${fileActive(a.id, a.nodeId) ? " is-on" : ""}" data-lib="${a.id}"${a.nodeId ? ` data-node="${a.nodeId}"` : ""}>
+            ${thumbOf(a.src)}
+            <span class="item-label">${a.name}</span>
+            <span class="asset-more" data-more="1" aria-label="더보기">⋯</span>
+          </button>`),
+        ...nodes.map((n) => `
+          <button type="button" class="asset-file${fileActive("", n.id) ? " is-on" : ""}" data-node="${n.id}">
+            ${thumbOf(n.src)}
+            <span class="item-label">${fileLabel(n)}</span>
+            <span class="asset-more" data-more="1" aria-label="더보기">⋯</span>
+          </button>`),
+      ].join("");
+      return `
+        <div class="asset-folder${open ? " is-open" : ""}" data-folder="${id}">
+          <div class="folder-row" data-folder="${id}">
+            ${ICO.chev}
+            ${ICO.folder}
+            <span class="item-label">${state.folderNames[id] || "폴더"}</span>
+          </div>
+          <div class="folder-kids"${open ? "" : " hidden"}>${files}</div>
+        </div>`;
+    }).join("");
+    renderInspect();
+  };
+
+  const focusAsset = (id) => {
+    const n = nodeById(id);
+    if (!n) return;
+    state.selectedId = id;
+    const sz = sizeOf(n);
+    const at = worldOf(n);
+    const r = canvas.getBoundingClientRect();
+    state.cam.x = r.width / 2 - (at.x + sz.w / 2) * state.cam.scale;
+    state.cam.y = r.height / 2 - (at.y + sz.h / 2) * state.cam.scale;
+    renderAll();
+  };
+
   const renderAll = () => {
     renderNodes();
+    renderAssetTree();
+    renderCanvasDock();
     applyLookCss();
     applyCam();
+  };
+
+  const nextCanvasNo = () => {
+    const used = new Set((state.groups || []).map((g) => Number.parseInt(g.no, 10)).filter((n) => Number.isFinite(n)));
+    let n = 1;
+    while (used.has(n)) n += 1;
+    return String(n).padStart(2, "0");
+  };
+
+  const paintFrameEdit = () => {
+    world.querySelectorAll(".board-group").forEach((el) => {
+      el.classList.toggle("is-on", !!(state.frameEdit && el.dataset.group === state.selectedGroup));
+    });
+    renderCanvasDock();
+  };
+
+  const selectFrame = (g, edit) => {
+    if (!g) return;
+    state.selectedGroup = g.id;
+    state.frameEdit = !!edit;
+    paintFrameEdit();
+  };
+
+  const clearFrameEdit = () => {
+    if (!state.selectedGroup && !state.frameEdit) return;
+    state.selectedGroup = "";
+    state.frameEdit = false;
+    paintFrameEdit();
+  };
+
+  const focusGroup = (g) => {
+    if (!g) return;
+    const r = canvas.getBoundingClientRect();
+    state.cam.x = r.width / 2 - (g.x + g.w / 2) * state.cam.scale;
+    state.cam.y = r.height / 2 - (g.y + g.h / 2) * state.cam.scale;
+    state.selectedGroup = g.id;
+    state.frameEdit = true;
+    renderAll();
+  };
+
+  const beginMoveGroup = (g, e) => {
+    state.movingGroup = {
+      id: g.id,
+      sx: e.clientX,
+      sy: e.clientY,
+      x: g.x,
+      y: g.y,
+      live: false,
+    };
+  };
+
+  const fitAllGroups = () => {
+    const groups = state.groups || [];
+    if (!groups.length) return;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    groups.forEach((g) => {
+      minX = Math.min(minX, g.x);
+      minY = Math.min(minY, g.y);
+      maxX = Math.max(maxX, g.x + g.w);
+      maxY = Math.max(maxY, g.y + g.h);
+    });
+    const r = canvas.getBoundingClientRect();
+    const pad = 64;
+    const bw = Math.max(240, maxX - minX + pad * 2);
+    const bh = Math.max(180, maxY - minY + pad * 2);
+    const scale = Math.min(1.2, Math.max(0.28, Math.min((r.width - 32) / bw, (r.height - 96) / bh)));
+    state.cam.scale = scale;
+    state.cam.x = r.width / 2 - (minX + (maxX - minX) / 2) * scale;
+    state.cam.y = r.height / 2 - (minY + (maxY - minY) / 2) * scale;
+  };
+
+  const layoutStackColumn = () => {
+    const groups = [...(state.groups || [])].sort((a, b) => Number(a.no) - Number(b.no));
+    if (!groups.length) return groups;
+    const gap = 72;
+    const maxW = Math.max(...groups.map((g) => g.w));
+    let y = 0;
+    groups.forEach((g) => {
+      g.x = Math.round((maxW - g.w) / 2);
+      g.y = y;
+      y += g.h + gap;
+    });
+    return groups;
+  };
+
+  const fitStackTop = (groups) => {
+    if (!groups.length) return;
+    const r = canvas.getBoundingClientRect();
+    let minX = Infinity, minY = Infinity, maxX = -Infinity;
+    groups.forEach((g) => {
+      minX = Math.min(minX, g.x);
+      minY = Math.min(minY, g.y);
+      maxX = Math.max(maxX, g.x + g.w);
+    });
+    const bw = Math.max(240, maxX - minX);
+    const scale = Math.min(0.92, Math.max(0.36, (r.width - 96) / (bw + 48)));
+    state.cam.scale = scale;
+    state.cam.x = r.width / 2 - (minX + bw / 2) * scale;
+    state.cam.y = 36 - minY * scale;
+  };
+
+  const stackCanvases = () => {
+    const groups = [...(state.groups || [])].sort((a, b) => Number(a.no) - Number(b.no));
+    groups.forEach((g) => {
+      if (g.rowX == null) {
+        g.rowX = g.x;
+        g.rowY = g.y;
+      }
+    });
+    layoutStackColumn();
+    state.stackView = true;
+    state.selectedGroup = "";
+    state.frameEdit = false;
+    fitStackTop(groups);
+    renderAll();
+  };
+
+  const unstackCanvases = () => {
+    (state.groups || []).forEach((g) => {
+      if (g.rowX != null) {
+        g.x = g.rowX;
+        g.y = g.rowY;
+      }
+    });
+    state.stackView = false;
+    fitAllGroups();
+    renderAll();
+  };
+
+  const nodeDockLabel = (n) => {
+    const st = stackOf(n);
+    const name = n.shot || n.title || NODE_TITLE[n.type] || n.type;
+    return st.label && st.label !== name ? `${name} · ${st.label}` : name;
+  };
+  const nodeDockChip = (n) => `
+    <button type="button" class="canvas-dock-item${state.selectedId === n.id ? " is-on" : ""}" data-focus-node="${n.id}">
+      <b class="dock-node-ico">${NODE_ICO[n.type] || ""}</b>
+      <span class="item-label">${nodeDockLabel(n)}</span>
+    </button>`;
+  const renderCanvasDock = () => {
+    const list = document.getElementById("canvasDockList");
+    const addBtn = document.getElementById("canvasDockAdd");
+    if (!list) return;
+    if (state.dockTab === "node") {
+      const seqs = [...(state.groups || [])].sort((a, b) => Number(a.no) - Number(b.no)).map((g) => {
+        const kids = sequenceNodes(g.id);
+        if (!kids.length) return "";
+        return `<div class="dock-seq">
+          <button type="button" class="dock-seq-label" data-focus-group="${g.id}">${g.no} ${g.title}</button>
+          ${kids.map(nodeDockChip).join("")}
+        </div>`;
+      }).join("");
+      const loose = state.nodes.filter((n) => !n.group);
+      const board = `<div class="dock-seq">
+        <p class="dock-seq-label">공통 참조</p>
+        ${loose.length ? loose.map(nodeDockChip).join("") : `<p class="dock-seq-empty">시퀀스 밖에 두면 전체가 참고합니다</p>`}
+      </div>`;
+      list.innerHTML = board + seqs;
+      if (addBtn) {
+        addBtn.dataset.addNode = "1";
+        delete addBtn.dataset.addCanvas;
+        addBtn.setAttribute("aria-label", "노드 추가");
+        addBtn.innerHTML = `<b>+</b><span class="item-label">노드</span>`;
+      }
+    } else {
+      list.innerHTML = (state.groups || []).map((g) => `
+        <button type="button" class="canvas-dock-item${state.selectedGroup === g.id ? " is-on" : ""}" data-focus-group="${g.id}">
+          <b>${g.no}</b><span class="item-label">${g.title}</span>
+        </button>`).join("");
+      if (addBtn) {
+        addBtn.dataset.addCanvas = "1";
+        delete addBtn.dataset.addNode;
+        addBtn.setAttribute("aria-label", "캔버스 추가");
+        addBtn.innerHTML = `<b>+</b><span class="item-label">캔버스</span>`;
+      }
+    }
+    list.hidden = !list.innerHTML.trim();
+    document.querySelectorAll("[data-dock-tab]").forEach((tab) => {
+      const on = tab.dataset.dockTab === state.dockTab;
+      tab.classList.toggle("is-on", on);
+      tab.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    document.getElementById("stackCanvases")?.classList.toggle("is-on", !!state.stackView);
+    document.getElementById("stackCanvases")?.setAttribute("aria-pressed", state.stackView ? "true" : "false");
+  };
+
+  const createMiniCanvas = () => {
+    const groups = state.groups || (state.groups = []);
+    const no = nextCanvasNo();
+    const last = state.stackView
+      ? groups.reduce((acc, g) => (!acc || g.y + g.h > acc.y + acc.h ? g : acc), null)
+      : groups.reduce((acc, g) => (!acc || g.x + g.w > acc.x + acc.w ? g : acc), null);
+    const g = {
+      id: uid("g"),
+      no,
+      title: "새 캔버스",
+      x: state.stackView ? 0 : (last ? last.x + last.w + 48 : 40),
+      y: state.stackView ? (last ? last.y + last.h + 72 : 0) : (last ? last.y : 24),
+      w: 560,
+      h: 700,
+    };
+    groups.push(g);
+    if (state.stackView) {
+      layoutStackColumn();
+      fitStackTop(groups);
+    }
+    focusGroup(g);
   };
 
   const storyboardFrom = (prompt) => {
@@ -592,16 +1405,18 @@
           type: "image",
           compact: true,
           title: "이미지",
-          x: 624 + (i % 4) * 148,
+          x: 28 + (i % 4) * 148,
           y: 48 + Math.floor(i / 4) * 176,
           prompt: shot.prompt,
           ready: false,
           src: shot.src,
           shot: shot.t,
+          group: "g2",
         };
         state.nodes.push(node);
         state.edges.push({ from: src.id, to: id });
       } else {
+        node.group = node.group || "g2";
         node.prompt = shot.prompt;
         node.src = shot.src;
         node.shot = shot.t;
@@ -610,6 +1425,7 @@
       }
       window.setTimeout(() => startJob(node.id, "generate"), 280 + i * 420);
     });
+    expandGroupToFit(groupById("g2"));
   };
 
   const startJob = (id, kind, label) => {
@@ -640,8 +1456,9 @@
       enhance: { label: "고화질 연결 중…", ms: 900, fn: (x) => {
         if (state.nodes.some((q) => q.type === "upscale")) return;
         const nid = uid("up");
-        state.nodes.push({ id: nid, type: "upscale", title: "고화질", x: x.x + 640, y: x.y, ready: false });
+        state.nodes.push({ id: nid, type: "upscale", title: "고화질", x: x.x + 640, y: x.y, ready: false, group: x.group });
         state.edges.push({ from: x.id, to: nid });
+        if (x.group) expandGroupToFit(groupById(x.group));
       } },
     };
     const job = jobs[kind];
@@ -657,40 +1474,95 @@
     }, job.ms);
   };
 
-  const spawnFrom = (type) => {
+  const spawnFrom = (type, folderId, stackId) => {
     const src = nodeById(state.plusFrom);
     if (!src || !NODE_TITLE[type]) return;
     const kind = type;
     const id = uid(kind.slice(0, 2));
     const siblings = state.edges.filter((e) => e.from === src.id).length;
     const prompts = { video: PROMPT, image: IMG_PROMPT, text: TEXT_PROMPT, audio: AUDIO_PROMPT, edit: EDIT_PROMPT, script: "" };
+    const srcAt = worldOf(src);
+    const mode = stackId || STACK_DEFAULT[kind] || "";
     const node = {
       id,
       type: kind,
       title: NODE_TITLE[kind] || kind,
-      compact: kind === "image",
-      x: src.x + sizeOf(src).w + 56,
-      y: src.y + siblings * (kind === "image" ? 168 : 280),
+      compact: false,
+      x: 0,
+      y: 0,
       prompt: prompts[kind] || "",
       ready: false,
-      mode: kind === "edit" ? "remake" : kind === "audio" ? "teacher" : kind === "ref" ? "style" : "",
+      mode,
       shots: kind === "director" ? SHOTS.map((s) => ({ ...s })) : undefined,
+      folder: folderId || (kind === "audio" ? "audio" : kind === "image" ? "scene" : kind === "ref" ? "style" : "new"),
+      group: src.group || "",
     };
+    if (src.group && groupById(src.group)) {
+      const slot = layoutSlotInGroup(groupById(src.group), node);
+      node.x = slot.x;
+      node.y = slot.y;
+    } else {
+      node.x = srcAt.x + sizeOf(src).w + 56;
+      node.y = srcAt.y + siblings * (kind === "image" ? 168 : 280);
+    }
     state.nodes.push(node);
     state.edges.push({ from: src.id, to: id });
+    if (src.group) expandGroupToFit(groupById(src.group));
     state.selectedId = id;
     if (kind === "video" && state.coach === 1) state.coach = 2;
     addMenu.hidden = true;
     renderAll();
   };
 
-  canvas.addEventListener("pointerdown", (e) => {
-    if (e.target.closest(".node") || e.target.closest(".plus-btn") || e.target.closest(".add-menu")) return;
+  const spawnFree = (type, stackId) => {
+    if (!NODE_TITLE[type]) return;
+    const kind = type;
+    const id = uid(kind.slice(0, 2));
+    const prompts = { video: PROMPT, image: IMG_PROMPT, text: TEXT_PROMPT, audio: AUDIO_PROMPT, edit: EDIT_PROMPT, script: "" };
+    const mode = stackId || STACK_DEFAULT[kind] || "";
+    const r = canvas.getBoundingClientRect();
+    const groups = state.groups || [];
+    const shared = state.nodes.filter((n) => !n.group);
+    const last = shared[shared.length - 1];
+    const left = groups.length ? Math.min(...groups.map((g) => g.x)) : (r.width * 0.5 - state.cam.x) / state.cam.scale;
+    const x = last ? last.x : Math.max(8, left - 380);
+    const y = last ? last.y + sizeOf(last).h + 32 : 24;
+    const node = {
+      id,
+      type: kind,
+      title: NODE_TITLE[kind] || kind,
+      compact: false,
+      x,
+      y,
+      prompt: prompts[kind] || "",
+      ready: false,
+      mode,
+      shots: kind === "director" ? SHOTS.map((s) => ({ ...s })) : undefined,
+      folder: kind === "audio" ? "audio" : kind === "image" ? "scene" : kind === "ref" ? "style" : "new",
+      group: "",
+    };
+    state.nodes.push(node);
+    state.selectedId = id;
+    state.dockTab = "node";
     addMenu.hidden = true;
+    renderAll();
+  };
+
+  canvas.addEventListener("pointerdown", (e) => {
+    if (e.target.closest(".node") || e.target.closest(".plus-btn") || e.target.closest(".add-menu") || e.target.closest("[data-group-drag]") || e.target.closest("[data-resize]") || e.target.closest(".board-group") || e.target.closest(".item-rename") || e.target.closest("[data-cut-edge]")) return;
+    addMenu.hidden = true;
+    clearFrameEdit();
     state.panning = { x: e.clientX - state.cam.x, y: e.clientY - state.cam.y };
+  });
+  edgesSvg.addEventListener("click", (e) => {
+    const cut = e.target.closest("[data-cut-edge]");
+    if (!cut) return;
+    e.stopPropagation();
+    cutEdge(cut.dataset.from, cut.dataset.to);
   });
 
   world.addEventListener("pointerdown", (e) => {
+    if (e.target.closest(".item-rename")) return;
     const plus = e.target.closest("[data-plus]");
     if (plus) {
       e.stopPropagation();
@@ -699,16 +1571,59 @@
       placeCoach();
       return;
     }
+    const handle = e.target.closest("[data-resize]");
+    if (handle) {
+      e.stopPropagation();
+      const g = groupById(handle.dataset.group);
+      if (!g) return;
+      selectFrame(g, true);
+      state.resizing = {
+        id: g.id,
+        dir: handle.dataset.resize,
+        sx: e.clientX,
+        sy: e.clientY,
+        x: g.x,
+        y: g.y,
+        w: g.w,
+        h: g.h,
+      };
+      return;
+    }
+    const tag = e.target.closest("[data-group-drag]");
+    if (tag) {
+      e.stopPropagation();
+      const g = groupById(tag.dataset.groupDrag);
+      if (!g) return;
+      selectFrame(g, true);
+      beginMoveGroup(g, e);
+      return;
+    }
     if (e.target.closest("button") || e.target.closest("textarea") || e.target.closest("select")) return;
     const card = e.target.closest(".node");
     if (card) {
       state.selectedId = card.dataset.id;
       const n = nodeById(card.dataset.id);
+      state.frameEdit = false;
+      state.selectedGroup = n?.group || "";
+      paintFrameEdit();
+      renderAssetTree();
+      const o = originOf(n);
       state.dragging = {
         id: n.id,
-        dx: e.clientX - (n.x * state.cam.scale + state.cam.x),
-        dy: e.clientY - (n.y * state.cam.scale + state.cam.y),
+        dx: e.clientX - ((o.x + n.x) * state.cam.scale + state.cam.x),
+        dy: e.clientY - ((o.y + n.y) * state.cam.scale + state.cam.y),
       };
+      if (n.group) world.querySelector(`[data-group="${n.group}"] .board-nodes`)?.classList.add("is-drag-out");
+      renderCanvasDock();
+      return;
+    }
+    const groupEl = e.target.closest(".board-group");
+    if (groupEl) {
+      e.stopPropagation();
+      const g = groupById(groupEl.dataset.group);
+      if (!g) return;
+      selectFrame(g, true);
+      beginMoveGroup(g, e);
     }
   });
 
@@ -732,6 +1647,15 @@
       const n = nodeById(note.dataset.note);
       if (n) n.note = note.value;
     }
+  });
+
+  world.addEventListener("change", (e) => {
+    const pick = e.target.closest("[data-stack]");
+    if (!pick) return;
+    const n = nodeById(pick.dataset.stack);
+    if (!n) return;
+    n.mode = pick.value;
+    renderAll();
   });
 
   world.addEventListener("click", (e) => {
@@ -780,13 +1704,49 @@
   });
 
   window.addEventListener("pointermove", (e) => {
+    if (state.movingGroup) {
+      const g = groupById(state.movingGroup.id);
+      if (!g) return;
+      const px = e.clientX - state.movingGroup.sx;
+      const py = e.clientY - state.movingGroup.sy;
+      if (!state.movingGroup.live) {
+        if (Math.hypot(px, py) < 5) return;
+        state.movingGroup.live = true;
+      }
+      const dx = px / state.cam.scale;
+      const dy = py / state.cam.scale;
+      g.x = state.movingGroup.x + dx;
+      g.y = state.movingGroup.y + dy;
+      paintGroup(g);
+      drawEdges();
+      placeMenu();
+      placeCoach();
+      return;
+    }
+    if (state.resizing) {
+      const g = groupById(state.resizing.id);
+      const spec = RESIZE[state.resizing.dir];
+      if (!g || !spec) return;
+      const dx = (e.clientX - state.resizing.sx) / state.cam.scale;
+      const dy = (e.clientY - state.resizing.sy) / state.cam.scale;
+      clampGroupResize(g, {
+        x: state.resizing.x + spec.x * dx,
+        y: state.resizing.y + spec.y * dy,
+        w: state.resizing.w + spec.w * dx,
+        h: state.resizing.h + spec.h * dy,
+      });
+      paintGroup(g);
+      return;
+    }
     if (state.dragging) {
       const n = nodeById(state.dragging.id);
-      n.x = (e.clientX - state.dragging.dx - state.cam.x) / state.cam.scale;
-      n.y = (e.clientY - state.dragging.dy - state.cam.y) / state.cam.scale;
-      const el = world.querySelector(`[data-id="${n.id}"]`);
-      if (el) { el.style.left = `${n.x}px`; el.style.top = `${n.y}px`; }
+      const o = originOf(n);
+      n.x = (e.clientX - state.dragging.dx - state.cam.x) / state.cam.scale - o.x;
+      n.y = (e.clientY - state.dragging.dy - state.cam.y) / state.cam.scale - o.y;
+      paintNode(n);
       drawEdges();
+      const pt = worldFromEvent(e);
+      paintDropTarget(groupAtWorld(pt.x, pt.y)?.id || "", n);
       placeMenu();
       placeCoach();
       return;
@@ -797,7 +1757,22 @@
       applyCam();
     }
   });
-  window.addEventListener("pointerup", () => { state.dragging = null; state.panning = false; });
+  window.addEventListener("pointerup", (e) => {
+    if (state.dragging) {
+      const n = nodeById(state.dragging.id);
+      if (n) {
+        const pt = worldFromEvent(e);
+        const hit = groupAtWorld(pt.x, pt.y);
+        placeIntoGroup(n, hit?.id || "");
+      }
+      paintDropTarget("");
+      renderAll();
+    }
+    state.dragging = null;
+    state.panning = false;
+    state.movingGroup = null;
+    state.resizing = null;
+  });
 
   canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
@@ -816,10 +1791,66 @@
   document.getElementById("zoomIn").onclick = () => { state.cam.scale = Math.min(1.4, state.cam.scale * 1.1); applyCam(); };
   document.getElementById("zoomOut").onclick = () => { state.cam.scale = Math.max(0.4, state.cam.scale * 0.9); applyCam(); };
 
+  document.getElementById("stackCanvases")?.addEventListener("click", () => {
+    if (state.stackView) unstackCanvases();
+    else stackCanvases();
+  });
+  document.getElementById("canvasDock")?.addEventListener("click", (e) => {
+    if (e.target.closest("#stackCanvases")) return;
+    const tab = e.target.closest("[data-dock-tab]");
+    if (tab) {
+      state.dockTab = tab.dataset.dockTab;
+      renderCanvasDock();
+      return;
+    }
+    if (e.target.closest("[data-add-canvas]")) {
+      createMiniCanvas();
+      return;
+    }
+    if (e.target.closest("[data-add-node]")) {
+      openDockAddMenu(e.target.closest("[data-add-node]"));
+      return;
+    }
+    const nodeItem = e.target.closest("[data-focus-node]");
+    if (nodeItem) {
+      focusAsset(nodeItem.dataset.focusNode);
+      return;
+    }
+    const item = e.target.closest("[data-focus-group]");
+    if (!item || item.querySelector(".item-rename")) return;
+    focusGroup(groupById(item.dataset.focusGroup));
+  });
+  document.getElementById("canvasDock")?.addEventListener("dblclick", (e) => {
+    const item = e.target.closest("[data-focus-group]");
+    if (!item) return;
+    e.preventDefault();
+    e.stopPropagation();
+    startRename(item);
+  });
+  world.addEventListener("dblclick", (e) => {
+    const tag = e.target.closest("[data-group-drag]");
+    if (!tag) return;
+    e.preventDefault();
+    e.stopPropagation();
+    state.movingGroup = null;
+    startRename(tag);
+  });
+
+  addMenu.addEventListener("pointerover", (e) => {
+    const typeBtn = e.target.closest("[data-spawn-type]");
+    if (!typeBtn || typeBtn.dataset.spawnStack) return;
+    showAddStacks(typeBtn.dataset.spawnType);
+  });
   addMenu.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-spawn]");
-    if (!btn || btn.disabled) return;
-    spawnFrom(btn.dataset.spawn);
+    const stackBtn = e.target.closest("[data-spawn-stack]");
+    if (stackBtn) {
+      if (state.plusFrom) spawnFrom(stackBtn.dataset.spawnType, "", stackBtn.dataset.spawnStack);
+      else spawnFree(stackBtn.dataset.spawnType, stackBtn.dataset.spawnStack);
+      return;
+    }
+    const typeBtn = e.target.closest("[data-spawn-type]");
+    if (!typeBtn) return;
+    showAddStacks(typeBtn.dataset.spawnType);
   });
 
   document.getElementById("coachNext").onclick = () => {
@@ -843,6 +1874,12 @@
         p.classList.toggle("is-on", p.dataset.sidePanel === btn.dataset.side);
         p.hidden = p.dataset.sidePanel !== btn.dataset.side;
       });
+      if (btn.dataset.side === "kit" && !state.inspect && state.library[0]) {
+        state.inspect = { kind: "lib", id: state.library[0].id };
+        renderAssetTree();
+      } else {
+        renderInspect();
+      }
     });
   });
 
@@ -861,14 +1898,238 @@
     document.querySelector("[data-side='canvas']")?.click();
   });
 
-  document.querySelectorAll("[data-kit]").forEach((btn) => {
-    btn.addEventListener("click", () => spawnFromKit(btn.dataset.kit));
+  document.querySelector("[data-side-panel='kit']")?.addEventListener("click", (e) => {
+    const tool = e.target.closest("[data-asset-tool]");
+    if (tool) {
+      const act = tool.dataset.assetTool;
+      if (act === "search") {
+        const wrap = document.getElementById("assetSearchWrap");
+        wrap.hidden = !wrap.hidden;
+        if (!wrap.hidden) document.getElementById("assetSearch")?.focus();
+        tool.classList.toggle("is-on", !wrap.hidden);
+      }
+      if (act === "list") tool.classList.add("is-on");
+      if (act === "filter") tool.classList.toggle("is-on");
+      return;
+    }
+    if (e.target.closest("#addFolder")) {
+      const id = uid("fd");
+      const n = state.folders.filter((f) => (state.folderNames[f] || "").startsWith("새 폴더")).length + 1;
+      state.folders.push(id);
+      state.folderNames[id] = n > 1 ? `새 폴더 ${n}` : "새 폴더";
+      state.folderOpen[id] = true;
+      renderAssetTree();
+      const row = document.querySelector(`.folder-row[data-folder="${id}"]`);
+      if (row) startRename(row);
+      return;
+    }
+    const more = e.target.closest("[data-more]");
+    if (more) {
+      const file = more.closest(".asset-file");
+      if (file) showCtx(e, { kind: "file", id: file.dataset.node, lib: file.dataset.lib, el: file });
+      return;
+    }
+    const file = e.target.closest(".asset-file");
+    if (file) {
+      if (file.querySelector(".item-rename")) return;
+      if (file.dataset.lib) state.inspect = { kind: "lib", id: file.dataset.lib };
+      else if (file.dataset.node) state.inspect = { kind: "node", id: file.dataset.node };
+      renderAssetTree();
+      return;
+    }
+    const row = e.target.closest(".folder-row");
+    if (row && e.detail < 2 && !row.querySelector(".item-rename")) {
+      const id = row.dataset.folder;
+      state.folderOpen[id] = !state.folderOpen[id];
+      renderAssetTree();
+    }
   });
 
-  const spawnFromKit = (type) => {
+  document.getElementById("assetSearch")?.addEventListener("input", (e) => {
+    state.assetQuery = e.target.value || "";
+    renderAssetTree();
+  });
+
+  const spawnFromKit = (folderId) => {
     state.plusFrom = state.selectedId || state.nodes[0]?.id;
-    spawnFrom(type);
+    spawnFrom(FOLDER_KIND[folderId] || "image", folderId);
   };
+
+  const pageIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h8l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v5h5"/></svg>`;
+  const itemName = (el) => el.querySelector(".item-label")?.textContent.trim() || el.textContent.trim();
+  const startRename = (host) => {
+    const label = host.querySelector(".item-label, .tab-label");
+    if (!label || host.querySelector(".item-rename")) return;
+    const orig = label.textContent.trim();
+    const input = document.createElement("input");
+    input.className = "item-rename";
+    input.value = orig;
+    input.setAttribute("aria-label", "이름 수정");
+    label.replaceWith(input);
+    input.focus();
+    input.select();
+    const finish = (ok) => {
+      if (!input.isConnected) return;
+      const name = ok ? (input.value.trim() || orig) : orig;
+      const span = document.createElement(label.tagName.toLowerCase());
+      span.className = label.className;
+      if (label.dataset.agentName != null) span.dataset.agentName = "";
+      span.textContent = name;
+      input.replaceWith(span);
+      if (host.classList.contains("canvas-item") && host.classList.contains("is-on")) {
+        const pick = document.querySelector(".canvas-pick");
+        if (pick) pick.textContent = `${name} ▾`;
+      }
+      if (host.dataset.folder) {
+        state.folderNames[host.dataset.folder] = name;
+      }
+      const canvasId = host.dataset.groupDrag || host.dataset.focusGroup;
+      if (canvasId) {
+        const g = groupById(canvasId);
+        if (g) g.title = name;
+        renderAll();
+        return;
+      }
+      if (host.dataset.lib) {
+        const item = libById(host.dataset.lib);
+        if (item) item.name = name;
+        renderInspect();
+      }
+      if (host.dataset.node) {
+        const n = nodeById(host.dataset.node);
+        if (n) {
+          if (n.shot) n.shot = name;
+          else n.title = name;
+          renderAll();
+        }
+      }
+    };
+    input.addEventListener("click", (e) => e.stopPropagation());
+    input.addEventListener("dblclick", (e) => e.stopPropagation());
+    input.addEventListener("keydown", (e) => {
+      e.stopPropagation();
+      if (e.key === "Enter") { e.preventDefault(); finish(true); }
+      if (e.key === "Escape") { e.preventDefault(); finish(false); }
+    });
+    input.addEventListener("blur", () => finish(true));
+  };
+
+  document.getElementById("sidebar")?.addEventListener("dblclick", (e) => {
+    const host = e.target.closest(".folder-row, .asset-file, .canvas-item, .rename-host, [data-side]");
+    if (!host || e.target.closest(".item-rename") || e.target.closest(".folder-add") || host.id === "addCanvas" || host.id === "addFolder") return;
+    e.preventDefault();
+    e.stopPropagation();
+    startRename(host);
+  }, true);
+
+  const ctxMenu = document.getElementById("ctxMenu");
+  let ctxTarget = null;
+  const hideCtx = () => {
+    if (ctxMenu) ctxMenu.hidden = true;
+    ctxTarget = null;
+  };
+  const showCtx = (e, target) => {
+    e.preventDefault();
+    e.stopPropagation();
+    ctxTarget = target;
+    const del = ctxMenu.querySelector('[data-ctx="delete"]');
+    if (del) del.hidden = target.kind === "page" && document.querySelectorAll(".canvas-item").length < 2;
+    ctxMenu.hidden = false;
+    const x = Math.min(e.clientX, window.innerWidth - 148);
+    const y = Math.min(e.clientY, window.innerHeight - 88);
+    ctxMenu.style.left = `${x}px`;
+    ctxMenu.style.top = `${y}px`;
+  };
+
+  const removeNodes = (ids) => {
+    const set = new Set(ids);
+    state.nodes = state.nodes.filter((n) => !set.has(n.id));
+    state.edges = state.edges.filter((ed) => !set.has(ed.from) && !set.has(ed.to));
+    if (set.has(state.selectedId)) state.selectedId = state.nodes[0]?.id || null;
+    if (set.has(state.plusFrom)) state.plusFrom = state.selectedId;
+  };
+
+  const deleteFolder = (id) => {
+    const ids = state.nodes.filter((n) => folderOf(n) === id).map((n) => n.id);
+    removeNodes(ids);
+    state.library = state.library.filter((a) => a.folder !== id);
+    state.folders = state.folders.filter((f) => f !== id);
+    delete state.folderNames[id];
+    delete state.folderOpen[id];
+    renderAll();
+  };
+
+  document.getElementById("sidebar")?.addEventListener("contextmenu", (e) => {
+    if (e.target.closest(".folder-add") || e.target.closest("#addFolder") || e.target.closest("#addCanvas") || e.target.closest(".item-rename")) return;
+    const file = e.target.closest(".asset-file");
+    if (file) {
+      showCtx(e, { kind: "file", id: file.dataset.node, lib: file.dataset.lib, el: file });
+      return;
+    }
+    const folder = e.target.closest(".folder-row");
+    if (folder) {
+      showCtx(e, { kind: "folder", id: folder.dataset.folder, el: folder });
+      return;
+    }
+    const page = e.target.closest(".canvas-item");
+    if (page) {
+      showCtx(e, { kind: "page", el: page });
+    }
+  });
+
+  ctxMenu?.addEventListener("click", (e) => {
+    const act = e.target.closest("[data-ctx]")?.dataset.ctx;
+    const target = ctxTarget;
+    hideCtx();
+    if (!act || !target) return;
+    if (act === "rename") {
+      const el = target.kind === "folder"
+        ? document.querySelector(`.folder-row[data-folder="${target.id}"]`)
+        : target.kind === "file"
+          ? document.querySelector(target.lib ? `.asset-file[data-lib="${target.lib}"]` : `.asset-file[data-node="${target.id}"]`)
+          : target.el;
+      if (el) startRename(el);
+      return;
+    }
+    if (act === "delete") {
+      if (target.kind === "folder") deleteFolder(target.id);
+      if (target.kind === "file") {
+        if (target.lib) {
+          state.library = state.library.filter((a) => a.id !== target.lib);
+          if (state.inspect?.kind === "lib" && state.inspect.id === target.lib) state.inspect = null;
+        } else if (target.id) {
+          removeNodes([target.id]);
+          if (state.inspect?.kind === "node" && state.inspect.id === target.id) state.inspect = null;
+        }
+        renderAll();
+      }
+      if (target.kind === "page") {
+        const pages = document.querySelectorAll(".canvas-item");
+        if (pages.length < 2) return;
+        const wasOn = target.el.classList.contains("is-on");
+        target.el.remove();
+        if (wasOn) {
+          const first = document.querySelector(".canvas-item");
+          if (first) {
+            first.classList.add("is-on");
+            document.querySelector(".canvas-pick").textContent = `${itemName(first)} ▾`;
+          }
+        }
+      }
+    }
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#ctxMenu")) hideCtx();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      hideCtx();
+      if (state.inspect) {
+        state.inspect = null;
+        renderAssetTree();
+      }
+    }
+  });
 
   document.getElementById("addCanvas")?.addEventListener("click", () => {
     const list = document.querySelector("[data-side-panel='canvas']");
@@ -876,40 +2137,233 @@
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "canvas-item";
-    btn.textContent = `캔버스 ${n}`;
+    btn.innerHTML = `${pageIcon}<span class="item-label">페이지 ${n}</span>`;
     list.insertBefore(btn, document.getElementById("addCanvas"));
-    document.querySelector(".canvas-pick").textContent = `캔버스 ${n} ▾`;
+    document.querySelector(".canvas-pick").textContent = `페이지 ${n} ▾`;
     list.querySelectorAll(".canvas-item").forEach((b) => b.classList.toggle("is-on", b === btn));
   });
 
   document.querySelector("[data-side-panel='canvas']")?.addEventListener("click", (e) => {
     const item = e.target.closest(".canvas-item");
-    if (!item) return;
+    if (!item || item.querySelector(".item-rename")) return;
     document.querySelectorAll(".canvas-item").forEach((b) => b.classList.toggle("is-on", b === item));
-    document.querySelector(".canvas-pick").textContent = `${item.textContent} ▾`;
+    document.querySelector(".canvas-pick").textContent = `${itemName(item)} ▾`;
   });
+
+  const CREW_PICO = {
+    writer: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10" fill="#f5d76e"/><circle cx="16" cy="16" r="8.2" fill="#f3c7a0"/><ellipse cx="13.1" cy="15.2" rx="2.1" ry="2.3" fill="#fff"/><ellipse cx="18.9" cy="15.2" rx="2.1" ry="2.3" fill="#fff"/><circle cx="13.2" cy="15.4" r=".85" fill="#3b2416"/><circle cx="19" cy="15.4" r=".85" fill="#3b2416"/><path d="M12.2 19.2c1.4 1.4 4.2 1.5 5.6.1" fill="none" stroke="#c45c3b" stroke-width="1.1" stroke-linecap="round"/><path d="M10.4 15.2h2.2M17.4 15.2h2.2M15.2 15.2h1.6" fill="none" stroke="#3b2416" stroke-width="1.15"/><rect x="22.2" y="7.2" width="2.2" height="10" rx="1" transform="rotate(28 23.3 12.2)" fill="#7c3aed"/><rect x="22.5" y="6.4" width="1.6" height="2.2" rx=".5" transform="rotate(28 23.3 7.5)" fill="#f8f4ff"/></svg>`,
+    cd: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10" fill="#7c3aed"/><path d="M8.5 13c.4-5 4-8.2 7.5-8.2S23 8 23.4 13H8.5z" fill="#2e1065"/><circle cx="16" cy="14.5" r="3.4" fill="#1c1424"/><circle cx="16" cy="18" r="7.6" fill="#e8b894"/><path d="M9.8 16.2h12.4" stroke="#1c1424" stroke-width="2.4" stroke-linecap="round"/><circle cx="13.1" cy="16.2" r="2.1" fill="#111"/><circle cx="18.9" cy="16.2" r="2.1" fill="#111"/><circle cx="13.6" cy="15.8" r=".55" fill="#fff"/><circle cx="19.4" cy="15.8" r=".55" fill="#fff"/><path d="M13 20.6c1.2 1.2 3.6 1.3 5 0" fill="none" stroke="#c45c3b" stroke-width="1.1" stroke-linecap="round"/><path d="M23.2 9.2 26 12.4l-1.3.9-2.8-3.2z" fill="#f4d35e"/></svg>`,
+    board: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10" fill="#fb7185"/><circle cx="16" cy="17" r="8" fill="#f3c7a0"/><circle cx="13.2" cy="16.2" r="1" fill="#3b2416"/><circle cx="18.8" cy="16.2" r="1" fill="#3b2416"/><path d="M13.2 19.6c1.2 1.3 3.4 1.3 4.6 0" fill="none" stroke="#c45c3b" stroke-width="1.1" stroke-linecap="round"/><rect x="7.2" y="6.4" width="5.2" height="6.4" rx="1" fill="#fff"/><rect x="13.4" y="5.6" width="5.2" height="6.4" rx="1" fill="#fff"/><rect x="19.6" y="6.4" width="5.2" height="6.4" rx="1" fill="#fff"/><path d="M8.4 8.8h2.8M14.6 8h2.8M20.8 8.8h2.8" stroke="#7c3aed" stroke-width="1.2"/><circle cx="10" cy="11.2" r=".7" fill="#f4d35e"/><circle cx="16" cy="10.4" r=".7" fill="#22c55e"/><circle cx="22.2" cy="11.2" r=".7" fill="#38bdf8"/></svg>`,
+    dp: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10" fill="#14b8a6"/><path d="M7 13.2h18v3.2H7z" fill="#115e59"/><path d="M9.2 8.4h13.6l1.6 4.8H7.6z" fill="#134e4a"/><circle cx="16" cy="19" r="7.4" fill="#f3c7a0"/><circle cx="13.4" cy="18.4" r="1" fill="#3b2416"/><circle cx="18.6" cy="18.4" r="1" fill="#3b2416"/><path d="M13.4 21.6c1.1 1.2 3.1 1.2 4.2 0" fill="none" stroke="#c45c3b" stroke-width="1.1" stroke-linecap="round"/><rect x="21.4" y="17.2" width="7.2" height="5.2" rx="1.2" fill="#111"/><circle cx="24.2" cy="19.8" r="1.5" fill="#7dd3fc"/><rect x="20.2" y="18.6" width="1.6" height="2.4" rx=".4" fill="#333"/></svg>`,
+    cast: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10" fill="#f59e0b"/><circle cx="12.2" cy="16.4" r="7.2" fill="#e8b894"/><circle cx="20.6" cy="17.2" r="7.2" fill="#f3c7a0"/><circle cx="10.6" cy="15.6" r=".95" fill="#3b2416"/><circle cx="14.2" cy="15.6" r=".95" fill="#3b2416"/><path d="M10.6 18.6c.9 1 2.5 1.1 3.4.1" fill="none" stroke="#c45c3b" stroke-width="1" stroke-linecap="round"/><circle cx="18.8" cy="16.4" r=".95" fill="#3b2416"/><circle cx="22.6" cy="16.4" r=".95" fill="#3b2416"/><path d="M18.8 19.5c1 1.1 2.7 1.1 3.7 0" fill="none" stroke="#c45c3b" stroke-width="1" stroke-linecap="round"/><path d="M16 8.4 16.8 10.6 19 11.2 16.8 12 16 14.2 15.2 12 13 11.2 15.2 10.6z" fill="#fde68a"/></svg>`,
+    editor: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10" fill="#64748b"/><rect x="6" y="6.4" width="20" height="6.4" rx="1.4" fill="#0f172a"/><rect x="8" y="7.6" width="2.2" height="4" rx=".4" fill="#f8fafc"/><rect x="12.2" y="7.6" width="2.2" height="4" rx=".4" fill="#f8fafc"/><rect x="16.4" y="7.6" width="2.2" height="4" rx=".4" fill="#c4b5fd"/><rect x="20.6" y="7.6" width="2.2" height="4" rx=".4" fill="#f8fafc"/><circle cx="16" cy="19.2" r="7.6" fill="#f3c7a0"/><circle cx="13.4" cy="18.6" r="1" fill="#3b2416"/><circle cx="18.6" cy="18.6" r="1" fill="#3b2416"/><path d="M13.4 21.8c1.1 1.2 3.1 1.2 4.2 0" fill="none" stroke="#c45c3b" stroke-width="1.1" stroke-linecap="round"/><path d="M22.6 21.4 26.4 25M22.6 25l3.8-3.6" stroke="#f8fafc" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+    sound: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10" fill="#38bdf8"/><path d="M8.2 13.6c0-6.2 15.6-6.2 15.6 0" fill="none" stroke="#0f172a" stroke-width="2.4" stroke-linecap="round"/><rect x="6.4" y="13.2" width="4.2" height="9.2" rx="2" fill="#0f172a"/><rect x="21.4" y="13.2" width="4.2" height="9.2" rx="2" fill="#0f172a"/><circle cx="16" cy="18.2" r="7.2" fill="#f3c7a0"/><circle cx="13.6" cy="17.8" r="1" fill="#3b2416"/><circle cx="18.4" cy="17.8" r="1" fill="#3b2416"/><path d="M13.6 20.8c1 1.1 2.8 1.1 3.8 0" fill="none" stroke="#c45c3b" stroke-width="1.1" stroke-linecap="round"/><path d="M24.8 8.4c1.4 1.2 2.2 3 2.2 4.8" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+  };
+
+  const CREW = [
+    {
+      id: "writer", name: "대본작가",
+      harness: "각본·대사·장면 리듬만 다룹니다. 스크립트 폴더에 쌓입니다.",
+      jobs: [{ key: "script", label: "각본 쓰기" }, { key: "dialogue", label: "대사 다듬기" }],
+    },
+    {
+      id: "cd", name: "크리에이티브 디렉터",
+      harness: "톤·장르·무드를 고정합니다. 비주얼 스타일이 이후 샷에 이어집니다.",
+      jobs: [{ key: "mood", label: "무드 잡기" }, { key: "look", label: "비주얼 스타일" }],
+    },
+    {
+      id: "board", name: "스토리보드 아티스트",
+      harness: "샷 구성과 컷 나눔. 이미지 폴더에 스토리보드가 붙습니다.",
+      jobs: [{ key: "storyboard", label: "스토리보드 뽑기" }, { key: "shot", label: "다음 샷" }],
+    },
+    {
+      id: "dp", name: "촬영감독",
+      harness: "렌즈, 라이팅, 카메라 무빙. 샷 프롬프트에 촬영 지시를 넣습니다.",
+      jobs: [{ key: "camera", label: "카메라 무빙" }, { key: "light", label: "조명 잡기" }],
+    },
+    {
+      id: "cast", name: "캐릭터 슈퍼바이저",
+      harness: "얼굴과 페르소나 일관성. 같은 캐릭터가 컷을 넘어도 유지됩니다.",
+      jobs: [{ key: "character", label: "캐릭터 고정" }],
+    },
+    {
+      id: "editor", name: "편집장",
+      harness: "컷 리듬, 다음 샷, 고화질 연결. 영상 폴더의 흐름을 다듬습니다.",
+      jobs: [{ key: "shot", label: "다음 컷" }, { key: "upscale", label: "고화질" }],
+    },
+    {
+      id: "sound", name: "사운드 디자이너",
+      harness: "대사, 효과음, 음악. 오디오 폴더에만 쌓입니다.",
+      jobs: [{ key: "audio", label: "보이스 입히기" }],
+    },
+  ];
+
+  const openChat = () => document.querySelector("[data-side='assets']")?.click();
+
+  const renderCrew = () => {
+    const list = document.getElementById("crewList");
+    if (!list) return;
+    list.innerHTML = CREW.map((c) => {
+      const on = !!state.crewOn[c.id];
+      const open = state.crewOpen === c.id;
+      return `
+        <article class="crew-card${on ? " is-on" : ""}${open ? " is-open" : ""}" data-crew="${c.id}">
+          <div class="crew-card-top">
+            <span class="crew-mark">${CREW_PICO[c.id] || ""}</span>
+            <div class="crew-copy">
+              <strong>${c.name}</strong>
+              <em>${on ? "이 보드에 배정됨" : "대기"}</em>
+            </div>
+            <button type="button" class="crew-assign" data-crew-toggle="${c.id}">${on ? "배정됨" : "배정"}</button>
+          </div>
+          ${open ? `
+            <p class="crew-harness">${c.harness}</p>
+            <div class="crew-jobs">
+              ${c.jobs.map((j) => `<button type="button" data-crew-job="${j.key}" data-crew-from="${c.id}">${j.label}</button>`).join("")}
+            </div>` : ""}
+        </article>`;
+    }).join("");
+  };
 
   const agentLog = document.getElementById("agentLog");
   const chatHead = document.getElementById("chatHead");
-  const pushAgent = (text, me = false) => {
+  const CHAT_STAR = `<svg class="chat-step-star" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.8 13.85 10.15 22.2 12 13.85 13.85 12 22.2 10.15 13.85 1.8 12 10.15 10.15Z"/></svg>`;
+  const pushAgent = (text, me = false, from = "") => {
     agentLog.querySelector(".empty")?.remove();
     const div = document.createElement("div");
     div.className = me ? "bubble is-me" : "bubble";
-    div.textContent = text;
+    if (!me && from) {
+      const tag = document.createElement("span");
+      tag.className = "bubble-from";
+      tag.textContent = from;
+      div.appendChild(tag);
+    }
+    div.appendChild(document.createTextNode(text));
     agentLog.appendChild(div);
     agentLog.scrollTop = agentLog.scrollHeight;
   };
+  const agentSteps = (t) => {
+    if (t.includes("브리프") || t.includes("기획")) return ["보드 브리프를 읽고 있습니다", "장면 흐름을 정리하고 있습니다"];
+    if (t.includes("무드") || t.includes("톤") || t.includes("장르") || t.includes("스타일") || t.includes("조명") || t.includes("비주얼")) {
+      return ["톤과 장르를 확인하고 있습니다", "비주얼 스타일을 맞추고 있습니다"];
+    }
+    if (t.includes("스토리") || t.includes("이야기") || t.includes("각본") || t.includes("스크립트") || t.includes("스토리보드") || t.includes("대사") || t.includes("대본")) {
+      return ["이야기를 읽고 있습니다", "샷으로 나누고 있습니다", "스토리보드를 준비하고 있습니다"];
+    }
+    if (t.includes("카메라") || t.includes("무빙") || t.includes("렌즈")) return ["선택한 샷을 확인하고 있습니다", "카메라 무빙을 넣고 있습니다"];
+    if (t.includes("캐릭터") || t.includes("페르소나") || t.includes("얼굴")) return ["캐릭터 고정을 확인하고 있습니다", "컷 사이 얼굴을 맞추고 있습니다"];
+    if (t.includes("오디오") || t.includes("보이스") || t.includes("사운드") || t.includes("대사 입")) return ["사운드 트랙을 확인하고 있습니다", "오디오 노드를 붙이고 있습니다"];
+    if (t.includes("고화질") || t.includes("upscale")) return ["원본 해상도를 읽고 있습니다", "고화질 노드를 잇고 있습니다"];
+    if (t.includes("비디오") || t.includes("영상")) return ["참조 샷을 읽고 있습니다", "비디오 생성을 시작하고 있습니다"];
+    if (t.includes("샷") || t.includes("다음") || t.includes("컷")) return ["현재 샷을 확인하고 있습니다", "다음 컷을 준비하고 있습니다"];
+    return ["요청을 읽고 있습니다", "캔버스 흐름을 확인하고 있습니다"];
+  };
+  const startTrace = (steps) => {
+    agentLog.querySelector(".empty")?.remove();
+    agentLog.querySelector(".chat-trace.is-busy")?.remove();
+    const trace = document.createElement("div");
+    trace.className = "chat-trace is-busy";
+    trace.setAttribute("aria-live", "polite");
+    agentLog.appendChild(trace);
+    let i = 0;
+    let timer = 0;
+    const addStep = () => {
+      if (!trace.isConnected) return;
+      const live = trace.querySelector(".chat-step.is-live");
+      if (live) {
+        live.classList.remove("is-live");
+        live.classList.add("is-done");
+      }
+      if (i >= steps.length) return;
+      const row = document.createElement("div");
+      row.className = "chat-step is-live";
+      row.innerHTML = `<span class="chat-step-rail">${CHAT_STAR}<i class="chat-step-line"></i></span><p>${steps[i]}</p>`;
+      trace.appendChild(row);
+      agentLog.scrollTop = agentLog.scrollHeight;
+      i += 1;
+      if (i < steps.length) timer = window.setTimeout(addStep, 420);
+    };
+    addStep();
+    return {
+      finish() {
+        window.clearTimeout(timer);
+        trace.classList.remove("is-busy");
+        const live = trace.querySelector(".chat-step.is-live");
+        if (live) {
+          live.classList.remove("is-live");
+          live.classList.add("is-done");
+        }
+      },
+    };
+  };
 
-  const runAgent = (text) => {
+  const addInspectToCanvas = () => {
+    const { lib, node } = inspectOn();
+    if (node) {
+      focusAsset(node.id);
+      return;
+    }
+    if (!lib) return;
+    const srcNode = nodeById(state.selectedId) || state.nodes[0];
+    if (!srcNode) return;
+    const kind = FOLDER_KIND[lib.folder] || "image";
+    const id = uid("im");
+    state.nodes.push({
+      id,
+      type: kind,
+      title: lib.name,
+      compact: kind === "image",
+      x: srcNode.x + sizeOf(srcNode).w + 56,
+      y: srcNode.y + 48,
+      prompt: lib.name,
+      ready: true,
+      src: lib.src,
+      folder: lib.folder,
+      shot: lib.name,
+      mode: STACK_DEFAULT[kind] || "",
+    });
+    state.edges.push({ from: srcNode.id, to: id });
+    lib.nodeId = id;
+    state.selectedId = id;
+    renderAll();
+    focusAsset(id);
+  };
+
+  document.getElementById("assetInspectClose")?.addEventListener("click", () => {
+    state.inspect = null;
+    renderAssetTree();
+  });
+  document.getElementById("assetAddCanvas")?.addEventListener("click", addInspectToCanvas);
+  document.getElementById("assetAddAgent")?.addEventListener("click", () => {
+    const { lib, node } = inspectOn();
+    const name = lib?.name || (node ? fileLabel(node) : "");
+    if (!name) return;
+    document.querySelector("[data-side='assets']")?.click();
+    pushAgent(`「${name}」을 컨텍스트에 넣었습니다. 이 에셋을 기준으로 이어서 작업할 수 있습니다.`, false, "에셋");
+  });
+
+  const runAgent = (text, from = "Avora Directing") => {
     pushAgent(text, true);
     const t = text.toLowerCase();
+    const steps = agentSteps(t);
+    const trace = startTrace(steps);
     chatHead.classList.add("is-generating");
     window.setTimeout(() => {
       const done = (msg) => {
+        trace.finish();
         chatHead.classList.remove("is-generating");
-        pushAgent(msg);
+        pushAgent(msg, false, from);
       };
-      if (t.includes("스토리") || t.includes("이야기") || t.includes("각본") || t.includes("스크립트") || t.includes("스토리보드")) {
+      if (t.includes("브리프") || t.includes("기획")) {
+        done("이 보드는 실험실 창가에서 잎과 빛을 잇는 교육 단편입니다. 배정된 크루에게 각본·무드·샷을 나눠 맡기면 됩니다.");
+        return;
+      }
+      if (t.includes("무드") || t.includes("톤") || t.includes("장르") || t.includes("스타일") || t.includes("조명") || t.includes("비주얼")) {
+        lookModal.hidden = false;
+        done("무드를 먼저 고정합니다. 팔레트·조명·미술을 고르면 이후 샷이 같은 색감으로 맞춰집니다.");
+        return;
+      }
+      if (t.includes("스토리") || t.includes("이야기") || t.includes("각본") || t.includes("스크립트") || t.includes("스토리보드") || t.includes("대사") || t.includes("대본")) {
         let sc = state.nodes.find((q) => q.type === "script");
         if (!sc) {
           state.plusFrom = state.selectedId || state.nodes[0]?.id;
@@ -918,7 +2372,24 @@
         }
         sc.prompt = text;
         startJob(sc.id, "script");
-        window.setTimeout(() => done("이야기를 샷으로 나누고 이미지를 만들고 있습니다. 오른쪽에 스토리보드가 붙습니다."), 900);
+        window.setTimeout(() => done("이야기를 샷으로 나누고 이미지를 만들고 있습니다. 스크립트·이미지 폴더에 쌓입니다."), 900);
+        return;
+      }
+      if (t.includes("카메라") || t.includes("무빙") || t.includes("렌즈")) {
+        const n = nodeById(state.selectedId) || state.nodes.find((q) => q.type === "video");
+        if (n) n.prompt = `${n.prompt || ""} 차네 클로즈업에서 항공정면으로 전환, 35mm, 모션 블러.`.trim();
+        renderAll();
+        done("선택한 샷에 카메라 무빙을 넣었습니다. 프롬프트를 확인하고 생성하면 됩니다.");
+        return;
+      }
+      if (t.includes("캐릭터") || t.includes("페르소나") || t.includes("얼굴")) {
+        done("같은 얼굴이 컷을 넘도록 캐릭터를 고정했습니다. 캐릭터 라이브러리에서 아린·하은을 이 보드에 쓸 수 있습니다.");
+        return;
+      }
+      if (t.includes("오디오") || t.includes("보이스") || t.includes("사운드") || t.includes("대사 입")) {
+        state.plusFrom = state.selectedId || state.nodes[0]?.id;
+        spawnFrom("audio");
+        done("오디오 노드를 붙였습니다. 사운드 폴더에 쌓입니다.");
         return;
       }
       if (t.includes("고화질") || t.includes("upscale")) {
@@ -933,19 +2404,60 @@
         window.setTimeout(() => done("이미지 참조로 비디오를 생성했습니다. 프롬프트를 다듬거나 고화질로 이어갈 수 있어요."), 1400);
         return;
       }
-      if (t.includes("샷") || t.includes("다음")) {
-        state.plusFrom = "vid-01";
+      if (t.includes("샷") || t.includes("다음") || t.includes("컷")) {
+        state.plusFrom = state.selectedId || "vid-01";
         spawnFrom("image");
-        done("다음 샷용 이미지 노드를 추가했습니다. +로 비디오를 이으면 됩니다.");
+        done("다음 샷용 이미지 노드를 추가했습니다. 이미지 폴더에 쌓입니다.");
         return;
       }
-      done("캔버스의 이미지→비디오 흐름을 유지하면서, 원하시면 고화질이나 다음 샷을 붙일 수 있습니다.");
-    }, 420);
+      done("배정된 크루 기준으로 캔버스 흐름을 유지합니다. 각본, 무드, 샷, 사운드 중 맡길 일을 말해 주세요.");
+    }, Math.max(980, steps.length * 460));
   };
+
+  document.getElementById("crewList")?.addEventListener("click", (e) => {
+    const toggle = e.target.closest("[data-crew-toggle]");
+    if (toggle) {
+      e.stopPropagation();
+      const id = toggle.dataset.crewToggle;
+      state.crewOn[id] = !state.crewOn[id];
+      if (state.crewOn[id]) state.crewOpen = id;
+      renderCrew();
+      return;
+    }
+    const job = e.target.closest("[data-crew-job]");
+    if (job) {
+      const role = CREW.find((c) => c.id === job.dataset.crewFrom);
+      if (role && !state.crewOn[role.id]) {
+        state.crewOn[role.id] = true;
+        renderCrew();
+      }
+      const map = {
+        script: "이 장면의 각본을 써줘",
+        dialogue: "대사를 짧게 다듬어줘",
+        mood: "무드를 잡아줘",
+        look: "비주얼 스타일을 고정해줘",
+        storyboard: "스토리보드를 뽑아줘",
+        shot: "다음 샷을 제안해줘",
+        camera: "카메라 무빙을 넣어줘",
+        light: "조명을 잡아줘",
+        character: "캐릭터를 고정해줘",
+        upscale: "고화질로 연결해줘",
+        audio: "보이스를 입혀줘",
+      };
+      openChat();
+      runAgent(map[job.dataset.crewJob] || job.textContent, role?.name || "Avora Directing");
+      return;
+    }
+    const card = e.target.closest("[data-crew]");
+    if (card) {
+      state.crewOpen = state.crewOpen === card.dataset.crew ? "" : card.dataset.crew;
+      renderCrew();
+    }
+  });
 
   document.querySelectorAll("[data-agent]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const map = { video: "비디오 생성해줘", upscale: "고화질 연결해줘", shot: "다음 샷 제안해줘" };
+      const map = { brief: "보드 브리프 정리해줘", video: "비디오 생성해줘", shot: "다음 샷 제안해줘" };
       runAgent(map[btn.dataset.agent] || btn.textContent);
     });
   });
@@ -964,6 +2476,7 @@
       document.getElementById("agentForm").requestSubmit();
     }
   });
+  renderCrew();
 
   const sharePop = document.getElementById("sharePop");
   const mePop = document.getElementById("mePop");
@@ -1024,9 +2537,11 @@
   const wanderPeers = () => {
     PEERS.forEach((peer, i) => {
       const n = state.nodes[i % state.nodes.length];
+      if (!n) return;
       const s = sizeOf(n);
-      peer.wx = n.x + 40 + Math.random() * Math.max(40, s.w - 80);
-      peer.wy = n.y + 24 + Math.random() * 80;
+      const at = worldOf(n);
+      peer.wx = at.x + 40 + Math.random() * Math.max(40, s.w - 80);
+      peer.wy = at.y + 24 + Math.random() * 80;
     });
     placeCursors();
   };
@@ -1041,11 +2556,12 @@
   let presentIndex = 0;
   const focusNode = (n) => {
     const s = sizeOf(n);
+    const at = worldOf(n);
     const rect = canvas.getBoundingClientRect();
     state.selectedId = n.id;
     state.cam.scale = 0.92;
-    state.cam.x = rect.width / 2 - (n.x + s.w / 2) * state.cam.scale;
-    state.cam.y = rect.height / 2 - (n.y + s.h / 2) * state.cam.scale + 18;
+    state.cam.x = rect.width / 2 - (at.x + s.w / 2) * state.cam.scale;
+    state.cam.y = rect.height / 2 - (at.y + s.h / 2) * state.cam.scale + 18;
     renderAll();
     world.querySelectorAll(".node").forEach((el) => el.classList.toggle("is-present-focus", el.dataset.id === n.id));
   };
@@ -1189,6 +2705,7 @@
     renderAll();
   };
 
+  renderAddMenu();
   renderAll();
   placeCursors();
   setInterval(wanderPeers, 2600);
