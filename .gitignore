@@ -1,18 +1,18 @@
-# AvoraEdu prototype only
+# Avora prototype only
 *
 !.gitignore
 !.github/
 !.github/workflows/
 !.github/workflows/**
-!edu.html
-!edu-boards.html
-!edu-workspace.html
-!edu.css
-!edu-workspace.css
-!edu-workspace.js
+!home.html
+!boards.html
+!workspace.html
+!site.css
+!workspace.css
+!workspace.js
 !assets/
-!assets/edu/
-!assets/edu/**
+!assets/app/
+!assets/app/**
 !README.md
 !LICENSE
 !.nojekyll

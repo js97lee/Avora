@@ -1,5 +1,5 @@
 (() => {
-  const BLANK = "assets/edu/blank.svg";
+  const BLANK = "assets/app/blank.svg";
   const SIZE = {
     image: { w: 320, h: 468, portY: 188 },
     video: { w: 560, h: 520, portY: 188 },
@@ -34,7 +34,7 @@
   };
   const boardId = new URLSearchParams(location.search).get("board") || "photo";
   document.getElementById("boardName").textContent = TITLES[boardId] || TITLES.photo;
-  document.title = `${TITLES[boardId] || TITLES.photo} · 아보라Edu`;
+  document.title = `${TITLES[boardId] || TITLES.photo} · 아보라`;
 
   const PROMPT = "실험실 창가에서 선생님이 잎을 들어 보이며 질문한다. 긴장된 표정, 차네 클로즈업에서 항공정면으로 전환, 35mm 필름, 사실적인 속도감과 모션 블러.";
   const IMG_PROMPT = "실험실 창가, 선생님이 잎을 들어 보이는 클로즈업, 사실적인 조명.";
@@ -44,10 +44,10 @@
   const SCRIPT_OUT = "선생님: 이 잎이 빛을 받으면 어떤 일이 생길까요?\n학생: 양분을 만들어요!\n선생님: 맞아요. 그걸 광합성이라고 합니다.";
   const STORY_DEFAULT = "실험실 창가에서 선생님이 잎을 들어 보이며 묻는다. 잎에 빛이 닿고, 학생들이 양분을 만든다고 대답한다.";
   const STORY_SHOTS = [
-    { t: "오프닝", d: "2s", src: "assets/edu/shots/open.png", line: "선생님이 창가에서 잎을 들어 질문을 던진다." },
-    { t: "핵심 클로즈업", d: "2s", src: "assets/edu/shots/leaf.png", line: "잎에 빛이 닿고 물이 움직인다." },
-    { t: "반응", d: "2s", src: "assets/edu/shots/class.png", line: "학생들이 양분이라고 대답한다." },
-    { t: "정리", d: "2s", src: "assets/edu/shots/idea.png", line: "빛·잎·양분이 한 장면으로 정리된다." },
+    { t: "오프닝", d: "2s", src: "assets/app/shots/open.png", line: "선생님이 창가에서 잎을 들어 질문을 던진다." },
+    { t: "핵심 클로즈업", d: "2s", src: "assets/app/shots/leaf.png", line: "잎에 빛이 닿고 물이 움직인다." },
+    { t: "반응", d: "2s", src: "assets/app/shots/class.png", line: "학생들이 양분이라고 대답한다." },
+    { t: "정리", d: "2s", src: "assets/app/shots/idea.png", line: "빛·잎·양분이 한 장면으로 정리된다." },
   ];
   const SHOTS = [
     { t: "클로즈업", d: "2s" },
@@ -94,14 +94,14 @@
     ],
   };
   const SHOT_SRC = {
-    open: "assets/edu/shots/open.png",
-    leaf: "assets/edu/shots/leaf.png",
-    class: "assets/edu/shots/class.png",
-    idea: "assets/edu/shots/idea.png",
-    wide: "assets/edu/shots/wide.png",
-    backlight: "assets/edu/shots/backlight.png",
-    cutaway: "assets/edu/shots/cutaway.png",
-    insert: "assets/edu/shots/insert.png",
+    open: "assets/app/shots/open.png",
+    leaf: "assets/app/shots/leaf.png",
+    class: "assets/app/shots/class.png",
+    idea: "assets/app/shots/idea.png",
+    wide: "assets/app/shots/wide.png",
+    backlight: "assets/app/shots/backlight.png",
+    cutaway: "assets/app/shots/cutaway.png",
+    insert: "assets/app/shots/insert.png",
   };
 
   const state = {
@@ -124,14 +124,14 @@
       { id: "sc-01", type: "script", title: "스크립트 생성기", x: 40, y: 48, ready: false, prompt: "" },
     ] : [
       { id: "sc-01", type: "script", title: "스크립트 생성기", x: 40, y: 48, ready: false, prompt: "" },
-      { id: "img-s1", type: "image", compact: true, title: "이미지", x: 624, y: 48, ready: true, shot: "오프닝", src: "assets/edu/shots/open.png", prompt: IMG_PROMPT },
-      { id: "img-s2", type: "image", compact: true, title: "이미지", x: 772, y: 48, ready: true, shot: "핵심 클로즈업", src: "assets/edu/shots/leaf.png", prompt: "잎에 빛이 닿는 클로즈업" },
-      { id: "img-s3", type: "image", compact: true, title: "이미지", x: 920, y: 48, ready: true, shot: "반응", src: "assets/edu/shots/class.png", prompt: "학생들이 대답한다" },
-      { id: "img-s4", type: "image", compact: true, title: "이미지", x: 1068, y: 48, ready: true, shot: "정리", src: "assets/edu/shots/idea.png", prompt: "빛·잎·양분 한 컷" },
-      { id: "img-v1", type: "image", compact: true, title: "이미지", x: 1344, y: 48, ready: true, shot: "와이드", src: "assets/edu/shots/wide.png", prompt: "같은 장면 와이드" },
-      { id: "img-v2", type: "image", compact: true, title: "이미지", x: 1492, y: 48, ready: true, shot: "역광", src: "assets/edu/shots/backlight.png", prompt: "역광 실루엣" },
-      { id: "img-v3", type: "image", compact: true, title: "이미지", x: 1344, y: 228, ready: true, shot: "컷어웨이", src: "assets/edu/shots/cutaway.png", prompt: "학생 컷어웨이" },
-      { id: "img-v4", type: "image", compact: true, title: "이미지", x: 1492, y: 228, ready: true, shot: "인서트", src: "assets/edu/shots/insert.png", prompt: "개념 인서트" },
+      { id: "img-s1", type: "image", compact: true, title: "이미지", x: 624, y: 48, ready: true, shot: "오프닝", src: "assets/app/shots/open.png", prompt: IMG_PROMPT },
+      { id: "img-s2", type: "image", compact: true, title: "이미지", x: 772, y: 48, ready: true, shot: "핵심 클로즈업", src: "assets/app/shots/leaf.png", prompt: "잎에 빛이 닿는 클로즈업" },
+      { id: "img-s3", type: "image", compact: true, title: "이미지", x: 920, y: 48, ready: true, shot: "반응", src: "assets/app/shots/class.png", prompt: "학생들이 대답한다" },
+      { id: "img-s4", type: "image", compact: true, title: "이미지", x: 1068, y: 48, ready: true, shot: "정리", src: "assets/app/shots/idea.png", prompt: "빛·잎·양분 한 컷" },
+      { id: "img-v1", type: "image", compact: true, title: "이미지", x: 1344, y: 48, ready: true, shot: "와이드", src: "assets/app/shots/wide.png", prompt: "같은 장면 와이드" },
+      { id: "img-v2", type: "image", compact: true, title: "이미지", x: 1492, y: 48, ready: true, shot: "역광", src: "assets/app/shots/backlight.png", prompt: "역광 실루엣" },
+      { id: "img-v3", type: "image", compact: true, title: "이미지", x: 1344, y: 228, ready: true, shot: "컷어웨이", src: "assets/app/shots/cutaway.png", prompt: "학생 컷어웨이" },
+      { id: "img-v4", type: "image", compact: true, title: "이미지", x: 1492, y: 228, ready: true, shot: "인서트", src: "assets/app/shots/insert.png", prompt: "개념 인서트" },
       { id: "vid-01", type: "video", title: "비디오", x: 1896, y: 48, ready: false, prompt: PROMPT },
     ],
     edges: boardId === "new" ? [] : [
@@ -1129,7 +1129,7 @@
     placeCursors();
   };
   if ("BroadcastChannel" in window) {
-    const channel = new BroadcastChannel(`avora-edu-${boardId}`);
+    const channel = new BroadcastChannel(`avora-${boardId}`);
     channel.onmessage = (ev) => {
       const msg = ev.data || {};
       if (!msg.id || msg.id === meId) return;

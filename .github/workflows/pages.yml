@@ -25,9 +25,9 @@ jobs:
       - name: Build static site
         run: |
           mkdir -p _site/assets
-          cp edu.html _site/index.html
-          cp edu.html edu-boards.html edu-workspace.html edu.css edu-workspace.css edu-workspace.js _site/
-          cp -R assets/edu _site/assets/
+          cp home.html _site/index.html
+          cp home.html boards.html workspace.html site.css workspace.css workspace.js _site/
+          cp -R assets/app _site/assets/
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

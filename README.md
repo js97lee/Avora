@@ -1,14 +1,14 @@
-# AvoraEdu
+# Avora
 
-아보라Edu 스토리보드 워크스페이스 UI 프로토타입입니다.
+아보라 스토리보드 워크스페이스 UI 프로토타입입니다.
 
-배경·캐릭터·카메라 룩을 노드로 이어 교육 영상을 협업 제작하는 흐름을 보여 줍니다.
+배경·캐릭터·카메라 룩을 노드로 이어 영상을 협업 제작하는 흐름을 보여 줍니다.
 
 ## 페이지 흐름
 
-1. 랜딩 — `edu.html`
-2. 마이 프로젝트 — `edu-boards.html`
-3. 노드 워크스페이스 — `edu-workspace.html`
+1. 랜딩 — `home.html`
+2. 마이 프로젝트 — `boards.html`
+3. 노드 워크스페이스 — `workspace.html`
 
 ## 로컬 실행
 
@@ -16,10 +16,10 @@
 python3 -m http.server 8765 --bind 127.0.0.1
 ```
 
-- 랜딩: http://127.0.0.1:8765/edu.html
-- 마이 프로젝트: http://127.0.0.1:8765/edu-boards.html
-- 워크스페이스: http://127.0.0.1:8765/edu-workspace.html?board=photo
+- 랜딩: http://127.0.0.1:8765/home.html
+- 마이 프로젝트: http://127.0.0.1:8765/boards.html
+- 워크스페이스: http://127.0.0.1:8765/workspace.html?board=photo
 
 ## 배포
 
-GitHub Pages: https://js97lee.github.io/AvoraEdu/
+GitHub Pages: https://js97lee.github.io/Avora/
