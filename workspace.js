@@ -273,6 +273,15 @@
   const searchParams = new URLSearchParams(location.search);
   const landingPrompt = (searchParams.get("prompt") || "").trim();
   const boardId = searchParams.get("board") || "photo";
+  const stickyStorageKey = `avora.sticky-notes.${boardId}.v1`;
+  const loadStickyNotes = () => {
+    try {
+      const notes = JSON.parse(localStorage.getItem(stickyStorageKey) || "[]");
+      return Array.isArray(notes) ? notes : [];
+    } catch {
+      return [];
+    }
+  };
   const reviewMode = searchParams.get("review") === "1";
   const reviewStudent = (searchParams.get("student") || "").trim();
   const reviewTeam = (searchParams.get("team") || "").trim();
@@ -335,19 +344,19 @@
     const nodes = [
       {
         id: "sample-ref-haeun", type: "ref", mode: "character", title: "공통 참조 · 서하은", x: 32, y: 36,
-        ready: true, src: "assets/app/sample-story/ref-haeun.png", prompt: "서하은, 22세 문예창작과. 베이지 코트, 버건디 머플러, 조용하지만 관찰력이 좋다.",
+        ready: true, src: "assets/app/sample-story/ref-haeun.png", aspect: "3:4", fit: "contain", prompt: "서하은, 22세 문예창작과. 베이지 코트, 버건디 머플러, 조용하지만 관찰력이 좋다.",
         shot: "주인공 서하은", folder: "scene",
         guide: guide("공통 A", "모든 장면에서 주인공의 얼굴과 의상을 고정합니다.", "정면 캐릭터 이미지 + 외형 설명", "뒤에 연결된 이미지·영상의 서하은 일관성"),
       },
       {
         id: "sample-ref-doyun", type: "ref", mode: "character", title: "공통 참조 · 한도윤", x: 420, y: 36,
-        ready: true, src: "assets/app/sample-story/ref-doyun.png", prompt: "한도윤, 23세 사진학과. 네이비 야상, 필름 카메라, 다정하지만 표현이 서툴다.",
+        ready: true, src: "assets/app/sample-story/ref-doyun.png", aspect: "3:4", fit: "contain", prompt: "한도윤, 23세 사진학과. 네이비 야상, 필름 카메라, 다정하지만 표현이 서툴다.",
         shot: "상대역 한도윤", folder: "scene",
         guide: guide("공통 B", "상대역의 얼굴·의상·소품을 장면 전체에 재사용합니다.", "캐릭터 이미지 + 의상/소품 키워드", "한도윤과 필름 카메라의 연속성"),
       },
       {
         id: "sample-ref-dog", type: "ref", mode: "object", title: "공통 참조 · 강아지 단풍", x: 808, y: 36,
-        ready: true, src: "assets/app/sample-story/ref-danpoong.png", prompt: "갈색 믹스견 ‘단풍’. 빨간 체크 목줄과 은행잎 모양 이름표. 이야기의 복선을 운반한다.",
+        ready: true, src: "assets/app/sample-story/ref-danpoong.png", aspect: "3:4", fit: "contain", prompt: "갈색 믹스견 ‘단풍’. 빨간 체크 목줄과 은행잎 모양 이름표. 이야기의 복선을 운반한다.",
         shot: "강아지 단풍", folder: "scene",
         guide: guide("공통 C", "강아지와 복선 소품을 모든 시퀀스가 함께 참고합니다.", "강아지 외형 + 빨간 목줄 + 은행잎 이름표", "매 장면 동일한 단풍과 복선 소품"),
       },
@@ -371,17 +380,17 @@
       },
       {
         id: "sample-image-grid", type: "image", mode: "grid9", title: "04 · 첫 만남 9컷 탐색", x: 650, y: 60, group: "sample-g-act1",
-        ready: true, src: "assets/app/sample-story/act1-meeting.png", prompt: "가을 캠퍼스 낙엽 우체통, 서하은이 은행잎 이름표를 든 순간, 단풍과 한도윤 등장, 따뜻한 16mm 필름룩.",
+        ready: true, src: "assets/app/sample-story/act1-meeting.png", aspect: "16:9", prompt: "가을 캠퍼스 낙엽 우체통, 서하은이 은행잎 이름표를 든 순간, 단풍과 한도윤 등장, 따뜻한 16mm 필름룩.",
         gridImages: [
-          ["EWS", "assets/app/sample-story/act1-meeting.png"],
-          ["WS", "assets/app/sample-story/act1-meeting.png"],
-          ["MS", "assets/app/sample-story/act1-dialogue.png"],
-          ["MCU", "assets/app/sample-story/act1-dialogue.png"],
-          ["CU", "assets/app/sample-story/act1-clue.png"],
-          ["ECU", "assets/app/sample-story/act1-clue.png"],
-          ["LOW", "assets/app/sample-story/act1-meeting.png"],
-          ["HIGH", "assets/app/sample-story/act1-dialogue.png"],
-          ["OTS", "assets/app/sample-story/act1-dialogue.png"],
+          ["EWS", "assets/app/sample-story/act1-meeting.png", "50% 50%"],
+          ["WS", "assets/app/sample-story/act1-meeting.png", "50% 48%"],
+          ["MS", "assets/app/sample-story/act1-dialogue.png", "52% 42%"],
+          ["MCU", "assets/app/sample-story/act1-dialogue.png", "36% 40%"],
+          ["CU", "assets/app/sample-story/act1-clue.png", "50% 48%"],
+          ["ECU", "assets/app/sample-story/act1-clue.png", "50% 42%"],
+          ["LOW", "assets/app/sample-story/act1-meeting.png", "50% 66%"],
+          ["HIGH", "assets/app/sample-story/act1-dialogue.png", "50% 28%"],
+          ["OTS", "assets/app/sample-story/act1-dialogue.png", "68% 42%"],
         ],
         shot: "첫 만남 9-Cut", folder: "scene",
         guide: guide("04", "한 장면을 9개 구도로 비교해 가장 좋은 쇼트를 고릅니다.", "03 씬 + 공통 캐릭터/강아지 참조", "EWS부터 OTS까지 9개 카메라 구도"),
@@ -400,7 +409,7 @@
       },
       {
         id: "sample-image-sheet", type: "image", mode: "character-sheet", title: "07 · 캐릭터 일관성 시트", x: 40, y: 60, group: "sample-g-act2",
-        ready: true, src: "assets/app/sample-story/ref-haeun.png", prompt: "서하은과 한도윤의 가을 캠퍼스 의상 턴어라운드, 단풍과 산책할 때의 미소·놀람·집중 표정.",
+        ready: true, src: "assets/app/sample-story/ref-haeun.png", aspect: "3:4", fit: "contain", prompt: "서하은과 한도윤의 가을 캠퍼스 의상 턴어라운드, 단풍과 산책할 때의 미소·놀람·집중 표정.",
         shot: "Character Sheet", folder: "scene",
         guide: guide("07", "여러 쇼트에서 얼굴·의상·표정이 바뀌지 않도록 기준표를 만듭니다.", "공통 A/B 캐릭터 참조", "4방향 턴어라운드 + 표정 4종"),
       },
@@ -430,7 +439,7 @@
       },
       {
         id: "sample-edit-clue", type: "edit", mode: "replace", title: "12 · 이름표 인서트 보정", x: 450, y: 60, group: "sample-g-act3",
-        ready: true, src: "assets/app/sample-story/act1-clue.png", prompt: "이름표 뒷면 글씨를 ‘은행나무 아래에서’로 교체. 손과 배경은 유지하고 글자만 자연스럽게 선명하게.",
+        ready: true, src: "assets/app/sample-story/act1-clue.png", fit: "contain", prompt: "이름표 뒷면 글씨를 ‘은행나무 아래에서’로 교체. 손과 배경은 유지하고 글자만 자연스럽게 선명하게.",
         shot: "복선 인서트", folder: "scene",
         guide: guide("12", "전체 장면을 다시 만들지 않고 필요한 소품만 수정합니다.", "11에서 찾은 이름표 프레임", "문구가 읽히는 수정 인서트 컷"),
       },
@@ -454,7 +463,7 @@
       },
       {
         id: "sample-image-ending", type: "image", mode: "t2i", title: "16 · 엔딩 키프레임", x: 650, y: 60, group: "sample-g-act4",
-        ready: true, src: "assets/app/sample-story/act4-ending.png", prompt: "황금빛 은행나무 아래 서하은과 한도윤, 둘 사이에 앉은 단풍. 하은의 손에는 은행잎 이름표, 따뜻한 역광, 35mm 필름 스틸.",
+        ready: true, src: "assets/app/sample-story/act4-ending.png", aspect: "16:9", prompt: "황금빛 은행나무 아래 서하은과 한도윤, 둘 사이에 앉은 단풍. 하은의 손에는 은행잎 이름표, 따뜻한 역광, 35mm 필름 스틸.",
         shot: "엔딩 키프레임", folder: "scene",
         guide: guide("16", "결말의 인물·강아지·복선 소품을 한 프레임에 확정합니다.", "15 대사 + 공통 A/B/C 참조", "일관성이 잠긴 엔딩 이미지"),
       },
@@ -472,7 +481,7 @@
       },
       {
         id: "sample-upscale-final", type: "upscale", title: "19 · 최종 4K 마스터", x: 2060, y: 60, group: "sample-g-act4",
-        ready: true, src: "assets/app/sample-story/act4-ending.png", prompt: "전체 60초 영상을 4K로 업스케일하고 프레임·색상·음량을 최종 정리합니다.",
+        ready: true, src: "assets/app/sample-story/act4-ending.png", fit: "contain", prompt: "전체 60초 영상을 4K로 업스케일하고 프레임·색상·음량을 최종 정리합니다.",
         shot: "4K Master", folder: "scene",
         guide: guide("19", "완성된 편집본의 해상도와 재생 품질을 납품 규격으로 올립니다.", "기·승·전·결 최종 영상", "4K · 24fps · 스테레오 최종 마스터"),
       },
@@ -578,6 +587,8 @@
     dockTab: "canvas",
     dockOpen: false,
     timelineTarget: 30,
+    notes: loadStickyNotes(),
+    noteDragging: null,
     spawnAt: null,
     movingGroup: null,
     resizing: null,
@@ -636,8 +647,21 @@
   const imageViewerPrompt = document.getElementById("imageViewerPrompt");
   const imageViewerDownload = document.getElementById("imageViewerDownload");
   const imageViewerZoom = document.getElementById("imageViewerZoom");
+  let collaborationChannel = null;
   const nodeById = (id) => state.nodes.find((n) => n.id === id);
+  const stickyById = (id) => state.notes.find((note) => note.id === id);
   const uid = (p) => `${p}-${Math.random().toString(36).slice(2, 6)}`;
+  const escapeHTML = (value = "") => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+  const saveStickyNotes = (broadcast = true) => {
+    localStorage.setItem(stickyStorageKey, JSON.stringify(state.notes));
+    if (broadcast && collaborationChannel) {
+      collaborationChannel.postMessage({
+        type: "sticky-notes",
+        id: sessionStorage.getItem("avora-peer") || "local",
+        notes: state.notes,
+      });
+    }
+  };
   const sizeOf = (n) => {
     const [aw, ah] = aspectOf(n).split(":").map(Number);
     const ratio = aw > 0 && ah > 0 ? aw / ah : 1;
@@ -646,6 +670,7 @@
     }
     const base = { ...(SIZE[n.type] || SIZE.image) };
     if (n.type === "image") base.h = Math.round(base.h + base.w / ratio - 320);
+    if (n.type === "ref") base.h = Math.round(base.h + base.w / ratio - 320);
     if (n.type === "video") base.h = Math.round(base.h + base.w / ratio - 316);
     return base;
   };
@@ -1065,15 +1090,21 @@
   };
 
   const ortho = (x1, y1, x2, y2) => {
-    const mid = x1 + Math.max(36, (x2 - x1) * 0.5);
-    const r = Math.min(8, Math.abs(y2 - y1) / 2, Math.max(4, Math.abs(x2 - mid) / 2));
-    if (Math.abs(y2 - y1) < 3) return { d: `M ${x1} ${y1} H ${x2}`, mx: (x1 + x2) / 2, my: y1 };
-    const s = y2 >= y1 ? 1 : -1;
-    if (r < 3) return { d: `M ${x1} ${y1} H ${mid} V ${y2} H ${x2}`, mx: mid, my: (y1 + y2) / 2 };
+    if (Math.abs(y2 - y1) < 3) {
+      return {
+        d: `M ${x1} ${y1} L ${x2} ${y2}`,
+        mx: (x1 + x2) / 2,
+        my: (y1 + y2) / 2,
+      };
+    }
+    const sx = x2 >= x1 ? 1 : -1;
+    const sy = y2 >= y1 ? 1 : -1;
+    const radius = Math.min(8, Math.abs(x2 - x1) / 2, Math.abs(y2 - y1) / 2);
+    const horizontalLonger = Math.abs(x2 - x1) >= Math.abs(y2 - y1);
     return {
-      d: `M ${x1} ${y1} H ${mid - r} Q ${mid} ${y1} ${mid} ${y1 + s * r} V ${y2 - s * r} Q ${mid} ${y2} ${mid + r} ${y2} H ${x2}`,
-      mx: mid,
-      my: (y1 + y2) / 2,
+      d: `M ${x1} ${y1} H ${x2 - sx * radius} Q ${x2} ${y1} ${x2} ${y1 + sy * radius} V ${y2}`,
+      mx: horizontalLonger ? (x1 + x2) / 2 : x2,
+      my: horizontalLonger ? y1 : (y1 + y2) / 2,
     };
   };
 
@@ -1154,8 +1185,8 @@
       return `
         <div class="mode-visual mode-grid9">
           ${veil(n, "image")}
-          ${shots.map(([label, src], index) => `
-            <figure><img src="${src}" alt="${label} 구도"><span>${String(index + 1).padStart(2, "0")}</span><figcaption>${label}</figcaption></figure>
+          ${shots.map(([label, src, position = "50% 50%"], index) => `
+            <figure><img src="${src}" alt="${label} 구도" style="object-position:${position}"><span>${String(index + 1).padStart(2, "0")}</span><figcaption>${label}</figcaption></figure>
           `).join("")}
         </div>
         <div class="mode-summary"><b>9개 카메라 구도</b><span>화면비 ${aspectOf(n)} · 동일 인물/조명 잠금</span></div>`;
@@ -1193,9 +1224,26 @@
       </section>`;
   };
 
+  const CAMERA_PRESETS = {
+    Front: { rotation: 0, tilt: 0, zoom: 18 },
+    "3/4": { rotation: 315, tilt: -12, zoom: 14 },
+    Profile: { rotation: 270, tilt: 0, zoom: 12 },
+    Back: { rotation: 180, tilt: 0, zoom: 16 },
+    High: { rotation: 0, tilt: -42, zoom: 8 },
+    Low: { rotation: 0, tilt: 34, zoom: 8 },
+  };
   const cameraSettings = (n) => {
-    if (!n.camera) n.camera = { rotation: 315, tilt: -30, zoom: 0 };
+    if (!n.camera) n.camera = { rotation: 315, tilt: -12, zoom: 14, view: "3/4", batch: false };
     return n.camera;
+  };
+  const cameraAngleLabel = (camera) => {
+    if (camera.view && camera.view !== "Custom") return camera.view;
+    if (camera.tilt <= -28) return "High angle";
+    if (camera.tilt >= 28) return "Low angle";
+    if (camera.rotation >= 135 && camera.rotation <= 225) return "Back";
+    if (camera.rotation >= 225 && camera.rotation <= 305) return "Profile";
+    if (camera.rotation > 305) return "3/4";
+    return "Custom";
   };
   const cameraPoint = (camera) => {
     const radians = (camera.rotation - 90) * Math.PI / 180;
@@ -1210,11 +1258,15 @@
     const point = cameraPoint(camera);
     return `
       <section class="node-mode-settings camera-angle-settings">
-        <div class="mode-settings-title"><b>카메라 앵글</b><span>INTERACTIVE ORBIT</span></div>
+        <div class="mode-settings-title"><b>카메라 앵글</b><span>ANGLES · 360° CONTROL</span></div>
+        <div class="camera-quick-select">
+          ${Object.keys(CAMERA_PRESETS).map((name) => `<button type="button" class="${camera.view === name ? "is-on" : ""}" data-camera-preset="${name}" data-id="${n.id}">${name}</button>`).join("")}
+        </div>
         <div class="camera-angle-stage">
-          <p>구체를 누른 채 드래그해 카메라 각도를 조절하세요</p>
+          <div class="camera-stage-hud"><span>ORBIT</span><b data-camera-view>${cameraAngleLabel(camera)}</b><em>360°</em></div>
           <div class="camera-orbit" data-camera-orbit="${n.id}" style="--camera-x:${point.x}%;--camera-y:${point.y}%">
-            <span class="orbit-globe" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="orbit-floor" aria-hidden="true"></span>
+            <span class="orbit-globe" aria-hidden="true"><i></i><i></i></span>
             <svg class="camera-ray" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <line x1="50" y1="50" x2="${point.x}" y2="${point.y}" />
             </svg>
@@ -1222,13 +1274,18 @@
             <span class="orbit-camera" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path d="M3.5 8.5h12v9h-12zM15.5 11l5-2.5v9l-5-2.5zM6 6l2-2h4l2 2"/></svg>
             </span>
-            <span class="orbit-axis axis-top">⌃</span><span class="orbit-axis axis-left">‹</span><span class="orbit-axis axis-right">›</span>
+            <span class="orbit-axis axis-top">TOP</span><span class="orbit-axis axis-left">L</span><span class="orbit-axis axis-right">R</span><span class="orbit-axis axis-bottom">LOW</span>
           </div>
+          <p>드래그하여 카메라를 피사체 주위로 이동</p>
         </div>
         <div class="camera-angle-values">
-          <label><span>Rotation</span><input type="range" min="0" max="359" value="${camera.rotation}" data-camera-setting="rotation" data-id="${n.id}"><output data-camera-output="rotation">${camera.rotation}°</output></label>
-          <label><span>Tilt</span><input type="range" min="-60" max="60" value="${camera.tilt}" data-camera-setting="tilt" data-id="${n.id}"><output data-camera-output="tilt">${camera.tilt}°</output></label>
-          <label><span>Zoom</span><input type="range" min="0" max="100" value="${camera.zoom}" data-camera-setting="zoom" data-id="${n.id}"><output data-camera-output="zoom">${camera.zoom}</output></label>
+          <label><span>Azimuth</span><input type="range" min="0" max="359" value="${camera.rotation}" data-camera-setting="rotation" data-id="${n.id}"><output data-camera-output="rotation">${camera.rotation}°</output></label>
+          <label><span>Elevation</span><input type="range" min="-60" max="60" value="${camera.tilt}" data-camera-setting="tilt" data-id="${n.id}"><output data-camera-output="tilt">${camera.tilt}°</output></label>
+          <label><span>Distance</span><input type="range" min="0" max="100" value="${camera.zoom}" data-camera-setting="zoom" data-id="${n.id}"><output data-camera-output="zoom">${camera.zoom}</output></label>
+        </div>
+        <div class="camera-angle-actions">
+          <button type="button" class="${camera.batch ? "is-on" : ""}" data-camera-batch="${n.id}"><i></i><span><b>12 Best Angles</b><small>추천 각도를 한 번에 생성</small></span></button>
+          <button type="button" data-camera-generate="${n.id}">각도 생성</button>
         </div>
       </section>`;
   };
@@ -1243,6 +1300,9 @@
     const ray = orbit.querySelector(".camera-ray line");
     ray?.setAttribute("x2", point.x);
     ray?.setAttribute("y2", point.y);
+    const view = card.querySelector("[data-camera-view]");
+    if (view) view.textContent = cameraAngleLabel(camera);
+    card.querySelectorAll("[data-camera-preset]").forEach((button) => button.classList.toggle("is-on", camera.view === button.dataset.cameraPreset));
     ["rotation", "tilt", "zoom"].forEach((key) => {
       const control = card.querySelector(`[data-camera-setting="${key}"]`);
       const output = card.querySelector(`[data-camera-output="${key}"]`);
@@ -1568,7 +1628,7 @@
     </article>`;
 
   const refHTML = (n) => `
-    <article class="node node-image" data-id="${n.id}" data-scope="${scopeOf(n)}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-image" data-id="${n.id}" data-scope="${scopeOf(n)}" data-aspect-ratio="${aspectOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("ref", "참조 노드")}${stackPick(n)}</div>
       ${sampleGuide(n)}
       <div class="media media-sq ${n.ready ? "" : "media-empty"}">
@@ -1590,6 +1650,19 @@
       <div class="node-meta">${kicker(n.type, n.title)}</div>
       <div class="media media-sq media-empty"><span>${n.title}</span></div>
       <button class="plus-btn" type="button" data-plus="${n.id}">+</button>
+    </article>`;
+
+  const stickyHTML = (note) => `
+    <article class="sticky-note" data-sticky-id="${note.id}" data-sticky-color="${note.color || "yellow"}" style="left:${note.x}px;top:${note.y}px">
+      <header data-sticky-drag="${note.id}" aria-label="포스트잇 이동">
+        <span aria-hidden="true">⠿</span>
+        <div>
+          <button type="button" data-sticky-cycle="${note.id}" title="색상 변경" aria-label="포스트잇 색상 변경"></button>
+          <button type="button" data-sticky-delete="${note.id}" title="삭제" aria-label="포스트잇 삭제">×</button>
+        </div>
+      </header>
+      <textarea data-sticky-text="${note.id}" maxlength="500" placeholder="메모를 입력하세요">${escapeHTML(note.text || "")}</textarea>
+      <footer><span>${escapeHTML((note.author || "게스트").slice(0, 1))}</span><b>${escapeHTML(note.author || "게스트")}</b></footer>
     </article>`;
 
   const nodeHTML = (n) => {
@@ -1620,11 +1693,13 @@
   const renderNodes = () => {
     const nested = new Set();
     (state.groups || []).forEach((g) => nodesInGroup(g.id).forEach((n) => nested.add(n.id)));
-    world.innerHTML = renderGroups() + state.nodes.filter((n) => !nested.has(n.id)).map(nodeHTML).join("");
+    world.innerHTML = renderGroups() + state.nodes.filter((n) => !nested.has(n.id)).map(nodeHTML).join("") + state.notes.map(stickyHTML).join("");
     const commonCount = (state.groups || []).filter((group) => group.common).length;
     state.nodes.forEach((node) => {
       const element = world.querySelector(`.node[data-id="${node.id}"]`);
       if (!element) return;
+      element.dataset.mediaFit = node.fit || (["ref", "upscale"].includes(node.type) ? "contain" : "cover");
+      element.style.setProperty("--media-position", node.focus || "50% 50%");
       element.insertAdjacentHTML("afterbegin", `<span class="node-frame" aria-hidden="true"></span>`);
       if (commonCount && !isCommonNode(node)) {
         element.dataset.commonRef = `${commonCount}`;
@@ -2517,7 +2592,7 @@
   };
 
   canvas.addEventListener("pointerdown", (e) => {
-    if (e.target.closest(".node") || e.target.closest(".plus-btn") || e.target.closest(".add-menu") || e.target.closest("[data-group-drag]") || e.target.closest("[data-resize]") || e.target.closest(".board-group") || e.target.closest(".item-rename") || e.target.closest("[data-cut-edge]") || e.target.closest(".media-tools")) return;
+    if (e.target.closest(".node") || e.target.closest(".sticky-note") || e.target.closest(".plus-btn") || e.target.closest(".add-menu") || e.target.closest("[data-group-drag]") || e.target.closest("[data-resize]") || e.target.closest(".board-group") || e.target.closest(".item-rename") || e.target.closest("[data-cut-edge]") || e.target.closest(".media-tools")) return;
     addMenu.hidden = true;
     state.mediaToolsNode = "";
     placeMediaTools();
@@ -2535,7 +2610,7 @@
   });
   canvas.addEventListener("dblclick", (e) => {
     if (reviewMode) return;
-    if (e.target.closest(".node") || e.target.closest(".board-group") || e.target.closest(".plus-btn") || e.target.closest(".add-menu") || e.target.closest(".media-tools") || e.target.closest(".canvas-dock")) return;
+    if (e.target.closest(".node") || e.target.closest(".sticky-note") || e.target.closest(".board-group") || e.target.closest(".plus-btn") || e.target.closest(".add-menu") || e.target.closest(".media-tools") || e.target.closest(".canvas-dock")) return;
     e.preventDefault();
     const pt = worldFromEvent(e);
     state.spawnAt = { x: Math.round(pt.x), y: Math.round(pt.y) };
@@ -2584,6 +2659,7 @@
         prompt: file.name,
         ready: true,
         src: URL.createObjectURL(file),
+        fit: type === "image" ? "contain" : "cover",
         mode: type === "image" ? "i2i" : type === "video" ? "i2v" : "tts",
         folder: type === "audio" ? "audio" : "scene",
         group: "",
@@ -2604,8 +2680,22 @@
   });
 
   world.addEventListener("pointerdown", (e) => {
-    if (reviewMode && (e.target.closest(".node") || e.target.closest(".board-group") || e.target.closest("[data-cut-edge]"))) return;
+    if (reviewMode && (e.target.closest(".node") || e.target.closest(".sticky-note") || e.target.closest(".board-group") || e.target.closest("[data-cut-edge]"))) return;
     if (e.target.closest(".item-rename")) return;
+    const stickyHandle = e.target.closest("[data-sticky-drag]");
+    if (stickyHandle && !e.target.closest("button, textarea")) {
+      const note = stickyById(stickyHandle.dataset.stickyDrag);
+      if (!note) return;
+      e.preventDefault();
+      e.stopPropagation();
+      state.noteDragging = {
+        id: note.id,
+        dx: e.clientX - (note.x * state.cam.scale + state.cam.x),
+        dy: e.clientY - (note.y * state.cam.scale + state.cam.y),
+      };
+      world.querySelector(`[data-sticky-id="${note.id}"]`)?.classList.add("is-dragging");
+      return;
+    }
     if (state.canvasTool === "pan" && !e.target.closest("button, textarea, select, input, [data-light-orbit], [data-camera-orbit]")) {
       e.preventDefault();
       e.stopPropagation();
@@ -2729,6 +2819,15 @@
   });
 
   world.addEventListener("input", (e) => {
+    const stickyText = e.target.closest("[data-sticky-text]");
+    if (stickyText) {
+      const note = stickyById(stickyText.dataset.stickyText);
+      if (note) {
+        note.text = stickyText.value;
+        saveStickyNotes();
+      }
+      return;
+    }
     const lightControl = e.target.closest("[data-light-setting]");
     if (lightControl) {
       const n = nodeById(lightControl.dataset.id);
@@ -2746,6 +2845,7 @@
       if (n) {
         const camera = cameraSettings(n);
         camera[cameraControl.dataset.cameraSetting] = Number(cameraControl.value);
+        camera.view = "Custom";
         paintCameraAngle(n);
       }
       return;
@@ -2789,6 +2889,23 @@
   });
 
   world.addEventListener("click", (e) => {
+    const stickyDelete = e.target.closest("[data-sticky-delete]");
+    if (stickyDelete) {
+      state.notes = state.notes.filter((note) => note.id !== stickyDelete.dataset.stickyDelete);
+      saveStickyNotes();
+      renderAll();
+      return;
+    }
+    const stickyCycle = e.target.closest("[data-sticky-cycle]");
+    if (stickyCycle) {
+      const note = stickyById(stickyCycle.dataset.stickyCycle);
+      if (!note) return;
+      const colors = ["yellow", "pink", "blue", "green", "gray"];
+      note.color = colors[(colors.indexOf(note.color || "yellow") + 1) % colors.length];
+      saveStickyNotes();
+      renderAll();
+      return;
+    }
     const groupRun = e.target.closest("[data-run-group]");
     if (groupRun) {
       const group = groupById(groupRun.dataset.runGroup);
@@ -2808,6 +2925,30 @@
         ? settings.toggles.filter((item) => item !== key)
         : [...settings.toggles, key];
       renderAll();
+      return;
+    }
+    const cameraPreset = e.target.closest("[data-camera-preset]");
+    if (cameraPreset) {
+      const n = nodeById(cameraPreset.dataset.id);
+      const preset = CAMERA_PRESETS[cameraPreset.dataset.cameraPreset];
+      if (!n || !preset) return;
+      Object.assign(cameraSettings(n), preset, { view: cameraPreset.dataset.cameraPreset });
+      paintCameraAngle(n);
+      return;
+    }
+    const cameraBatch = e.target.closest("[data-camera-batch]");
+    if (cameraBatch) {
+      const n = nodeById(cameraBatch.dataset.cameraBatch);
+      if (!n) return;
+      cameraSettings(n).batch = !cameraSettings(n).batch;
+      cameraBatch.classList.toggle("is-on", cameraSettings(n).batch);
+      return;
+    }
+    const cameraGenerate = e.target.closest("[data-camera-generate]");
+    if (cameraGenerate) {
+      const n = nodeById(cameraGenerate.dataset.cameraGenerate);
+      if (!n) return;
+      startJob(n.id, "tool", cameraSettings(n).batch ? "12개 추천 각도 생성 중…" : `${cameraAngleLabel(cameraSettings(n))} 각도 생성 중…`);
       return;
     }
     const previewSurface = e.target.closest(".media, .mode-grid9 figure, .character-turnaround figure, .expression-strip > span, .story-grid figure");
@@ -2907,6 +3048,16 @@
   });
 
   window.addEventListener("pointermove", (e) => {
+    if (state.noteDragging) {
+      const note = stickyById(state.noteDragging.id);
+      const element = world.querySelector(`[data-sticky-id="${state.noteDragging.id}"]`);
+      if (!note || !element) return;
+      note.x = Math.round((e.clientX - state.noteDragging.dx - state.cam.x) / state.cam.scale);
+      note.y = Math.round((e.clientY - state.noteDragging.dy - state.cam.y) / state.cam.scale);
+      element.style.left = `${note.x}px`;
+      element.style.top = `${note.y}px`;
+      return;
+    }
     if (state.lightAdjust) {
       const n = nodeById(state.lightAdjust.id);
       const stage = world.querySelector(`[data-light-orbit="${state.lightAdjust.id}"]`);
@@ -2925,6 +3076,7 @@
       const camera = cameraSettings(n);
       camera.rotation = Math.round((state.cameraAdjust.rotation + (e.clientX - state.cameraAdjust.sx) * .8 + 360) % 360);
       camera.tilt = Math.round(Math.max(-60, Math.min(60, state.cameraAdjust.tilt - (e.clientY - state.cameraAdjust.sy) * .45)));
+      camera.view = "Custom";
       paintCameraAngle(n);
       return;
     }
@@ -2995,6 +3147,12 @@
     }
   });
   window.addEventListener("pointerup", (e) => {
+    if (state.noteDragging) {
+      world.querySelector(`[data-sticky-id="${state.noteDragging.id}"]`)?.classList.remove("is-dragging");
+      state.noteDragging = null;
+      saveStickyNotes();
+      return;
+    }
     if (state.lightAdjust) {
       world.querySelector(`[data-light-orbit="${state.lightAdjust.id}"]`)?.classList.remove("is-adjusting");
       state.lightAdjust = null;
@@ -3057,6 +3215,25 @@
 
   document.getElementById("zoomIn").onclick = () => { state.cam.scale = Math.min(1.4, state.cam.scale * 1.1); applyCam(); };
   document.getElementById("zoomOut").onclick = () => { state.cam.scale = Math.max(0.4, state.cam.scale * 0.9); applyCam(); };
+  const addStickyNote = () => {
+    if (reviewMode) return;
+    const rect = canvas.getBoundingClientRect();
+    const offset = state.notes.length % 6 * 18;
+    const note = {
+      id: uid("note"),
+      x: Math.round((rect.width / 2 - state.cam.x) / state.cam.scale - 110 + offset),
+      y: Math.round((rect.height / 2 - state.cam.y) / state.cam.scale - 95 + offset),
+      text: "",
+      color: "yellow",
+      author: document.getElementById("meName")?.textContent?.trim() || "Jisu Lee",
+      createdAt: new Date().toISOString(),
+    };
+    state.notes.push(note);
+    saveStickyNotes();
+    renderAll();
+    window.setTimeout(() => world.querySelector(`[data-sticky-text="${note.id}"]`)?.focus(), 0);
+  };
+  document.getElementById("stickyNoteAdd")?.addEventListener("click", addStickyNote);
   const timelineCheckBtn = document.getElementById("timelineCheckBtn");
   const timelineAudit = document.getElementById("timelineAudit");
   timelineCheckBtn?.addEventListener("click", (e) => {
@@ -4245,9 +4422,15 @@
     placeCursors();
   };
   if ("BroadcastChannel" in window) {
-    const channel = new BroadcastChannel(`avora-${boardId}`);
+    const channel = collaborationChannel = new BroadcastChannel(`avora-${boardId}`);
     channel.onmessage = (ev) => {
       const msg = ev.data || {};
+      if (msg.type === "sticky-notes" && msg.id !== meId && Array.isArray(msg.notes)) {
+        state.notes = msg.notes;
+        saveStickyNotes(false);
+        renderAll();
+        return;
+      }
       if (!msg.id || msg.id === meId) return;
       const existed = remotes.has(msg.id);
       const prev = remotes.get(msg.id) || { id: msg.id, name: msg.name || "게스트", short: msg.short || "게", color: msg.color || "#059669" };

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>보드 · 아보라</title>
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
-  <link rel="stylesheet" href="workspace.css?v=kit92" />
+  <link rel="stylesheet" href="workspace.css?v=kit99" />
   <link rel="stylesheet" href="auth.css?v=scroll1" />
   <script src="auth.js"></script>
 </head>
@@ -286,6 +286,13 @@
             <button type="button" class="canvas-dock-tab is-on" data-dock-tab="canvas" role="tab" aria-selected="true">캔버스</button>
             <button type="button" class="canvas-dock-tab" data-dock-tab="node" role="tab" aria-selected="false">노드</button>
           </div>
+          <button type="button" class="sticky-note-add" id="stickyNoteAdd" aria-label="포스트잇 추가" title="포스트잇 추가">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 3.5h14v12L14.5 20H5z"/>
+              <path d="M14.5 20v-4.5H19"/>
+            </svg>
+            포스트잇
+          </button>
           <div class="dock-create-menu" id="dockCreateMenu" hidden>
             <p>새 캔버스</p>
             <button type="button" data-canvas-template="blank"><b>□</b><span><strong>빈 캔버스</strong><small>자유롭게 시작</small></span></button>
@@ -488,6 +495,6 @@
     <span class="starry-name">Starry · Avora Agent</span>
   </aside>
 
-  <script src="workspace.js?v=kit92"></script>
+  <script src="workspace.js?v=kit99"></script>
 </body>
 </html>
