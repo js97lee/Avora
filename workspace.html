@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>보드 · 아보라</title>
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
-  <link rel="stylesheet" href="workspace.css?v=kit25" />
-  <link rel="stylesheet" href="auth.css" />
+  <link rel="stylesheet" href="workspace.css?v=kit69" />
+  <link rel="stylesheet" href="auth.css?v=scroll1" />
   <script src="auth.js"></script>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar" id="sidebar">
       <div class="side-head">
-        <a class="back-chip" href="boards.html" title="뒤로" aria-label="마이 프로젝트로 돌아가기">
+        <a class="back-chip" href="boards.html" data-history-back title="이전 화면" aria-label="직전 화면으로 돌아가기">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6 9 12l6 6"/></svg>
         </a>
         <div class="side-title">
@@ -26,13 +26,13 @@
       </div>
 
       <nav class="side-tabs" aria-label="사이드 패널">
-        <button type="button" data-side="kit">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><rect x="14" y="14" width="7" height="7" rx="1.2"/></svg>
-          <span class="tab-label">에셋</span>
-        </button>
         <button type="button" data-side="canvas">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h8l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v5h5"/><path d="M9 13h8M9 17h5"/></svg>
           <span class="tab-label">페이지</span>
+        </button>
+        <button type="button" data-side="kit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><rect x="14" y="14" width="7" height="7" rx="1.2"/></svg>
+          <span class="tab-label">에셋</span>
         </button>
         <button type="button" class="is-on" data-side="assets">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2.8 13.6 9.2 20 10.8 13.6 12.4 12 18.8 10.4 12.4 4 10.8 10.4 9.2Z"/><circle cx="18.2" cy="18.2" r="2.2"/></svg>
@@ -102,8 +102,9 @@
             <button type="button" data-agent="shot">다음 샷</button>
           </div>
           <form class="ws-dock" id="agentForm">
+            <div class="asset-mention-pop" id="assetMentionPop" hidden></div>
             <div class="ws-dock-bar">
-              <textarea id="agentInput" placeholder="Avora Directing에 무엇을 맡길까요?" rows="2"></textarea>
+              <textarea id="agentInput" placeholder="@로 에셋 호출 · Avora Directing에 무엇을 맡길까요?" rows="2"></textarea>
               <button class="ws-dock-send" type="submit" aria-label="전송">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
               </button>
@@ -111,6 +112,7 @@
           </form>
         </div>
       </div>
+
     </aside>
 
     <header class="topbar">
@@ -119,18 +121,6 @@
         <div class="presence" id="presence" aria-label="접속 중">
           <button class="avatar a-cyan" type="button" title="민재 · 편집 중">민</button>
           <button class="avatar a-amber" type="button" title="하은 · 함께 보는 중">하</button>
-          <div class="me-wrap">
-            <button class="me-btn" type="button" id="meBtn" title="지수 · 나">
-              <span class="avatar a-purple">지</span>
-              <span class="chev">▾</span>
-            </button>
-            <div class="me-pop" id="mePop" hidden>
-              <p>지수</p>
-              <span>이 캔버스에 접속 중</span>
-              <a href="boards.html">마이 프로젝트</a>
-              <button type="button" data-logout>로그아웃</button>
-            </div>
-          </div>
         </div>
         <div class="present-wrap">
           <div class="present-split" title="Present">
@@ -145,10 +135,23 @@
           </div>
         </div>
         <div class="share-wrap">
-          <button class="share-cta" id="shareBtn" type="button">공유</button>
+          <button class="share-cta" id="shareBtn" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="m8.2 13.2 7.4 4.3M15.6 6.6 8.3 10.8"/></svg>
+            공유 및 게시
+          </button>
           <div class="share-pop" id="sharePop" hidden>
             <p class="share-pop-title">공유</p>
             <p class="share-pop-lead">링크가 있는 사람은 지금 이 캔버스에 들어와, 같은 영상 프로세스를 함께 만들 수 있습니다.</p>
+            <section class="class-team-share" id="classTeamShare" hidden>
+              <div class="class-team-share-head">
+                <span class="class-team-badge">관리자 배정</span>
+                <em>수업 팀</em>
+              </div>
+              <strong id="classTeamName">프레임 메이커스</strong>
+              <p id="classTeamProject">브랜드 숏폼 광고 제작</p>
+              <div class="class-team-members" id="classTeamMembers"></div>
+              <small>팀 구성과 편집 권한은 관리자가 설정했습니다.</small>
+            </section>
             <form class="share-invite" id="shareInvite">
               <input id="shareEmail" type="email" placeholder="이메일로 초대" required />
               <select id="shareRole" aria-label="권한">
@@ -166,7 +169,72 @@
               <input id="shareLink" readonly value="https://app.avora.ai/b/photosynthesis" />
               <button type="button" id="copyLink">링크 복사</button>
             </div>
-            <p class="share-hint">피그마처럼 동시에 들어와 노드를 붙이고 생성할 수 있습니다.</p>
+            <p class="share-hint">동시에 들어와 노드를 붙이고 생성할 수 있습니다.</p>
+          </div>
+        </div>
+        <div class="me-wrap">
+          <button class="account-chip" type="button" id="meBtn" title="계정">
+            <span class="account-plan">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.4 14.1 9.1 21 11.2 14.1 13.3 12 20 9.9 13.3 3 11.2 9.9 9.1Z"/></svg>
+              요금제
+            </span>
+            <span class="account-credit" title="크레딧">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-14h-7z"/></svg>
+              <b id="creditCount">100</b>
+            </span>
+            <span class="avatar a-purple" id="meAvatar">지</span>
+          </button>
+          <div class="me-pop" id="mePop" hidden>
+            <div class="me-head">
+              <span class="avatar a-purple me-head-av" id="meHeadAvatar">지</span>
+              <div class="me-head-meta">
+                <div class="me-name-row">
+                  <strong id="meName">Jisu Lee</strong>
+                  <button type="button" class="me-uuid" id="copyUuid" title="UUID 복사">
+                    UUID
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>
+                  </button>
+                </div>
+                <span id="meEmail">js97lee@gmail.com</span>
+              </div>
+            </div>
+            <div class="me-section">
+              <button type="button" class="me-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg>
+                구독하기
+              </button>
+              <button type="button" class="me-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19a6.5 6.5 0 0 1 13 0"/><circle cx="12" cy="12" r="9"/></svg>
+                계정 관리
+              </button>
+              <a class="me-item" href="boards.html">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19a6.5 6.5 0 0 1 13 0"/></svg>
+                내 정보
+              </a>
+            </div>
+            <div class="me-section">
+              <button type="button" class="me-item me-item-nav" data-me-pref="lang">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+                <span id="meLangLabel">한국어</span>
+                <i>›</i>
+              </button>
+              <button type="button" class="me-item me-item-nav" data-me-pref="theme">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
+                <span id="meThemeLabel">다크</span>
+                <i>›</i>
+              </button>
+              <button type="button" class="me-item me-item-nav">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 1 1 4.2 2.7c-.7.4-1.3 1-1.3 1.8M12 17h.01"/></svg>
+                도움말
+                <i>›</i>
+              </button>
+            </div>
+            <div class="me-section me-section-foot">
+              <button type="button" class="me-item" data-logout>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 7V5a2 2 0 0 1 2-2h7v18h-7a2 2 0 0 1-2-2v-2M15 12H3m0 0 3-3M3 12l3 3"/></svg>
+                로그아웃
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -176,6 +244,7 @@
       <svg class="edges" id="edges"></svg>
       <div class="world" id="world"></div>
       <img class="ws-watermark" src="assets/app/avora-logo.png" alt="" aria-hidden="true" />
+      <div class="media-tools" id="mediaTools" hidden></div>
       <div class="live-cursors" id="liveCursors" aria-hidden="true">
         <div class="live-cursor" data-peer="민" style="--peer:#0891b2; left: 360px; top: 210px">
           <svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 1 7.5 14.5 9 8.5 15 7z"/></svg>
@@ -190,7 +259,7 @@
 
     <div class="add-menu" id="addMenu" hidden></div>
 
-    <aside class="coach" id="coach">
+    <aside class="coach" id="coach" hidden>
       <p id="coachText">+로 새 노드를 추가하세요.</p>
       <div class="coach-row">
         <span id="coachStep">1/4</span>
@@ -205,13 +274,23 @@
       <div class="canvas-dock-bar">
         <div class="canvas-dock-cluster" id="canvasDockCluster">
           <div class="canvas-dock-list" id="canvasDockList"></div>
+          <button type="button" class="canvas-dock-add canvas-dock-add-item" id="canvasDockAdd" aria-label="새 항목 추가" aria-expanded="false">
+            <b>+</b>
+          </button>
           <div class="canvas-dock-tabs" role="tablist" aria-label="하단 탭">
             <button type="button" class="canvas-dock-tab is-on" data-dock-tab="canvas" role="tab" aria-selected="true">캔버스</button>
             <button type="button" class="canvas-dock-tab" data-dock-tab="node" role="tab" aria-selected="false">노드</button>
           </div>
-          <button type="button" class="canvas-dock-add canvas-dock-add-item" id="canvasDockAdd" data-add-canvas="1" aria-label="캔버스 추가">
-            <b>+</b><span class="item-label">캔버스</span>
-          </button>
+          <div class="dock-create-menu" id="dockCreateMenu" hidden>
+            <p>새 캔버스</p>
+            <button type="button" data-canvas-template="blank"><b>□</b><span><strong>빈 캔버스</strong><small>자유롭게 시작</small></span></button>
+            <button type="button" data-canvas-template="preproduction"><b>✦</b><span><strong>프리 프로덕션</strong><small>기획 · 각본 · 샷 설계</small></span></button>
+            <button type="button" data-canvas-template="storyboard"><b>▦</b><span><strong>스토리보드</strong><small>스크립트 · 연속 이미지</small></span></button>
+            <button type="button" data-canvas-template="image-video"><b>▶</b><span><strong>이미지 → 영상</strong><small>키 비주얼 · 모션 · 업스케일</small></span></button>
+            <button type="button" data-canvas-template="postproduction"><b>◇</b><span><strong>포스트 프로덕션</strong><small>편집 · 사운드 마감</small></span></button>
+            <span class="dock-create-sep" aria-hidden="true"></span>
+            <button type="button" data-create-kind="node"><b>＋</b><span><strong>노드만 추가</strong><small>현재 보드에 자유 노드 생성</small></span></button>
+          </div>
         </div>
         <button type="button" class="canvas-dock-overview" id="stackCanvases" aria-pressed="false" title="캔버스 전체보기">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="3" width="16" height="5" rx="1"/><rect x="4" y="10" width="16" height="5" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg>
@@ -225,6 +304,22 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="present-loading" id="presentLoading" hidden role="status" aria-live="polite">
+    <div class="present-loading-glow" aria-hidden="true"></div>
+    <div class="present-loader-mark" aria-hidden="true">
+      <span class="present-loader-orbit orbit-a"><i></i></span>
+      <span class="present-loader-orbit orbit-b"><i></i></span>
+      <span class="present-loader-star">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2.8 13.8 10l7.2 2-7.2 2L12 21.2 10.2 14 3 12l7.2-2L12 2.8Z" fill="currentColor"/>
+        </svg>
+      </span>
+    </div>
+    <strong>스토리보드를 재생할게요</strong>
+    <span id="presentLoadingStatus">장면을 불러오는 중</span>
+    <div class="present-loader-track" aria-hidden="true"><i></i></div>
   </div>
 
   <div class="present-mode" id="presentMode" hidden>
@@ -290,6 +385,33 @@
     </div>
   </div>
 
-  <script src="workspace.js?v=kit25"></script>
+  <aside class="starry-agent" id="starryAgent" aria-live="polite">
+    <button class="starry-bubble" id="starryToggle" type="button" aria-label="Starry 상태 접기">
+      <span class="starry-status" id="starryStatus">준비됐어요</span>
+      <span class="starry-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+    <div class="starry-contact" id="starryContactPop" hidden>
+      <div class="starry-contact-head">
+        <div><span>CONTACT ADMIN</span><strong>관리자에게 문의</strong></div>
+        <button type="button" id="starryContactClose" aria-label="문의창 닫기">×</button>
+      </div>
+      <p id="starryContactGuide">현재 프로젝트 화면과 함께 관리자에게 전달됩니다.</p>
+      <form id="starryContactForm">
+        <textarea id="starryContactInput" rows="3" maxlength="500" placeholder="도움이 필요한 내용을 입력하세요." required></textarea>
+        <div class="starry-contact-foot">
+          <span id="starryContactCount">0 / 500</span>
+          <button type="submit">문의 보내기</button>
+        </div>
+      </form>
+    </div>
+    <div class="starry-stage" id="starryContact" role="button" tabindex="0" aria-label="관리자에게 문의하기" aria-expanded="false">
+      <span class="starry-spark starry-spark-a" aria-hidden="true">✦</span>
+      <span class="starry-spark starry-spark-b" aria-hidden="true">✦</span>
+      <img id="starryPose" data-pose="basic" src="assets/app/starry-poses/basic.png" alt="채팅 상태에 반응하는 Starry 에이전트" />
+    </div>
+    <span class="starry-name">Starry · Avora Agent</span>
+  </aside>
+
+  <script src="workspace.js?v=kit69"></script>
 </body>
 </html>

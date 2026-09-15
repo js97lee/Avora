@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Avora Shortform Studio</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <section id="authGate" class="auth-gate">
+    <div class="auth-modal-wrap">
+      <a class="auth-close" href="/" aria-label="닫기">×</a>
+      <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authWelcome">
+
+      <div class="auth-modal-left">
+        <div class="auth-brand">
+          <img src="/assets/brand/avora-logo.png" alt="AVORA" class="auth-logo" />
+        </div>
+        <h1 id="authWelcome" class="auth-welcome">
+          Welcome to
+          <img src="/assets/brand/avora-logo.png" alt="AVORA" class="auth-welcome-logo" />
+        </h1>
+        <p class="auth-tagline">Your Brand, as an AI Avatar.</p>
+
+        <div id="emailAuthPanel" class="email-auth-panel" data-auth-mode="login">
+          <div class="auth-tabs" role="tablist" aria-label="인증 방식">
+            <button id="showLogin" class="auth-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="loginForm">로그인</button>
+            <button id="showRegister" class="auth-tab" type="button" role="tab" aria-selected="false" aria-controls="registerForm">회원가입</button>
+          </div>
+          <form id="loginForm" class="auth-form is-active" role="tabpanel">
+            <input name="email" type="email" placeholder="이메일" required />
+            <input name="password" type="password" placeholder="비밀번호" minlength="8" required />
+            <button class="primary" type="submit">로그인</button>
+          </form>
+          <form id="registerForm" class="auth-form" role="tabpanel" hidden>
+            <input name="name" placeholder="이름" required />
+            <input name="email" type="email" placeholder="이메일" required />
+            <input name="password" type="password" placeholder="비밀번호 8자 이상" minlength="8" required />
+            <button class="primary" type="submit">회원가입</button>
+          </form>
+        </div>
+        <p id="authMessage" class="auth-message"></p>
+
+        <button id="workspaceAccessButton" class="auth-workspace-btn" type="button">
+          워크스페이스 접근
+        </button>
+
+        <div class="auth-footer">
+          <p class="auth-hint">
+            <span aria-hidden="true">☁</span>
+            브랜드 채널 운영을 시작하려면 로그인해주세요.
+          </p>
+          <p class="auth-legal">
+            By continuing, I acknowledge the
+            <a href="/privacy.html">Privacy Policy</a><br />
+            and agree to the
+            <a href="/terms.html">Terms of Use</a>.
+          </p>
+        </div>
+      </div>      <aside class="auth-modal-right" aria-hidden="true">
+        <div class="auth-art">
+          <video
+            id="authLoopVideo"
+            src="/assets/landing/auth-loop.mp4"
+            muted
+            loop
+            autoplay
+            playsinline
+            preload="auto"
+          ></video>
+        </div>
+      </aside>
+    </div>
+    </div>
+  </section>
+
+  <main id="studio" class="workspace layout" hidden>
+    <header class="ws-topnav">
+      <div class="ws-topnav-left">
+        <button type="button" class="ws-icon-btn ws-chat-toggle" id="chatToggle" aria-label="대화 패널" aria-controls="workspaceChat" aria-expanded="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16"/>
+            <path d="M4 12h16"/>
+            <path d="M4 17h16"/>
+          </svg>
+        </button>
+        <a class="ws-brand" href="/" aria-label="AVORA 홈으로 이동">
+          <img src="/assets/brand/avora-logo.png" alt="AVORA" class="ws-brand-logo" />
+        </a>
+        <span id="projectState" class="ws-project-state" hidden>프로젝트를 생성하면 단계별 버튼이 활성화됩니다.</span>
+      </div>
+      <div class="ws-topnav-right">
+        <span class="ws-meta muted">채팅 <span id="socketState" class="status">연결 중</span></span>
+        <span class="ws-meta muted">미디어 <span id="mediaSocketState" class="status">연결 중</span></span>
+        <button type="button" class="ws-nav-btn" aria-label="내보내기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          내보내기
+        </button>
+        <button type="button" class="ws-nav-btn" aria-label="공유">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+          공유
+        </button>
+        <div class="ws-account">
+          <span id="userLabel" class="muted"></span>
+          <b id="creditBalance">0 크레딧</b>
+          <a id="adminLink" href="/admin/" class="ghost-link" target="_blank" rel="noreferrer" hidden>Admin</a>
+          <button id="logoutButton" class="ghost" type="button">로그아웃</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="ws-body">
+    <section class="ws-converse" id="workspaceChat" aria-label="대화 및 입력">
+      <aside class="ws-chat" aria-label="대화형 인터페이스">
+        <div class="ws-chat-card">
+          <header class="ws-chat-head" id="chatHead">
+            <span class="ws-chat-mark" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+            </span>
+            <div class="ws-chat-head-copy">
+              <strong>Avora Director</strong>
+              <p>기획을 대화로 정리합니다.</p>
+            </div>
+            <span class="ws-agent-star" id="agentStar" aria-hidden="true" title="에이전트">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 1.8 13.85 10.15 22.2 12 13.85 13.85 12 22.2 10.15 13.85 1.8 12 10.15 10.15Z"/>
+              </svg>
+            </span>
+          </header>
+          <div id="messages" class="messages">
+            <p class="empty">영상 방향을 자유롭게 말해 주세요.</p>
+          </div>
+        </div>
+      </aside>
+
+      <form id="chatForm" class="ws-dock">
+        <div class="ws-dock-bar">
+          <textarea id="chatInput" placeholder="무엇을 변경하거나 만들고 싶으신가요?" required></textarea>
+          <button class="ws-dock-send" type="submit" aria-label="전송">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <div class="ws-canvas">
+      <section class="ws-stage workspace-panel">
+      <nav class="flow-nav" aria-label="제작 단계">
+        <button type="button" class="flow-back" id="flowBack" hidden aria-label="뒤로가기" title="뒤로가기">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5"/>
+            <path d="m12 19-7-7 7-7"/>
+          </svg>
+        </button>
+        <nav class="project-library-crumb" id="projectLibraryCrumb" aria-label="프로젝트 경로" hidden>
+          <button type="button" class="project-crumb" data-library-back>프로젝트</button>
+          <span class="project-crumb-sep" aria-hidden="true">›</span>
+          <span class="project-crumb-folder-wrap" aria-hidden="true">
+            <svg class="project-crumb-folder" width="20" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5v-10Z"/>
+            </svg>
+          </span>
+          <button type="button" class="project-crumb is-active" id="projectLibraryName" data-library-folder>
+            <span id="projectLibraryNameLabel">폴더</span>
+          </button>
+        </nav>
+        <h2 class="flow-list-title" id="flowListTitle">프로젝트</h2>
+        <button type="button" class="flow-step flow-step-root" data-step="0" id="flowStepRoot" hidden></button>
+        <div class="flow-subnav is-locked" id="flowSubnav" aria-label="프로젝트 하위 단계">
+          <button type="button" class="flow-step" data-step="1" disabled><span>1</span>프로젝트 기획</button>
+          <button type="button" class="flow-step" data-step="2" disabled><span>2</span>페르소나</button>
+          <button type="button" class="flow-step" data-step="3" disabled><span>3</span>시트</button>
+          <button type="button" class="flow-step" data-step="4" disabled><span>4</span>스토리보드</button>
+          <button type="button" class="flow-step" data-step="5" disabled><span>5</span>컷씬</button>
+          <button type="button" class="flow-step" data-step="6" disabled><span>6</span>오디오</button>
+          <button type="button" class="flow-step" data-step="7" disabled><span>7</span>영상</button>
+          <button type="button" class="flow-step" data-step="8" disabled><span>8</span>합치기</button>
+        </div>
+        <div class="drive-toolbar-right" id="driveListActions">
+          <button id="refreshProjectsButton" class="ghost" type="button">목록 새로고침</button>
+          <div class="drive-view-toggle" role="group" aria-label="보기 방식">
+            <button type="button" class="drive-view-btn is-active" data-view="grid" aria-label="그리드 보기">▦</button>
+            <button type="button" class="drive-view-btn" data-view="list" aria-label="리스트 보기">☰</button>
+          </div>
+          <button id="deleteFolderButton" class="drive-del-btn" type="button" title="폴더 삭제" aria-label="선택한 폴더 삭제" disabled>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          </button>
+          <button id="createFolderButton" class="drive-add-btn" type="button" title="새 폴더" aria-label="새 폴더 만들기">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          </button>
+        </div>
+      </nav>
+
+      <div class="flow-body">
+      <nav class="ws-lnb is-locked" id="workspaceLnb" aria-label="작업 메뉴" aria-disabled="true" hidden>
+        <button type="button" class="ws-lnb-item" data-lnb="character" data-prompt="브랜드용 AI 캐릭터를 생성해줘." disabled>
+          <span class="ws-lnb-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/><path d="M17.5 4.5 18 6l1.5.5L18 7l-.5 1.5L17 7l-1.5-.5L17 6z"/></svg>
+          </span>
+          <span class="ws-lnb-label">AI캐릭터 생성하기</span>
+        </button>
+        <button type="button" class="ws-lnb-item" data-lnb="video" data-prompt="브랜드 숏폼 영상을 만들어줘." disabled>
+          <span class="ws-lnb-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3z"/></svg>
+          </span>
+          <span class="ws-lnb-label">영상 만들기</span>
+        </button>
+      </nav>
+
+      <div class="flow-pages" id="flowPages">
+        <section class="flow-page is-active" data-page="0">
+          <section class="drive-card" id="driveListPanel">
+            <div class="drive-toolbar">
+              <nav class="drive-breadcrumb" id="driveBreadcrumb" aria-label="폴더 경로"></nav>
+            </div>
+
+            <div id="driveFolderGrid" class="drive-grid" data-view="grid" aria-live="polite"></div>
+            <p id="driveEmpty" class="drive-empty muted" hidden>이 위치에 폴더가 없습니다. 새 폴더를 만들어 보세요.</p>
+
+            <div class="project-picker drive-hidden-compat" hidden>
+              <select id="projectSelect"><option value="">프로젝트를 선택하세요</option></select>
+              <button id="loadProjectButton" class="secondary" type="button">프로젝트 불러오기</button>
+            </div>
+          </section>
+
+          <section class="project-library" id="projectLibrary" hidden>
+            <div class="project-plan-head">
+              <h3 class="project-section-title">프로젝트 기획</h3>
+              <button type="button" class="project-plan-add" id="addProcessCard" title="새 기획 추가" aria-label="새 기획 프로세스 추가">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              </button>
+            </div>
+
+            <div class="project-plan-cards" id="projectPlanCards" aria-live="polite"></div>
+
+            <div class="project-assets-head">
+              <h2 class="project-section-title">프로젝트 에셋</h2>
+              <div class="drive-view-toggle" role="group" aria-label="보기 방식">
+                <button type="button" class="drive-view-btn" data-library-view="list" aria-label="리스트 보기">☰</button>
+                <button type="button" class="drive-view-btn is-active" data-library-view="grid" aria-label="그리드 보기">▦</button>
+              </div>
+            </div>
+
+            <div class="project-library-filters" role="tablist" aria-label="저장 데이터 유형">
+              <button type="button" class="project-filter is-active" data-asset-filter="all" role="tab" aria-selected="true">전체</button>
+              <button type="button" class="project-filter" data-asset-filter="image" role="tab" aria-selected="false">
+                <svg class="project-filter-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+                이미지
+              </button>
+              <button type="button" class="project-filter" data-asset-filter="avatar" role="tab" aria-selected="false">
+                <svg class="project-filter-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>
+                아바타 생성정보
+              </button>
+              <button type="button" class="project-filter" data-asset-filter="video" role="tab" aria-selected="false">
+                <svg class="project-filter-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3z"/></svg>
+                영상 데이터
+              </button>
+            </div>
+
+            <p class="project-library-sort">이름 <span aria-hidden="true">↑</span></p>
+            <div id="projectAssetGrid" class="project-asset-grid" data-view="grid" aria-live="polite"></div>
+          </section>
+        </section>
+
+        <section class="flow-page" data-page="1" hidden>
+          <div class="step-shell">
+            <header class="step-header">
+              <div class="step-header-copy">
+                <span class="step-badge">1</span>
+                <div>
+                  <h2 class="step-title">프로젝트 기획</h2>
+                  <p class="step-desc">제목과 브리프를 정해 영상 제작의 기준을 만듭니다.</p>
+                </div>
+              </div>
+            </header>
+
+            <section class="step-block section-card">
+              <div class="step-block-head">
+                <h3 class="step-block-title">새 프로젝트</h3>
+                <p class="step-block-hint">제목과 한 줄 요약을 입력한 뒤 생성하세요.</p>
+              </div>
+              <form id="projectForm" class="step-form">
+                <label class="field">
+                  <span class="field-label">프로젝트 제목</span>
+                  <input name="title" placeholder="예: 봄 시즌 브랜드 숏폼" required />
+                </label>
+                <label class="field field-span">
+                  <span class="field-label">한 줄 브리프</span>
+                  <input name="brief" placeholder="예: 귀여운 마스코트가 신제품을 소개하는 15초 영상" required />
+                </label>
+                <div class="step-form-actions">
+                  <button class="primary" type="submit">프로젝트 생성</button>
+                </div>
+              </form>
+              <form id="projectEditForm" class="step-form" hidden>
+                <label class="field">
+                  <span class="field-label">프로젝트 제목</span>
+                  <input name="title" placeholder="프로젝트 제목" required />
+                </label>
+                <label class="field field-span">
+                  <span class="field-label">프로젝트 브리프</span>
+                  <textarea name="brief" placeholder="프로젝트 브리프" required></textarea>
+                </label>
+                <div class="step-form-actions">
+                  <button class="secondary" type="submit">현재 프로젝트 텍스트 저장</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="step-block section-card" id="historySection">
+              <div class="step-block-head row-between">
+                <div>
+                  <h3 class="step-block-title">버전 히스토리</h3>
+                  <p class="step-block-hint">저장된 기획 버전을 확인할 수 있습니다.</p>
+                </div>
+                <button id="refreshHistoryButton" class="ghost" type="button" disabled>새로고침</button>
+              </div>
+              <div id="historyBox" class="history-list step-empty-panel"><p class="muted">프로젝트를 선택하면 버전 기록이 표시됩니다.</p></div>
+            </section>
+
+            <section class="step-block section-card" id="mediaJobsSection">
+              <div class="step-block-head row-between">
+                <div>
+                  <h3 class="step-block-title">미디어 생성 진행도</h3>
+                  <p class="step-block-hint">이미지·오디오·영상 작업 상태를 추적합니다.</p>
+                </div>
+                <button id="refreshJobsButton" class="ghost" type="button" disabled>새로고침</button>
+              </div>
+              <div id="mediaJobsBox" class="job-list step-empty-panel"><p class="muted">진행 중인 작업이 없습니다.</p></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="flow-page" data-page="2" hidden>
+          <div class="step-shell" id="personaSection">
+            <header class="step-header">
+              <div class="step-header-copy">
+                <span class="step-badge">2</span>
+                <div>
+                  <h2 class="step-title">페르소나</h2>
+                  <p class="step-desc">캐릭터 설정과 정면샷을 만들고, 페르소나 텍스트를 다듬습니다.</p>
+                </div>
+              </div>
+              <button id="personaButton" class="secondary" type="button" disabled>페르소나 기획</button>
+            </header>
+
+            <section class="step-block section-card">
+              <div class="step-block-head">
+                <h3 class="step-block-title">캐릭터 설정</h3>
+                <p class="step-block-hint">외형·스타일·아키타입을 정한 뒤 정면샷을 생성합니다.</p>
+              </div>
+              <form id="characterForm" class="step-form character-form locked">
+                <label class="field field-span">
+                  <span class="field-label">외형 / 의상 / 설정</span>
+                  <input name="description" placeholder="예: 주황빛 털, 작은 가방, 밝은 표정" required />
+                </label>
+                <label class="field">
+                  <span class="field-label">스타일</span>
+                  <select name="style">
+                    <option>실사형 시네마틱</option>
+                    <option>3D 애니메이션</option>
+                    <option>2D 일러스트</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field-label">아키타입</span>
+                  <select name="archetype">
+                    <option value="human">사람 캐릭터</option>
+                    <option value="animal-mascot">동물 마스코트</option>
+                    <option value="humanoid-mascot">휴머노이드 마스코트</option>
+                    <option value="creature-mascot">크리처 마스코트</option>
+                    <option value="product-mascot">제품 마스코트</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field-label">종 / 모티프</span>
+                  <input name="species" placeholder="예: 햄스터, 고양이, 북극여우" />
+                </label>
+                <label class="field">
+                  <span class="field-label">캐릭터 무드</span>
+                  <input name="mascotTone" placeholder="예: 귀여운, 포근한, 둥글둥글한" />
+                </label>
+                <label class="checkbox field-check">
+                  <input type="checkbox" name="isMainBrandCharacter" checked />
+                  메인 브랜드 캐릭터
+                </label>
+                <div class="preset-row character-preset-row">
+                  <span class="field-label">빠른 프리셋</span>
+                  <div class="preset-chips">
+                    <button class="ghost" type="button" data-character-preset="cuteHamster">귀여운 햄스터</button>
+                    <button class="ghost" type="button" data-character-preset="softRabbit">포근한 토끼</button>
+                    <button class="ghost" type="button" data-character-preset="teddyBear">테디베어</button>
+                    <button class="ghost" type="button" data-character-preset="humanHost">사람 캐릭터</button>
+                  </div>
+                </div>
+                <div class="step-form-actions">
+                  <button class="primary" type="submit">정면샷 생성</button>
+                  <button id="characterMetaSaveButton" class="ghost" type="button" disabled>텍스트 설정만 저장</button>
+                  <span id="characterOutdatedLabel" class="muted step-inline-note"></span>
+                </div>
+              </form>
+            </section>
+
+            <section class="step-block section-card">
+              <div class="step-block-head">
+                <h3 class="step-block-title">페르소나 결과</h3>
+                <p class="step-block-hint">생성된 페르소나를 확인하고 텍스트를 수정할 수 있습니다.</p>
+              </div>
+              <div id="personaBox" class="info-box muted step-empty-panel">페르소나 대기 중</div>
+              <form id="personaEditForm" class="text-editor-grid step-form" hidden>
+                <label class="field">
+                  <span class="field-label">이름</span>
+                  <input name="name" placeholder="페르소나 이름" />
+                </label>
+                <label class="field">
+                  <span class="field-label">한줄 정의</span>
+                  <input name="oneLiner" placeholder="한줄 정의" />
+                </label>
+                <label class="field field-span">
+                  <span class="field-label">백스토리</span>
+                  <textarea name="backstory" placeholder="백스토리"></textarea>
+                </label>
+                <label class="field">
+                  <span class="field-label">성격 키워드</span>
+                  <textarea name="traits" placeholder="쉼표 또는 줄바꿈으로 구분"></textarea>
+                </label>
+                <label class="field">
+                  <span class="field-label">비주얼 키워드</span>
+                  <textarea name="visualKeywords" placeholder="쉼표 또는 줄바꿈으로 구분"></textarea>
+                </label>
+                <label class="field">
+                  <span class="field-label">말투</span>
+                  <textarea name="speakingStyle" placeholder="말투"></textarea>
+                </label>
+                <label class="field">
+                  <span class="field-label">캐치프레이즈</span>
+                  <textarea name="catchphrase" placeholder="캐치프레이즈"></textarea>
+                </label>
+                <label class="field field-span">
+                  <span class="field-label">활용 가이드</span>
+                  <textarea name="usageGuide" placeholder="활용 가이드"></textarea>
+                </label>
+                <div class="step-form-actions field-span">
+                  <button class="secondary" type="submit">페르소나 텍스트 저장</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="step-block section-card">
+              <div class="step-block-head">
+                <h3 class="step-block-title">생성된 캐릭터 에셋</h3>
+                <p class="step-block-hint">정면샷 등 생성된 이미지가 여기에 모입니다.</p>
+              </div>
+              <div id="characterAssets" class="asset-grid"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="flow-page" data-page="3" hidden>
+          <div class="step-shell">
+            <header class="step-header">
+              <div class="step-header-copy">
+                <span class="step-badge">3</span>
+                <div>
+                  <h2 class="step-title">캐릭터 시트</h2>
+                  <p class="step-desc">앞·뒤·좌·우 뷰와 통합 시트를 생성해 일관된 비주얼을 고정합니다.</p>
+                </div>
+              </div>
+              <button id="sheetButton" class="secondary" type="button" disabled>앞/뒤/좌/우 + 시트 생성</button>
+            </header>
+            <section class="step-block section-card">
+              <div class="step-placeholder" id="sheetPlaceholder">
+                <div class="step-placeholder-icon" aria-hidden="true">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="13" width="7" height="7" rx="1.5"/></svg>
+                </div>
+                <p class="step-placeholder-title">시트가 아직 없습니다</p>
+                <p class="step-placeholder-desc">정면샷이 준비되면 시트를 생성할 수 있습니다. 생성된 결과는 이 영역에 표시됩니다.</p>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="flow-page" data-page="4" hidden>
+          <div class="step-shell">
+            <header class="step-header">
+              <div class="step-header-copy">
+                <span class="step-badge">4</span>
+                <div>
+                  <h2 class="step-title">스토리보드</h2>
+                  <p class="step-desc">5컷 구성으로 장면 흐름·대사·연출을 기획합니다.</p>
+                </div>
+              </div>
+              <button id="storyboardButton" class="secondary" type="button" disabled>5컷 스토리보드 생성</button>
+            </header>
+            <section class="step-block section-card">
+              <div id="storyboardBox" class="storyboard-list">
+                <div class="step-placeholder">
+                  <div class="step-placeholder-icon" aria-hidden="true">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M9 5v14"/></svg>
+                  </div>
+                  <p class="step-placeholder-title">스토리보드 대기 중</p>
+                  <p class="step-placeholder-desc">생성하면 컷별 장면 설명이 이 목록에 나타납니다.</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="flow-page" data-page="5" hidden>
+          <div class="step-shell">
+            <header class="step-header">
+              <div class="step-header-copy">
+                <span class="step-badge">5</span>
+                <div>
+                  <h2 class="step-title">컷씬</h2>
+                  <p class="step-desc">스토리보드 기준으로 독립 컷 이미지 5장을 생성합니다.</p>
+                </div>
+              </div>
+              <button id="scenesButton" class="secondary" type="button" disabled>독립 컷 5개 생성</button>
+            </header>
+            <section class="step-block section-card">
+              <div id="scenesBox" class="scene-grid">
+                <div class="step-placeholder step-placeholder-span">
+                  <div class="step-placeholder-icon" aria-hidden="true">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+                  </div>
+                  <p class="step-placeholder-title">컷 이미지 없음</p>
+                  <p class="step-placeholder-desc">생성 후 5개 컷이 그리드로 표시됩니다.</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="flow-page" data-page="6" hidden>
+          <div class="step-shell">
+            <header class="step-header">
+              <div class="step-header-copy">
+                <span class="step-badge">6</span>
+                <div>
+                  <h2 class="step-title">오디오</h2>
+                  <p class="step-desc">BGM과 컷별 음성을 만들어 영상에 입힐 사운드를 준비합니다.</p>
+                </div>
+              </div>
+            </header>
+
+            <section class="step-block section-card">
+              <div class="step-block-head">
+                <h3 class="step-block-title">BGM</h3>
+                <p class="step-block-hint">분위기를 입력하거나 스토리보드 추천값을 사용합니다.</p>
+              </div>
+              <div class="step-form audio-bgm-form">
+                <label class="field field-span">
+                  <span class="field-label">BGM 분위기</span>
+                  <input id="musicPrompt" placeholder="예: 밝고 경쾌한 어쿠스틱, 브랜드 숏폼용" />
+                </label>
+                <div class="step-form-actions">
+                  <button id="musicPromptSaveButton" class="ghost" type="button" disabled>프롬프트만 저장</button>
+                  <button id="musicButton" class="secondary" type="button" disabled>Suno BGM 생성</button>
+                  <button id="musicStatusButton" class="ghost" type="button" disabled>상태 조회</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="step-block section-card">
+              <div class="step-block-head row-between">
+                <div>
+                  <h3 class="step-block-title">컷별 음성</h3>
+                  <p class="step-block-hint">스토리보드 대사 기준으로 음성 5개를 생성합니다.</p>
+                </div>
+                <button id="voicesButton" class="secondary" type="button" disabled>음성 5개 생성</button>
+              </div>
+            </section>
+
+            <section class="step-block section-card">
+              <div class="step-block-head">
+                <h3 class="step-block-title">오디오 상태</h3>
+              </div>
+              <div id="audioBox" class="info-box muted step-empty-panel">오디오 대기 중</div>
+            </section>
+          </div>
+        </section>
+
+        <section class="flow-page" data-page="7" hidden>
+          <div class="step-shell">
+            <header class="step-header">
+              <div class="step-header-copy">
+                <span class="step-badge">7</span>
+                <div>
+                  <h2 class="step-title">영상</h2>
+                  <p class="step-desc">선택한 컷을 Higgsfield / Kling 2.1 Pro로 영상화합니다.</p>
+                </div>
+              </div>
+            </header>
+
+            <section class="step-block section-card">
+              <div class="step-block-head">
+                <h3 class="step-block-title">컷 선택</h3>
+                <p class="step-block-hint">생성할 컷을 고른 뒤 영상 요청을 보냅니다.</p>
+              </div>
+              <div class="video-select-toolbar">
+                <button id="selectPendingClipsButton" class="ghost" type="button" disabled>미생성 선택</button>
+                <button id="selectAllClipsButton" class="ghost" type="button" disabled>전체 선택</button>
+                <button id="clearClipSelectionButton" class="ghost" type="button" disabled>선택 해제</button>
+                <label class="checkbox video-force-option"><input id="forceSelectedClips" type="checkbox" /> 완료된 컷도 재생성</label>
+              </div>
+              <p id="clipSelectionSummary" class="selection-summary muted">선택된 컷 없음</p>
+              <div class="step-form-actions">
+                <button id="clipsButton" class="secondary" type="button" disabled>선택한 컷 영상 요청</button>
+                <button id="clipsStatusButton" class="ghost" type="button" disabled>영상 상태 조회</button>
+              </div>
+            </section>
+
+            <section class="step-block section-card">
+              <div class="step-block-head">
+                <h3 class="step-block-title">영상 작업 상태</h3>
+              </div>
+              <div id="clipBox" class="info-box muted step-empty-panel">영상 작업 대기 중</div>
+            </section>
+          </div>
+        </section>
+
+        <section class="flow-page" data-page="8" hidden>
+          <div class="step-shell">
+            <header class="step-header">
+              <div class="step-header-copy">
+                <span class="step-badge">8</span>
+                <div>
+                  <h2 class="step-title">합치기</h2>
+                  <p class="step-desc">컷 영상과 오디오를 브라우저에서 최종 25초 영상으로 합칩니다.</p>
+                </div>
+              </div>
+              <div class="step-header-actions">
+                <button id="renderButton" class="accent" type="button" disabled>최종 영상 만들기</button>
+                <a id="downloadLink" class="ghost-link step-download" hidden>다운로드</a>
+              </div>
+            </header>
+
+            <section class="step-block section-card">
+              <div class="step-block-head">
+                <h3 class="step-block-title">미리보기</h3>
+                <p class="step-block-hint">렌더가 끝나면 여기에서 재생·다운로드할 수 있습니다.</p>
+              </div>
+              <div class="step-preview-stage">
+                <video id="previewVideo" controls playsinline hidden></video>
+                <div class="step-placeholder" id="previewPlaceholder">
+                  <div class="step-placeholder-icon" aria-hidden="true">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3z"/></svg>
+                  </div>
+                  <p class="step-placeholder-title">미리보기 없음</p>
+                  <p class="step-placeholder-desc">최종 영상을 만들면 여기에 표시됩니다.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="step-block section-card">
+              <div class="step-block-head">
+                <h3 class="step-block-title">렌더 로그</h3>
+              </div>
+              <pre id="log" class="log-box">대기 중</pre>
+            </section>
+          </div>
+        </section>
+      </div>
+      </div>
+
+      <footer class="flow-footer">
+        <button type="button" class="ghost" id="flowPrev" disabled>← 이전 단계</button>
+        <p class="flow-footer-label" id="flowFooterLabel">프로젝트</p>
+        <button type="button" class="primary" id="flowNext">다음 단계 →</button>
+      </footer>
+      </section>
+    </div>
+    </div>
+  </main>
+
+  <canvas id="renderCanvas" width="540" height="960" hidden></canvas>
+
+  <div class="asset-lightbox" id="assetLightbox" hidden>
+    <div class="asset-lightbox-backdrop" data-lightbox-close role="presentation"></div>
+    <div class="asset-lightbox-dialog" role="dialog" aria-modal="true" aria-labelledby="assetLightboxTitle">
+      <header class="asset-lightbox-head">
+        <div class="asset-lightbox-copy">
+          <p class="asset-lightbox-type" id="assetLightboxType"></p>
+          <h3 class="asset-lightbox-title" id="assetLightboxTitle"></h3>
+        </div>
+        <button type="button" class="asset-lightbox-close" data-lightbox-close aria-label="닫기">×</button>
+      </header>
+      <div class="asset-lightbox-stage">
+        <img id="assetLightboxImage" alt="" />
+      </div>
+    </div>
+  </div>
+
+  <script src="/auth-ui.js"></script>
+  <script src="/studio-flow.js"></script>
+  <script src="/drive-ui.js"></script>
+  <script src="/project-library.js"></script>
+  <script src="/process-cards.js"></script>
+  <script src="/project-sync.js"></script>
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>

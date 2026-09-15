@@ -1,4 +1,14 @@
 (() => {
+  document.querySelectorAll("[data-history-back]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      if (!document.referrer) return;
+      try {
+        if (new URL(document.referrer).origin !== location.origin || history.length <= 1) return;
+        event.preventDefault();
+        history.back();
+      } catch {}
+    });
+  });
   const BLANK = "assets/app/blank.svg";
   const SIZE = {
     image: { w: 320, h: 468, portY: 188 },
@@ -39,6 +49,29 @@
     upscale: ico(`<path d="M4 14v6h6M20 10V4h-6M14 4l6 6M10 20 4 14"/>`),
   };
   const kicker = (type, label) => `<span class="node-kicker">${NODE_ICO[type] || NODE_ICO.image}${label}</span>`;
+  const SLASH_PRESETS = [
+    { id: "cam9", label: "멀티 카메라 9분할", hint: "같은 장면을 9개 구도로 확장" },
+    { id: "story4", label: "스토리 4분할", hint: "10~15초 이야기 흐름" },
+    { id: "board25", label: "25분할 스토리보드", hint: "연속 컷 촘촘히 설계" },
+    { id: "light", label: "영화급 조명", hint: "빛 방향·분위기 보정" },
+    { id: "turn3", label: "캐릭터 3면도", hint: "정면·측면·후면" },
+    { id: "after3", label: "3초 후", hint: "이어질 화면 추론" },
+    { id: "before5", label: "5초 전", hint: "이전 컷 역추론" },
+    { id: "charSheet", label: "캐릭터 설정", hint: "외형·의상 설정 이미지" },
+    { id: "storyboard", label: "스토리보드", hint: "숏폼용 연속 보드" },
+    { id: "directing", label: "디렉팅 보드", hint: "액션·카메라 힌트 포함" },
+  ];
+  const IMG_TOOLS = [
+    { id: "pano", label: "파노라마" },
+    { id: "angle", label: "다각도" },
+    { id: "light", label: "조명" },
+    { id: "grid9", label: "9분할" },
+    { id: "edit", label: "기본 편집" },
+    { id: "split", label: "그리드 분할" },
+    { id: "annotate", label: "주석" },
+    { id: "flip", label: "회전·미러" },
+    { id: "group", label: "분컷 그룹" },
+  ];
   const NODE_STACKS = {
     text: [
       { id: "plain", label: "일반 텍스트", hint: "프롬프트 / 메모 / 카피 입력" },
@@ -62,6 +95,8 @@
       { id: "remove", label: "Remove", hint: "객체/배경 제거" },
       { id: "upscale", label: "Upscale", hint: "해상도 향상" },
       { id: "variation", label: "Variation", hint: "베리에이션 생성" },
+      { id: "grid9", label: "9-Cut Grid", hint: "한 장면을 9개 카메라 구도로 분할" },
+      { id: "character-sheet", label: "Character Sheet", hint: "캐릭터 턴어라운드와 표정 시트" },
     ],
     video: [
       { id: "t2v", label: "Text → Video", hint: "텍스트 기반 영상" },
@@ -187,13 +222,32 @@
     sejong: "세종, 한글을 만들다",
     math: "분수 개념 3분 컷",
     water: "물의 순환",
-    new: "새 시나리오",
-    blank: "Blank",
+    new: "프로젝트 00",
+    blank: "프로젝트 00",
+    sample: "Sample 프로젝트",
   };
-  const landingPrompt = (new URLSearchParams(location.search).get("prompt") || "").trim();
-  const boardId = new URLSearchParams(location.search).get("board") || "photo";
-  document.getElementById("boardName").textContent = TITLES[boardId] || TITLES.photo;
-  document.title = `${TITLES[boardId] || TITLES.photo} · 아보라`;
+  const searchParams = new URLSearchParams(location.search);
+  const landingPrompt = (searchParams.get("prompt") || "").trim();
+  const boardId = searchParams.get("board") || "photo";
+  const reviewMode = searchParams.get("review") === "1";
+  const reviewStudent = (searchParams.get("student") || "").trim();
+  const reviewTeam = (searchParams.get("team") || "").trim();
+  const reviewProject = (searchParams.get("project") || "").trim();
+  const projectNameKey = `avora-project-name:${boardId}`;
+  const projectName = reviewProject || localStorage.getItem(projectNameKey) || TITLES[boardId] || TITLES.photo;
+  document.getElementById("boardName").textContent = projectName;
+  document.title = `${projectName} · 아보라`;
+  if (reviewMode) {
+    document.body.classList.add("is-admin-review");
+    const reviewChip = document.createElement("div");
+    reviewChip.className = "admin-review-chip";
+    const reviewLabel = document.createElement("b");
+    reviewLabel.textContent = "관리자 검토 모드";
+    const reviewCopy = document.createElement("span");
+    reviewCopy.textContent = [reviewTeam, reviewStudent].filter(Boolean).join(" · ") || projectName;
+    reviewChip.append(reviewLabel, reviewCopy);
+    document.querySelector(".topbar-left")?.append(reviewChip);
+  }
 
   const PROMPT = "실험실 창가에서 선생님이 잎을 들어 보이며 질문한다. 긴장된 표정, 차네 클로즈업에서 항공정면으로 전환, 35mm 필름, 사실적인 속도감과 모션 블러.";
   const IMG_PROMPT = "실험실 창가, 선생님이 잎을 들어 보이는 클로즈업, 사실적인 조명.";
@@ -217,6 +271,66 @@
     script: "각본: 실험실 창가. 선생님이 잎을 들고 묻는다. \"이 잎이 빛을 받으면?\" 학생들이 양분이라고 답한다.",
     character: "캐릭터: 호기심 많은 하은과 선생님. 하은이 창가 화분의 잎을 관찰하다가 빛이 양분이 되는 순간을 발견한다.",
     write: "",
+  };
+
+  const buildSampleWorkspace = () => {
+    const pad = 32;
+    const gap = 36;
+    const categories = [
+      { type: "text", label: "텍스트", prompt: "15초 브랜드 필름의 핵심 메시지를 명료하게 정리해 주세요." },
+      { type: "script", label: "스크립트", prompt: "낯선 도시에서 자신의 목소리를 발견하는 주인공의 30초 이야기를 구성해 주세요." },
+      { type: "image", label: "이미지", prompt: "비가 그친 새벽 도심, 보라색 네온과 젖은 아스팔트, 시네마틱 와이드 샷." },
+      { type: "video", label: "비디오", prompt: "인물을 따라 천천히 돌리 인하며 네온 반사가 흐르는 5초 시네마틱 영상." },
+      { type: "edit", label: "스마트 편집", prompt: "주인공은 유지하고 배경의 불필요한 행인과 간판을 자연스럽게 정리해 주세요." },
+      { type: "director", label: "디렉터 콘솔", prompt: "감정이 고조되는 순간을 35mm 렌즈와 느린 돌리 인으로 연출합니다." },
+      { type: "analyze", label: "스마트 분석", prompt: "현재 장면의 구도, 카메라, 컬러와 개선 포인트를 분석해 주세요." },
+      { type: "audio", label: "오디오", prompt: "차분하지만 긴장감 있는 내레이션과 빗소리 기반의 앰비언스를 생성해 주세요." },
+      { type: "ref", label: "참조", prompt: "이 이미지를 캐릭터와 룩의 일관성 참조로 사용합니다." },
+      { type: "upscale", label: "고화질", prompt: "최종 영상을 4K 마스터 품질로 업스케일합니다." },
+    ];
+    const groups = [];
+    const nodes = [];
+    let groupX = 8;
+    categories.forEach(({ type, label, prompt }, categoryIndex) => {
+      const modes = NODE_STACKS[type] || [{ id: "master", label: "4K Upscale", hint: "최종 출력 화질 개선" }];
+      const size = SIZE[type] || SIZE.image;
+      const columns = size.w >= 500 ? 3 : 4;
+      const rows = Math.ceil(modes.length / columns);
+      const groupWidth = pad * 2 + columns * size.w + (columns - 1) * gap;
+      const groupHeight = 128 + rows * size.h + Math.max(0, rows - 1) * gap;
+      const group = {
+        id: `sample-g-${type}`,
+        no: String(categoryIndex + 1).padStart(2, "0"),
+        title: `${label} 노드 · ${modes.length}개 유즈케이스`,
+        x: groupX,
+        y: 24,
+        w: groupWidth,
+        h: groupHeight,
+      };
+      groups.push(group);
+      modes.forEach((mode, index) => {
+        const column = index % columns;
+        const row = Math.floor(index / columns);
+        nodes.push({
+          id: `sample-${type}-${mode.id}`,
+          type,
+          title: `${label} · ${mode.label}`,
+          compact: false,
+          x: pad + column * (size.w + gap),
+          y: 48 + row * (size.h + gap),
+          prompt: `${mode.label}: ${prompt}`,
+          ready: type === "ref",
+          src: type === "ref" ? "assets/app/shots/open.png" : "",
+          mode: mode.id,
+          shots: type === "director" ? SHOTS.map((shot) => ({ ...shot })) : undefined,
+          folder: type === "audio" ? "audio" : type === "image" || type === "ref" ? "scene" : "new",
+          shot: mode.label,
+          group: group.id,
+        });
+      });
+      groupX += groupWidth + 64;
+    });
+    return { groups, nodes, edges: [] };
   };
   const LOOKS = {
     palette: [
@@ -265,19 +379,22 @@
 
   const isBlank = boardId === "blank";
   const isFresh = boardId === "new" || isBlank;
+  const isSample = boardId === "sample";
+  const sampleWorkspace = isSample ? buildSampleWorkspace() : null;
   const state = {
-    selectedId: isBlank ? "" : "sc-01",
+    selectedId: isBlank ? "" : isSample ? sampleWorkspace.nodes[0]?.id || "" : "sc-01",
     plusFrom: null,
-    cam: { x: isFresh ? 48 : 24, y: isFresh ? 72 : 48, scale: isFresh ? 0.78 : 0.42 },
+    cam: { x: isFresh ? 48 : 24, y: isFresh ? 72 : 48, scale: isFresh ? 0.78 : isSample ? 0.32 : 0.42 },
     dragging: null,
     panning: false,
-    coach: isFresh ? -1 : 0,
+    coach: -1,
     look: { tab: "palette", palette: null, light: null, art: null },
     folderNames: { new: "새 폴더", audio: "음향 효과", character: "캐릭터", scene: "장면", prop: "소품", style: "스타일" },
     folderOpen: { new: false, audio: false, character: true, scene: true, prop: false, style: false },
     folders: ["new", "audio", "character", "scene", "prop", "style"],
     assetQuery: "",
     inspect: null,
+    mediaToolsNode: "",
     library: [
       { id: "lib-char-1", folder: "character", name: "스크린샷 2026-09-13 오후 4.41.27", src: "assets/app/inspire/inspire-01-character.png", author: "Jisu Lee", createdAt: "2026-09-15 05:32" },
     ],
@@ -287,9 +404,11 @@
     frameEdit: false,
     stackView: false,
     dockTab: "canvas",
+    dockOpen: false,
+    spawnAt: null,
     movingGroup: null,
     resizing: null,
-    groups: isBlank ? [] : boardId === "new" ? [
+    groups: isBlank ? [] : isSample ? sampleWorkspace.groups : boardId === "new" ? [
       { id: "g1", no: "01", title: "기획 · 톤과 장르", x: 8, y: 0, w: 560, h: 700 },
     ] : [
       { id: "g1", no: "01", title: "기획 · 톤과 장르", x: 8, y: 0, w: 560, h: 700 },
@@ -297,7 +416,7 @@
       { id: "g3", no: "03", title: "샷 변형", x: 1308, y: 0, w: 520, h: 900 },
       { id: "g4", no: "04", title: "영상", x: 1860, y: 0, w: 720, h: 700 },
     ],
-    nodes: isBlank ? [] : boardId === "new" ? [
+    nodes: isBlank ? [] : isSample ? sampleWorkspace.nodes : boardId === "new" ? [
       { id: "sc-01", type: "script", title: "스크립트", x: 40, y: 48, ready: false, prompt: landingPrompt, folder: "new", group: "g1" },
     ] : [
       { id: "sc-01", type: "script", title: "스크립트", x: 40, y: 48, ready: false, prompt: landingPrompt, folder: "new", group: "g1" },
@@ -311,7 +430,7 @@
       { id: "img-v4", type: "image", compact: true, title: "이미지", x: 1492, y: 228, ready: true, shot: "인서트", src: "assets/app/shots/insert.png", prompt: "개념 인서트", folder: "prop", group: "g3" },
       { id: "vid-01", type: "video", title: "비디오", x: 1896, y: 48, ready: false, prompt: PROMPT, folder: "scene", group: "g4" },
     ],
-    edges: isBlank || boardId === "new" ? [] : [
+    edges: isBlank || boardId === "new" ? [] : isSample ? sampleWorkspace.edges : [
       { from: "sc-01", to: "img-s1" },
       { from: "sc-01", to: "img-s2" },
       { from: "sc-01", to: "img-s3" },
@@ -331,6 +450,9 @@
   const addMenu = document.getElementById("addMenu");
   const coachEl = document.getElementById("coach");
   const framePop = document.getElementById("framePop");
+  const starryAgent = document.getElementById("starryAgent");
+  const starryStatus = document.getElementById("starryStatus");
+  const starryPose = document.getElementById("starryPose");
   const nodeById = (id) => state.nodes.find((n) => n.id === id);
   const uid = (p) => `${p}-${Math.random().toString(36).slice(2, 6)}`;
   const sizeOf = (n) => {
@@ -350,6 +472,41 @@
   };
   const groupById = (id) => (state.groups || []).find((g) => g.id === id);
   const nodesInGroup = (gid) => state.nodes.filter((n) => n.group === gid);
+  const layoutSampleWorkspace = () => {
+    if (!isSample) return;
+    const pad = 32;
+    const gap = 72;
+    let groupX = 8;
+    (state.groups || []).forEach((group) => {
+      const nodes = nodesInGroup(group.id);
+      const elements = nodes.map((node) => world.querySelector(`.node[data-id="${node.id}"]`));
+      const maxWidth = Math.max(320, ...elements.map((el) => el?.offsetWidth || 0));
+      const maxHeight = Math.max(220, ...elements.map((el) => el?.offsetHeight || 0));
+      const columns = Math.min(nodes.length, maxWidth >= 500 ? 3 : 4);
+      const rows = Math.ceil(nodes.length / columns);
+      nodes.forEach((node, index) => {
+        node.x = pad + (index % columns) * (maxWidth + gap);
+        node.y = 48 + Math.floor(index / columns) * (maxHeight + gap);
+        const el = elements[index];
+        if (el) {
+          el.style.left = `${node.x}px`;
+          el.style.top = `${node.y}px`;
+        }
+      });
+      group.x = groupX;
+      group.y = 24;
+      group.w = pad * 2 + columns * maxWidth + Math.max(0, columns - 1) * gap;
+      group.h = 104 + rows * maxHeight + Math.max(0, rows - 1) * gap;
+      const groupEl = world.querySelector(`.board-group[data-group="${group.id}"]`);
+      if (groupEl) {
+        groupEl.style.left = `${group.x}px`;
+        groupEl.style.top = `${group.y}px`;
+        groupEl.style.width = `${group.w}px`;
+        groupEl.style.height = `${group.h}px`;
+      }
+      groupX += group.w + 96;
+    });
+  };
   const originOf = (n) => {
     const g = n?.group ? groupById(n.group) : null;
     return g ? { x: g.x, y: g.y } : { x: 0, y: 0 };
@@ -632,12 +789,31 @@
     placeMenu();
     placeCoach();
     placeCursors();
+    placeMediaTools();
   };
 
   const portWorld = (n, which) => {
-    const s = sizeOf(n);
+    const fallback = sizeOf(n);
+    const el = world.querySelector(`.node[data-id="${n.id}"]`);
+    if (el) {
+      const anchor = which === "out" ? el.querySelector(".plus-btn") : el;
+      const rect = anchor?.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      if (rect) {
+        const screenX = which === "out" ? rect.left + rect.width / 2 : rect.left;
+        const screenY = rect.top + rect.height / 2;
+        return {
+          x: (screenX - canvasRect.left - state.cam.x) / state.cam.scale,
+          y: (screenY - canvasRect.top - state.cam.y) / state.cam.scale,
+        };
+      }
+    }
+    const s = {
+      w: el?.offsetWidth || fallback.w,
+      h: el?.offsetHeight || fallback.h,
+    };
     const w = worldOf(n);
-    return { x: which === "out" ? w.x + s.w : w.x, y: w.y + s.portY };
+    return { x: which === "out" ? w.x + s.w : w.x, y: w.y + s.h / 2 };
   };
 
   const ortho = (x1, y1, x2, y2) => {
@@ -682,6 +858,122 @@
     renderAll();
   };
 
+  const slashRow = (n) => `
+    <div class="slash-row" data-slash-for="${n.id}">
+      <button type="button" class="slash-trigger" data-slash-open="${n.id}" title="Slash 빠른 기능">/</button>
+      <div class="slash-chips">
+        ${SLASH_PRESETS.slice(0, 5).map((p) => `
+          <button type="button" class="slash-chip" data-slash="${p.id}" data-id="${n.id}" title="${p.hint}">${p.label}</button>`).join("")}
+        <button type="button" class="slash-chip slash-more" data-slash-more="${n.id}">더보기</button>
+      </div>
+    </div>`;
+
+  const rangeSetting = (label, value, min, max, suffix = "") => `
+    <label class="mode-range">
+      <span>${label}<b>${value}${suffix}</b></span>
+      <input type="range" min="${min}" max="${max}" value="${value}" />
+    </label>`;
+
+  const imageModeVisual = (n) => {
+    const mode = stackIdOf(n);
+    if (mode === "grid9") {
+      const shots = [
+        ["EWS", "wide.png"], ["WS", "open.png"], ["MS", "class.png"],
+        ["MCU", "idea.png"], ["CU", "leaf.png"], ["ECU", "insert.png"],
+        ["LOW", "backlight.png"], ["HIGH", "cutaway.png"], ["OTS", "class.png"],
+      ];
+      return `
+        <div class="mode-visual mode-grid9">
+          ${shots.map(([label, src], index) => `
+            <figure><img src="assets/app/shots/${src}" alt="${label} 구도"><span>${String(index + 1).padStart(2, "0")}</span><figcaption>${label}</figcaption></figure>
+          `).join("")}
+        </div>
+        <div class="mode-summary"><b>9개 카메라 구도</b><span>화면비 16:9 · 동일 인물/조명 잠금</span></div>`;
+    }
+    if (mode === "character-sheet") {
+      const views = [["정면", "50%"], ["3/4", "42%"], ["측면", "62%"], ["후면", "74%"]];
+      return `
+        <div class="mode-visual character-sheet">
+          <div class="character-turnaround">
+            ${views.map(([label, pos]) => `<figure><img src="assets/app/inspire/inspire-01-character.png" style="object-position:${pos} center" alt="${label}"><figcaption>${label}</figcaption></figure>`).join("")}
+          </div>
+          <div class="expression-strip">
+            ${["기본", "미소", "놀람", "집중"].map((label, index) => `<span><img src="assets/app/inspire/inspire-01-character.png" alt=""><em>${label}</em><i style="--exp:${index}"></i></span>`).join("")}
+          </div>
+        </div>
+        <div class="mode-summary"><b>캐릭터 ID 잠금</b><span>의상 A · 전신 턴어라운드 · 표정 4종</span></div>`;
+    }
+    return "";
+  };
+
+  const cameraMotionPanel = (n) => {
+    if (!["camera", "motion"].includes(stackIdOf(n))) return "";
+    return `
+      <section class="node-mode-settings camera-motion-settings">
+        <div class="mode-settings-title"><b>${stackIdOf(n) === "camera" ? "카메라 워크" : "모션 컨트롤"}</b><span>KEYFRAME 01 → 02</span></div>
+        <div class="motion-path"><i class="motion-start">A</i><span><b></b></span><i class="motion-end">B</i></div>
+        <div class="mode-field-grid">
+          <label><span>Movement</span><select><option>Dolly In</option><option>Pan Left</option><option>Orbit Right</option><option>Crane Up</option></select></label>
+          <label><span>Easing</span><select><option>Ease In-Out</option><option>Linear</option><option>Ease Out</option></select></label>
+        </div>
+        ${rangeSetting("이동 강도", 42, 0, 100, "%")}
+        ${rangeSetting("회전 각도", 18, -180, 180, "°")}
+      </section>`;
+  };
+
+  const directorModePanel = (n) => {
+    const mode = stackIdOf(n);
+    if (mode === "camera") return `
+      <section class="node-mode-settings">
+        <div class="mode-settings-title"><b>카메라 앵글</b><span>SHOT SETUP</span></div>
+        <div class="angle-preview"><span class="angle-horizon"></span><i class="angle-subject">SUBJECT</i><b>−12°</b></div>
+        <div class="mode-field-grid">
+          <label><span>Shot Size</span><select><option>Medium Close-Up</option><option>Wide Shot</option><option>Close-Up</option></select></label>
+          <label><span>Angle</span><select><option>Low Angle</option><option>Eye Level</option><option>High Angle</option><option>Dutch Angle</option></select></label>
+          <label><span>Height</span><input value="1.2 m" /></label>
+          <label><span>Tilt</span><input value="-12°" /></label>
+        </div>
+      </section>`;
+    if (mode === "lens") return `
+      <section class="node-mode-settings">
+        <div class="mode-settings-title"><b>렌즈 설정</b><span>FULL FRAME</span></div>
+        <div class="lens-dial"><strong>35</strong><span>mm</span><i></i></div>
+        ${rangeSetting("초점 거리", 35, 18, 135, "mm")}
+        ${rangeSetting("조리개", 28, 14, 160, "")}
+        <div class="mode-field-grid"><label><span>Focus</span><select><option>Subject Eye</option><option>Manual</option></select></label><label><span>DOF</span><select><option>Shallow</option><option>Deep</option></select></label></div>
+      </section>`;
+    if (mode === "movement") return `
+      <section class="node-mode-settings">
+        <div class="mode-settings-title"><b>카메라 이동</b><span>5.0 SEC</span></div>
+        <div class="motion-path is-director"><i class="motion-start">IN</i><span><b></b></span><i class="motion-end">OUT</i></div>
+        <div class="mode-field-grid"><label><span>Move</span><select><option>Slow Dolly In</option><option>Orbit</option><option>Handheld</option></select></label><label><span>Speed</span><select><option>0.6× Slow</option><option>1.0× Normal</option></select></label></div>
+        ${rangeSetting("이동 거리", 180, 20, 400, "cm")}
+      </section>`;
+    if (mode === "lighting") return `
+      <section class="node-mode-settings lighting-settings">
+        <div class="mode-settings-title"><b>3점 조명</b><span>LIGHTING PLOT</span></div>
+        <div class="light-plot">
+          <i class="light-subject">S</i><button type="button" class="light-point key">KEY<b>45°</b></button><button type="button" class="light-point fill">FILL<b>−35°</b></button><button type="button" class="light-point rim">RIM<b>135°</b></button>
+        </div>
+        <div class="mode-field-grid"><label><span>Color Temp.</span><select><option>4300K Neutral</option><option>3200K Warm</option><option>5600K Daylight</option></select></label><label><span>Key : Fill</span><select><option>2 : 1</option><option>4 : 1</option><option>8 : 1</option></select></label></div>
+        ${rangeSetting("Key 강도", 78, 0, 100, "%")}
+      </section>`;
+    const generic = {
+      composition: ["구도 가이드", "Rule of Thirds", "Head Room", "12%"],
+      subject: ["피사체 설정", "Frame Left", "Eye Line", "Camera"],
+      color: ["컬러 사이언스", "ARRI LogC", "LUT", "Neutral Film"],
+      depth: ["심도와 포커스", "Rack Focus", "Near → Subject", "2.4m"],
+      blocking: ["블로킹", "Mark A → B", "Facing", "Camera Left"],
+      continuity: ["연속성", "Previous Shot", "Axis", "180° 유지"],
+    }[mode] || ["연출 설정", stackOf(n).label, "Preset", "Default"];
+    return `
+      <section class="node-mode-settings">
+        <div class="mode-settings-title"><b>${generic[0]}</b><span>DIRECTING</span></div>
+        <div class="mode-field-grid"><label><span>Preset</span><select><option>${generic[1]}</option></select></label><label><span>${generic[2]}</span><input value="${generic[3]}" /></label></div>
+        ${rangeSetting("적용 강도", 65, 0, 100, "%")}
+      </section>`;
+  };
+
   const imageHTML = (n) => n.compact ? `
     <article class="node node-thumb" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
       <div class="media media-thumb ${n.ready ? "" : "media-empty"}">
@@ -694,13 +986,15 @@
     </article>` : `
     <article class="node node-image" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("image", "이미지")}${stackPick(n)}</div>
-      <div class="media media-sq ${n.ready ? "" : "media-empty"}">
+      ${imageModeVisual(n) || `<div class="media media-sq ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
         ${n.ready ? `<img src="${n.src || BLANK}" alt=""><span class="look-wash"></span>` : `<span>${stackOf(n).hint}</span>`}
-      </div>
+        <button class="icon-btn media-tools-trigger" type="button" data-media-tools="${n.id}" aria-label="이미지 도구 열기" title="이미지 도구">⋯</button>
+      </div>`}
       ${lookLine() ? `<div class="look-strip"><span class="look-dots">${palDots(lookBy("palette", state.look.palette) || lookBy("light", state.look.light))}</span><em>${lookLine()}</em></div>` : ""}
+      ${slashRow(n)}
       <div class="prompt-dock narrow">
-        <textarea data-prompt="${n.id}" placeholder="${stackOf(n).hint}">${n.prompt || ""}</textarea>
+        <textarea data-prompt="${n.id}" placeholder="/ 로 빠른 기능 · ${stackOf(n).hint}">${n.prompt || ""}</textarea>
         <div class="prompt-foot"><span>${stackOf(n).label}</span>${sendBtn(n)}</div>
       </div>
       <button class="plus-btn" type="button" data-plus="${n.id}">+</button>
@@ -714,15 +1008,17 @@
           <button type="button" data-run="enhance" data-id="${n.id}">고화질</button>
           <button type="button" data-run="tool" data-id="${n.id}" data-label="구간 리메이크 중…">구간 리메이크</button>
           <button type="button" data-run="tool" data-id="${n.id}" data-label="분석 중…">스마트 분석</button>
-          <button type="button" data-run="tool" data-id="${n.id}" data-label="자막 정리 중…">자동 자막 제거</button>
-          <button type="button" data-run="tool" data-id="${n.id}" data-label="음성 분리 중…">음성 영상 분리</button>
-          <button type="button" data-run="tool" data-id="${n.id}" data-label="피사체 제거 중…">피사체 제거</button>
+          <button type="button" data-run="tool" data-id="${n.id}" data-label="영상 합성 중…">영상 합성</button>
+          <button type="button" data-run="tool" data-id="${n.id}" data-label="음성 분리 중…">음성/배경음 분리</button>
+          <button type="button" data-run="tool" data-id="${n.id}" data-label="오디오/비디오 분리 중…">오디오/비디오 분리</button>
+          <button type="button" data-run="tool" data-id="${n.id}" data-label="스마트 이어쓰기 중…">스마트 이어쓰기</button>
           <button type="button" data-frame="${n.id}">현재 프레임 캡처</button>
         </div>` : ""}
       <div class="media media-wide ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
         ${n.ready ? `<span class="ai-tag">AI</span><img src="${BLANK}" alt=""><span class="look-wash"></span><div class="player-ui"><span>▶</span><span>0:00</span><span class="bar"><span></span></span><span>0:05</span></div>` : `<span class="play-mark">▶</span>`}
       </div>
+      ${cameraMotionPanel(n)}
       <div class="prompt-dock">
         <div class="prompt-tools">
           <button class="chip" type="button">+ 참고</button>
@@ -816,7 +1112,8 @@
   const directorHTML = (n) => `
     <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("director", "디렉터 콘솔 <em>NEW</em>")}${stackPick(n)}</div>
-      <ol class="shot-list">
+      ${directorModePanel(n)}
+      <ol class="shot-list director-shot-summary">
         ${(n.shots || SHOTS).map((s, i) => `
           <li class="shot-row">
             <div class="shot-thumb ${n.ready ? "" : "is-empty"}">${n.ready ? `<img src="${BLANK}" alt="">` : i + 1}</div>
@@ -896,6 +1193,7 @@
       <div class="media media-sq ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
         ${n.ready ? `<img src="${BLANK}" alt=""><span class="ai-tag">REF</span>` : `<span>${stackOf(n).hint}</span>`}
+        <button class="icon-btn media-tools-trigger" type="button" data-media-tools="${n.id}" aria-label="이미지 도구 열기" title="이미지 도구">⋯</button>
       </div>
       <div class="prompt-foot dock-pad">
         <span>이 보드의 참조로 사용</span>
@@ -973,6 +1271,19 @@
         <b>${s.label}</b>
         <small>${s.hint}</small>
       </button>`).join("");
+    requestAnimationFrame(clampAddMenu);
+  };
+
+  const clampAddMenu = () => {
+    if (addMenu.hidden) return;
+    const gap = 16;
+    const r = addMenu.getBoundingClientRect();
+    if (r.right > window.innerWidth - gap) {
+      addMenu.style.left = `${Math.max(340, window.innerWidth - r.width - gap)}px`;
+    }
+    if (!addMenu.style.bottom && r.bottom > window.innerHeight - gap) {
+      addMenu.style.top = `${Math.max(60, r.top - (r.bottom - window.innerHeight + gap))}px`;
+    }
   };
 
   const setAddMenuTitle = () => {
@@ -985,7 +1296,13 @@
     setAddMenuTitle();
     const r = btn.getBoundingClientRect();
     addMenu.style.left = `${r.right + 10}px`;
-    addMenu.style.top = `${Math.max(60, r.top - 24)}px`;
+    if (r.top > window.innerHeight / 2) {
+      addMenu.style.top = "auto";
+      addMenu.style.bottom = `${Math.max(16, window.innerHeight - r.bottom)}px`;
+    } else {
+      addMenu.style.bottom = "";
+      addMenu.style.top = `${Math.max(60, r.top - 24)}px`;
+    }
     addMenu.querySelectorAll("[data-spawn-type]").forEach((b) => {
       if (b.dataset.spawnStack) return;
       b.classList.toggle("is-hot", b.dataset.spawnType === "video" && state.coach === 1);
@@ -1003,7 +1320,8 @@
     setAddMenuTitle();
     const r = btn.getBoundingClientRect();
     addMenu.style.left = `${Math.min(r.left, window.innerWidth - 460)}px`;
-    addMenu.style.top = `${Math.max(60, r.top - 360)}px`;
+    addMenu.style.top = "auto";
+    addMenu.style.bottom = `${Math.max(16, window.innerHeight - r.top + 10)}px`;
     const panel = addMenu.querySelector("#addMenuStack");
     if (panel) panel.hidden = true;
     addMenu.querySelectorAll("[data-spawn-type]").forEach((b) => {
@@ -1018,14 +1336,21 @@
       if (!btn) return;
       const r = btn.getBoundingClientRect();
       addMenu.style.left = `${r.right + 10}px`;
-      addMenu.style.top = `${Math.max(60, r.top - 24)}px`;
+      if (r.top > window.innerHeight / 2) {
+        addMenu.style.top = "auto";
+        addMenu.style.bottom = `${Math.max(16, window.innerHeight - r.bottom)}px`;
+      } else {
+        addMenu.style.bottom = "";
+        addMenu.style.top = `${Math.max(60, r.top - 24)}px`;
+      }
       return;
     }
     const btn = document.querySelector("[data-add-node]");
     if (!btn) return;
     const r = btn.getBoundingClientRect();
     addMenu.style.left = `${Math.min(r.left, window.innerWidth - 460)}px`;
-    addMenu.style.top = `${Math.max(60, r.top - 360)}px`;
+    addMenu.style.top = "auto";
+    addMenu.style.bottom = `${Math.max(16, window.innerHeight - r.top + 10)}px`;
   };
 
   const placeCoach = () => {
@@ -1165,12 +1490,75 @@
     renderAll();
   };
 
+  const STARRY_POSES = new Set(["basic", "smile", "wink", "curious", "focus", "thinking", "love", "excited", "tired", "surprised", "greeting", "hello"]);
+  const setStarryPose = (pose) => {
+    if (!starryPose || !STARRY_POSES.has(pose) || starryPose.dataset.pose === pose) return;
+    starryPose.dataset.pose = pose;
+    starryPose.src = `assets/app/starry-poses/${pose}.png`;
+  };
+  const starryPoseForMessage = (text) => {
+    const t = String(text || "").toLowerCase();
+    if (t.includes("피곤") || t.includes("힘들") || t.includes("실패") || t.includes("안 돼") || t.includes("에러")) return "tired";
+    if (t.includes("놀라") || t.includes("대박") || t.includes("헉") || t.includes("와!")) return "surprised";
+    if (t.includes("사랑") || t.includes("최고") || t.includes("마음에 들어")) return "love";
+    if (t.includes("신나") || t.includes("재밌") || t.includes("기대")) return "excited";
+    if (t.includes("안녕") || t.includes("하이")) return "hello";
+    if (t.includes("인사") || t.includes("반가")) return "greeting";
+    if (t.includes("윙크")) return "wink";
+    if (t.includes("?") || t.includes("왜") || t.includes("뭐") || t.includes("어떻게")) return "curious";
+    if (t.includes("생각") || t.includes("고민") || t.includes("아이디어") || t.includes("기획")) return "thinking";
+    if (t.includes("만들") || t.includes("생성") || t.includes("분석") || t.includes("스토리") || t.includes("영상")) return "focus";
+    if (t.includes("좋아") || t.includes("고마워") || t.includes("잘했")) return "smile";
+    return "basic";
+  };
+  const starryPoseForStep = (step, intentPose) => {
+    if (/준비|완성|시작/.test(step)) return "excited";
+    if (/정리|나누|맞추|넣고|붙이고/.test(step)) return "thinking";
+    if (/읽고|확인|분석|생성|변환|고화질/.test(step)) return "focus";
+    return intentPose || "basic";
+  };
+  const updateStarry = (forcedLabel = "", workingOverride, forcedPose = "") => {
+    if (!starryAgent || !starryStatus) return;
+    const busyNode = state.nodes.find((node) => node.busy);
+    const chatBusy = chatHead?.classList.contains("is-generating");
+    const working = workingOverride ?? Boolean(forcedLabel || busyNode || chatBusy);
+    starryAgent.classList.toggle("is-working", working);
+    starryStatus.textContent = forcedLabel || busyNode?.busy || (chatBusy ? "요청을 정리 중…" : "준비됐어요");
+    setStarryPose(forcedPose || (busyNode ? "focus" : chatBusy ? (starryAgent.dataset.intentPose || "thinking") : "basic"));
+  };
+
   const renderAll = () => {
     renderNodes();
+    layoutSampleWorkspace();
     renderAssetTree();
     renderCanvasDock();
     applyLookCss();
     applyCam();
+    placeMediaTools();
+    updateStarry();
+  };
+
+  const placeMediaTools = () => {
+    const bar = document.getElementById("mediaTools");
+    if (!bar) return;
+    const n = nodeById(state.mediaToolsNode);
+    const show = n && state.selectedId === n.id && (n.type === "image" || n.type === "ref") && !n.compact;
+    if (!show) {
+      bar.hidden = true;
+      return;
+    }
+    bar.hidden = false;
+    bar.innerHTML = `<span class="media-tools-label">이미지 도구</span>${IMG_TOOLS.map((t) => `
+      <button type="button" data-img-tool="${t.id}" data-id="${n.id}">${t.label}</button>`).join("")}`;
+    const el = world.querySelector(`[data-id="${n.id}"]`);
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const cr = canvas.getBoundingClientRect();
+    const half = bar.offsetWidth / 2;
+    const center = r.left - cr.left + r.width / 2;
+    bar.style.left = `${Math.min(Math.max(center, half + 8), cr.width - half - 8)}px`;
+    const above = r.top - cr.top - bar.offsetHeight - 8;
+    bar.style.top = `${above >= 8 ? above : Math.min(cr.height - bar.offsetHeight - 8, r.top - cr.top + 38)}px`;
   };
 
   const nextCanvasNo = () => {
@@ -1329,35 +1717,62 @@
         ${loose.length ? loose.map(nodeDockChip).join("") : `<p class="dock-seq-empty">시퀀스 밖에 두면 전체가 참고합니다</p>`}
       </div>`;
       list.innerHTML = board + seqs;
-      if (addBtn) {
-        addBtn.dataset.addNode = "1";
-        delete addBtn.dataset.addCanvas;
-        addBtn.setAttribute("aria-label", "노드 추가");
-        addBtn.innerHTML = `<b>+</b><span class="item-label">노드</span>`;
-      }
     } else {
       list.innerHTML = (state.groups || []).map((g) => `
         <button type="button" class="canvas-dock-item${state.selectedGroup === g.id ? " is-on" : ""}" data-focus-group="${g.id}">
           <b>${g.no}</b><span class="item-label">${g.title}</span>
         </button>`).join("");
-      if (addBtn) {
-        addBtn.dataset.addCanvas = "1";
-        delete addBtn.dataset.addNode;
-        addBtn.setAttribute("aria-label", "캔버스 추가");
-        addBtn.innerHTML = `<b>+</b><span class="item-label">캔버스</span>`;
-      }
     }
-    list.hidden = !list.innerHTML.trim();
+    if (addBtn) addBtn.hidden = false;
+    list.hidden = !state.dockOpen || !list.innerHTML.trim();
     document.querySelectorAll("[data-dock-tab]").forEach((tab) => {
       const on = tab.dataset.dockTab === state.dockTab;
       tab.classList.toggle("is-on", on);
       tab.setAttribute("aria-selected", on ? "true" : "false");
+      tab.setAttribute("aria-expanded", on && state.dockOpen ? "true" : "false");
     });
     document.getElementById("stackCanvases")?.classList.toggle("is-on", !!state.stackView);
     document.getElementById("stackCanvases")?.setAttribute("aria-pressed", state.stackView ? "true" : "false");
   };
 
-  const createMiniCanvas = () => {
+  const CANVAS_WORKFLOWS = {
+    preproduction: {
+      title: "프리 프로덕션",
+      nodes: [
+        { type: "text", title: "콘셉트 브리프", prompt: "로그라인, 타깃, 톤앤매너와 핵심 메시지를 정리합니다." },
+        { type: "script", title: "트리트먼트", prompt: "콘셉트 브리프를 장면과 비트 단위의 트리트먼트로 발전시킵니다." },
+        { type: "director", title: "샷 설계" },
+      ],
+    },
+    storyboard: {
+      title: "스토리보드",
+      nodes: [
+        { type: "script", title: "스크립트", prompt: "장면을 샷 단위로 분해합니다." },
+        { type: "image", title: "와이드 샷", compact: true, shot: "와이드 샷", from: 0 },
+        { type: "image", title: "미디엄 샷", compact: true, shot: "미디엄 샷", from: 0 },
+        { type: "image", title: "클로즈업", compact: true, shot: "클로즈업", from: 0 },
+        { type: "image", title: "인서트 샷", compact: true, shot: "인서트 샷", from: 0 },
+      ],
+    },
+    "image-video": {
+      title: "이미지 → 영상",
+      nodes: [
+        { type: "image", title: "키 비주얼", prompt: "영상의 시작 프레임과 룩을 생성합니다." },
+        { type: "video", title: "모션 생성", prompt: "카메라 무빙과 피사체 동작을 적용합니다." },
+        { type: "upscale", title: "마스터 업스케일" },
+      ],
+    },
+    postproduction: {
+      title: "포스트 프로덕션",
+      nodes: [
+        { type: "video", title: "편집본", prompt: "선택한 테이크를 기준으로 편집 흐름을 구성합니다." },
+        { type: "edit", title: "컬러·리터치", prompt: "컬러 매칭, 리터치와 화면 정리를 적용합니다." },
+        { type: "audio", title: "사운드 마감", prompt: "대사, 효과음과 배경 음악의 밸런스를 정리합니다." },
+      ],
+    },
+  };
+
+  const createMiniCanvas = (options = {}) => {
     const groups = state.groups || (state.groups = []);
     const no = nextCanvasNo();
     const last = state.stackView
@@ -1366,17 +1781,59 @@
     const g = {
       id: uid("g"),
       no,
-      title: "새 캔버스",
+      title: options.title || "새 캔버스",
       x: state.stackView ? 0 : (last ? last.x + last.w + 48 : 40),
       y: state.stackView ? (last ? last.y + last.h + 72 : 0) : (last ? last.y : 24),
-      w: 560,
-      h: 700,
+      w: options.w || 560,
+      h: options.h || 700,
     };
     groups.push(g);
     if (state.stackView) {
       layoutStackColumn();
       fitStackTop(groups);
     }
+    if (options.focus !== false) focusGroup(g);
+    return g;
+  };
+
+  const createWorkflowCanvas = (templateId) => {
+    if (templateId === "blank") {
+      createMiniCanvas();
+      return;
+    }
+    const workflow = CANVAS_WORKFLOWS[templateId];
+    if (!workflow) return;
+    const g = createMiniCanvas({ title: workflow.title, w: 1480, h: 720, focus: false });
+    const created = [];
+    workflow.nodes.forEach((spec, index) => {
+      const type = spec.type;
+      const node = {
+        id: uid(type.slice(0, 2)),
+        type,
+        title: spec.title || NODE_TITLE[type],
+        compact: !!spec.compact,
+        x: 0,
+        y: 0,
+        prompt: spec.prompt || "",
+        ready: false,
+        mode: STACK_DEFAULT[type] || "",
+        shots: type === "director" ? SHOTS.map((shot) => ({ ...shot })) : undefined,
+        folder: type === "audio" ? "audio" : type === "image" ? "scene" : "new",
+        shot: spec.shot || "",
+        group: g.id,
+      };
+      const slot = layoutSlotInGroup(g, node);
+      node.x = slot.x;
+      node.y = slot.y;
+      state.nodes.push(node);
+      created.push(node);
+      if (index > 0) {
+        const source = created[Number.isInteger(spec.from) ? spec.from : index - 1];
+        if (source) state.edges.push({ from: source.id, to: node.id });
+      }
+    });
+    expandGroupToFit(g);
+    state.selectedId = created[0]?.id || "";
     focusGroup(g);
   };
 
@@ -1449,7 +1906,7 @@
         x.ready = true;
         x.shots = shots;
         x.note = shots.map((s, i) => `샷 ${i + 1}. ${s.t}\n${s.line}`).join("\n\n");
-        spawnStoryImages(x, shots);
+        if (!isSample) spawnStoryImages(x, shots);
       } },
       upscale: { label: "고화질 변환 중…", ms: 1500, fn: (x) => { x.ready = true; } },
       tool: { label: label || "처리 중…", ms: 1000, fn: () => {} },
@@ -1525,8 +1982,10 @@
     const shared = state.nodes.filter((n) => !n.group);
     const last = shared[shared.length - 1];
     const left = groups.length ? Math.min(...groups.map((g) => g.x)) : (r.width * 0.5 - state.cam.x) / state.cam.scale;
-    const x = last ? last.x : Math.max(8, left - 380);
-    const y = last ? last.y + sizeOf(last).h + 32 : 24;
+    const drop = state.spawnAt;
+    const x = drop ? drop.x : (last ? last.x : Math.max(8, left - 380));
+    const y = drop ? drop.y : (last ? last.y + sizeOf(last).h + 32 : 24);
+    state.spawnAt = null;
     const node = {
       id,
       type: kind,
@@ -1549,10 +2008,33 @@
   };
 
   canvas.addEventListener("pointerdown", (e) => {
-    if (e.target.closest(".node") || e.target.closest(".plus-btn") || e.target.closest(".add-menu") || e.target.closest("[data-group-drag]") || e.target.closest("[data-resize]") || e.target.closest(".board-group") || e.target.closest(".item-rename") || e.target.closest("[data-cut-edge]")) return;
+    if (e.target.closest(".node") || e.target.closest(".plus-btn") || e.target.closest(".add-menu") || e.target.closest("[data-group-drag]") || e.target.closest("[data-resize]") || e.target.closest(".board-group") || e.target.closest(".item-rename") || e.target.closest("[data-cut-edge]") || e.target.closest(".media-tools")) return;
     addMenu.hidden = true;
+    state.mediaToolsNode = "";
+    placeMediaTools();
     clearFrameEdit();
     state.panning = { x: e.clientX - state.cam.x, y: e.clientY - state.cam.y };
+  });
+  canvas.addEventListener("dblclick", (e) => {
+    if (reviewMode) return;
+    if (e.target.closest(".node") || e.target.closest(".board-group") || e.target.closest(".plus-btn") || e.target.closest(".add-menu") || e.target.closest(".media-tools") || e.target.closest(".canvas-dock")) return;
+    e.preventDefault();
+    const pt = worldFromEvent(e);
+    state.spawnAt = { x: Math.round(pt.x), y: Math.round(pt.y) };
+    state.plusFrom = "";
+    addMenu.hidden = false;
+    setAddMenuTitle();
+    const panel = addMenu.querySelector("#addMenuStack");
+    if (panel) panel.hidden = true;
+    addMenu.querySelectorAll("[data-spawn-type]").forEach((b) => b.classList.remove("is-hot", "is-on"));
+    addMenu.style.left = `${Math.min(e.clientX + 12, window.innerWidth - 460)}px`;
+    if (e.clientY > window.innerHeight / 2) {
+      addMenu.style.top = "auto";
+      addMenu.style.bottom = `${Math.max(16, window.innerHeight - e.clientY + 12)}px`;
+    } else {
+      addMenu.style.bottom = "";
+      addMenu.style.top = `${Math.max(60, e.clientY - 24)}px`;
+    }
   });
   edgesSvg.addEventListener("click", (e) => {
     const cut = e.target.closest("[data-cut-edge]");
@@ -1562,6 +2044,7 @@
   });
 
   world.addEventListener("pointerdown", (e) => {
+    if (reviewMode && (e.target.closest(".node") || e.target.closest(".board-group") || e.target.closest("[data-cut-edge]"))) return;
     if (e.target.closest(".item-rename")) return;
     const plus = e.target.closest("[data-plus]");
     if (plus) {
@@ -1598,10 +2081,11 @@
       beginMoveGroup(g, e);
       return;
     }
-    if (e.target.closest("button") || e.target.closest("textarea") || e.target.closest("select")) return;
+    if (e.target.closest("button") || e.target.closest("textarea") || e.target.closest("select") || e.target.closest("input")) return;
     const card = e.target.closest(".node");
     if (card) {
       state.selectedId = card.dataset.id;
+      if (state.mediaToolsNode !== card.dataset.id) state.mediaToolsNode = "";
       const n = nodeById(card.dataset.id);
       state.frameEdit = false;
       state.selectedGroup = n?.group || "";
@@ -1659,6 +2143,38 @@
   });
 
   world.addEventListener("click", (e) => {
+    const mediaToolsToggle = e.target.closest("[data-media-tools]");
+    if (mediaToolsToggle) {
+      const id = mediaToolsToggle.dataset.mediaTools;
+      state.selectedId = id;
+      state.mediaToolsNode = state.mediaToolsNode === id ? "" : id;
+      renderAll();
+      return;
+    }
+    const slashMore = e.target.closest("[data-slash-more]");
+    if (slashMore) {
+      const row = slashMore.closest(".slash-row");
+      if (!row) return;
+      row.classList.toggle("is-open");
+      if (row.classList.contains("is-open")) {
+        row.querySelector(".slash-chips").innerHTML = SLASH_PRESETS.map((p) => `
+          <button type="button" class="slash-chip" data-slash="${p.id}" data-id="${slashMore.dataset.slashMore}" title="${p.hint}">${p.label}</button>`).join("");
+      }
+      return;
+    }
+    const slash = e.target.closest("[data-slash]");
+    if (slash) {
+      const n = nodeById(slash.dataset.id);
+      const preset = SLASH_PRESETS.find((p) => p.id === slash.dataset.slash);
+      if (!n || !preset) return;
+      if (n.type === "image" && preset.id === "cam9") n.mode = "grid9";
+      if (n.type === "image" && ["charSheet", "turn3"].includes(preset.id)) n.mode = "character-sheet";
+      n.prompt = `/${preset.label}: ${preset.hint}`;
+      n.shot = preset.label;
+      renderAll();
+      startJob(n.id, "generate", `${preset.label} 생성 중…`);
+      return;
+    }
     const openLook = e.target.closest("[data-open-look]");
     if (openLook) {
       lookModal.hidden = false;
@@ -1797,27 +2313,51 @@
   });
   document.getElementById("canvasDock")?.addEventListener("click", (e) => {
     if (e.target.closest("#stackCanvases")) return;
+    const createToggle = e.target.closest("#canvasDockAdd");
+    if (createToggle) {
+      state.dockOpen = false;
+      renderCanvasDock();
+      const menu = document.getElementById("dockCreateMenu");
+      const open = menu.hidden;
+      menu.hidden = !open;
+      createToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      return;
+    }
+    const canvasTemplate = e.target.closest("[data-canvas-template]");
+    if (canvasTemplate) {
+      const menu = document.getElementById("dockCreateMenu");
+      menu.hidden = true;
+      document.getElementById("canvasDockAdd")?.setAttribute("aria-expanded", "false");
+      createWorkflowCanvas(canvasTemplate.dataset.canvasTemplate);
+      return;
+    }
+    const createKind = e.target.closest("[data-create-kind]");
+    if (createKind) {
+      const menu = document.getElementById("dockCreateMenu");
+      menu.hidden = true;
+      document.getElementById("canvasDockAdd")?.setAttribute("aria-expanded", "false");
+      openDockAddMenu(document.getElementById("canvasDockAdd"));
+      return;
+    }
     const tab = e.target.closest("[data-dock-tab]");
     if (tab) {
+      const same = state.dockTab === tab.dataset.dockTab;
       state.dockTab = tab.dataset.dockTab;
+      state.dockOpen = same ? !state.dockOpen : true;
+      document.getElementById("dockCreateMenu").hidden = true;
+      document.getElementById("canvasDockAdd")?.setAttribute("aria-expanded", "false");
       renderCanvasDock();
-      return;
-    }
-    if (e.target.closest("[data-add-canvas]")) {
-      createMiniCanvas();
-      return;
-    }
-    if (e.target.closest("[data-add-node]")) {
-      openDockAddMenu(e.target.closest("[data-add-node]"));
       return;
     }
     const nodeItem = e.target.closest("[data-focus-node]");
     if (nodeItem) {
+      state.dockOpen = false;
       focusAsset(nodeItem.dataset.focusNode);
       return;
     }
     const item = e.target.closest("[data-focus-group]");
     if (!item || item.querySelector(".item-rename")) return;
+    state.dockOpen = false;
     focusGroup(groupById(item.dataset.focusGroup));
   });
   document.getElementById("canvasDock")?.addEventListener("dblclick", (e) => {
@@ -1834,6 +2374,18 @@
     e.stopPropagation();
     state.movingGroup = null;
     startRename(tag);
+  });
+
+  document.getElementById("mediaTools")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-img-tool]");
+    if (!btn) return;
+    e.stopPropagation();
+    const n = nodeById(btn.dataset.id);
+    const tool = IMG_TOOLS.find((t) => t.id === btn.dataset.imgTool);
+    if (!n || !tool) return;
+    if (n.type === "image" && tool.id === "grid9") n.mode = "grid9";
+    n.prompt = `[${tool.label}] ${n.prompt || stackOf(n).hint}`;
+    startJob(n.id, "tool", `${tool.label} 처리 중…`);
   });
 
   addMenu.addEventListener("pointerover", (e) => {
@@ -1976,6 +2528,10 @@
       if (label.dataset.agentName != null) span.dataset.agentName = "";
       span.textContent = name;
       input.replaceWith(span);
+      if (host.classList.contains("board-name-host")) {
+        localStorage.setItem(projectNameKey, name);
+        document.title = `${name} · 아보라`;
+      }
       if (host.classList.contains("canvas-item") && host.classList.contains("is-on")) {
         const pick = document.querySelector(".canvas-pick");
         if (pick) pick.textContent = `${name} ▾`;
@@ -2120,6 +2676,15 @@
   });
   document.addEventListener("click", (e) => {
     if (!e.target.closest("#ctxMenu")) hideCtx();
+    if (!e.target.closest("#canvasDockCluster")) {
+      const menu = document.getElementById("dockCreateMenu");
+      if (menu) menu.hidden = true;
+      document.getElementById("canvasDockAdd")?.setAttribute("aria-expanded", "false");
+      if (state.dockOpen) {
+        state.dockOpen = false;
+        renderCanvasDock();
+      }
+    }
   });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
@@ -2258,7 +2823,7 @@
     if (t.includes("샷") || t.includes("다음") || t.includes("컷")) return ["현재 샷을 확인하고 있습니다", "다음 컷을 준비하고 있습니다"];
     return ["요청을 읽고 있습니다", "캔버스 흐름을 확인하고 있습니다"];
   };
-  const startTrace = (steps) => {
+  const startTrace = (steps, onStep) => {
     agentLog.querySelector(".empty")?.remove();
     agentLog.querySelector(".chat-trace.is-busy")?.remove();
     const trace = document.createElement("div");
@@ -2279,6 +2844,7 @@
       row.className = "chat-step is-live";
       row.innerHTML = `<span class="chat-step-rail">${CHAT_STAR}<i class="chat-step-line"></i></span><p>${steps[i]}</p>`;
       trace.appendChild(row);
+      onStep?.(steps[i], i);
       agentLog.scrollTop = agentLog.scrollHeight;
       i += 1;
       if (i < steps.length) timer = window.setTimeout(addStep, 420);
@@ -2345,14 +2911,29 @@
   const runAgent = (text, from = "Avora Directing") => {
     pushAgent(text, true);
     const t = text.toLowerCase();
+    const intentPose = starryPoseForMessage(t);
+    starryAgent.dataset.intentPose = intentPose;
+    updateStarry("요청을 이해하는 중…", true, intentPose);
     const steps = agentSteps(t);
-    const trace = startTrace(steps);
+    const trace = startTrace(steps, (step, index) => {
+      updateStarry(step, true, index === 0 ? intentPose : starryPoseForStep(step, intentPose));
+    });
     chatHead.classList.add("is-generating");
     window.setTimeout(() => {
       const done = (msg) => {
         trace.finish();
         chatHead.classList.remove("is-generating");
         pushAgent(msg, false, from);
+        if (state.nodes.some((node) => node.busy)) {
+          updateStarry();
+        } else {
+          const donePose = intentPose === "love" ? "love" : intentPose === "hello" || intentPose === "greeting" ? "wink" : "smile";
+          updateStarry("완료했어요", false, donePose);
+          window.setTimeout(() => {
+            delete starryAgent.dataset.intentPose;
+            updateStarry();
+          }, 1200);
+        }
       };
       if (t.includes("브리프") || t.includes("기획")) {
         done("이 보드는 실험실 창가에서 잎과 빛을 잇는 교육 단편입니다. 배정된 크루에게 각본·무드·샷을 나눠 맡기면 됩니다.");
@@ -2468,9 +3049,94 @@
     const val = input.value.trim();
     if (!val) return;
     input.value = "";
+    document.getElementById("assetMentionPop").hidden = true;
     runAgent(val);
   });
-  document.getElementById("agentInput").addEventListener("keydown", (e) => {
+  const agentInput = document.getElementById("agentInput");
+  const mentionPop = document.getElementById("assetMentionPop");
+  let mentionStart = -1;
+  let mentionItems = [];
+  let mentionIndex = 0;
+  const mentionEsc = (value) => String(value || "").replace(/[&<>"']/g, (ch) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[ch]));
+  const mentionAssets = () => [
+    ...state.library.map((a) => ({
+      key: `lib:${a.id}`, name: a.name, src: a.src, kind: "에셋",
+    })),
+    ...state.nodes.map((n) => ({
+      key: `node:${n.id}`, name: fileLabel(n), src: n.src, kind: NODE_TITLE[n.type] || "노드",
+    })),
+  ].filter((item, i, all) => item.name && all.findIndex((x) => x.name === item.name) === i);
+  const paintMentions = () => {
+    mentionPop.querySelectorAll(".asset-mention-item").forEach((el, i) => {
+      el.classList.toggle("is-on", i === mentionIndex);
+    });
+  };
+  const renderMentions = () => {
+    const caret = agentInput.selectionStart;
+    const before = agentInput.value.slice(0, caret);
+    const match = before.match(/@([^@\n]*)$/);
+    if (!match) {
+      mentionPop.hidden = true;
+      mentionStart = -1;
+      return;
+    }
+    mentionStart = caret - match[0].length;
+    const query = match[1].trim().toLowerCase();
+    mentionItems = mentionAssets()
+      .filter((item) => !query || item.name.toLowerCase().includes(query))
+      .slice(0, 8);
+    mentionIndex = 0;
+    mentionPop.innerHTML = `<p class="asset-mention-head">에셋 호출</p>` + (mentionItems.length
+      ? mentionItems.map((item, i) => `
+        <button type="button" class="asset-mention-item${i === 0 ? " is-on" : ""}" data-mention-index="${i}">
+          ${item.src
+            ? `<img src="${mentionEsc(item.src)}" alt="" />`
+            : `<span class="asset-mention-thumb">${ICO.image}</span>`}
+          <span class="asset-mention-copy">
+            <strong>${mentionEsc(item.name)}</strong>
+            <span>${mentionEsc(item.kind)}</span>
+          </span>
+        </button>`).join("")
+      : `<p class="asset-mention-head">일치하는 에셋이 없습니다</p>`);
+    mentionPop.hidden = false;
+  };
+  const pickMention = (index) => {
+    const item = mentionItems[index];
+    if (!item || mentionStart < 0) return;
+    const caret = agentInput.selectionStart;
+    const mention = `@[${item.name}] `;
+    agentInput.value = agentInput.value.slice(0, mentionStart) + mention + agentInput.value.slice(caret);
+    const next = mentionStart + mention.length;
+    agentInput.setSelectionRange(next, next);
+    mentionPop.hidden = true;
+    mentionStart = -1;
+    agentInput.focus();
+  };
+  agentInput.addEventListener("input", renderMentions);
+  agentInput.addEventListener("click", renderMentions);
+  mentionPop.addEventListener("click", (e) => {
+    const item = e.target.closest("[data-mention-index]");
+    if (item) pickMention(Number(item.dataset.mentionIndex));
+  });
+  agentInput.addEventListener("keydown", (e) => {
+    if (!mentionPop.hidden && mentionItems.length && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+      e.preventDefault();
+      mentionIndex = (mentionIndex + (e.key === "ArrowDown" ? 1 : -1) + mentionItems.length) % mentionItems.length;
+      paintMentions();
+      return;
+    }
+    if (!mentionPop.hidden && e.key === "Escape") {
+      e.preventDefault();
+      mentionPop.hidden = true;
+      return;
+    }
+    if (!mentionPop.hidden && e.key === "Enter" && mentionItems.length) {
+      e.preventDefault();
+      pickMention(mentionIndex);
+      return;
+    }
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       document.getElementById("agentForm").requestSubmit();
@@ -2479,9 +3145,52 @@
   renderCrew();
 
   const sharePop = document.getElementById("sharePop");
+  const renderClassTeamShare = () => {
+    const fallbackTeams = {
+      photo: { id: "t2", name: "그린 픽셀", project: "광합성 실험 가이드", members: ["김서윤", "정현우", "윤다인"] },
+      campus: { id: "t4", name: "모션 랩", project: "캠퍼스 오리엔테이션", members: ["임채원", "강도윤", "배수아"] },
+      sample: { id: "t1", name: "프레임 메이커스", project: "브랜드 숏폼 광고 제작", members: ["이지수", "박민재", "최하은"] }
+    };
+    let assigned = null;
+    try {
+      const classState = JSON.parse(localStorage.getItem("avora.professor-board.v1") || "null");
+      const signedIn = JSON.parse(localStorage.getItem("avora.nodeSignedIn") || "null");
+      const student = classState?.students?.find((item) => item.email === signedIn?.email);
+      const team = classState?.teams?.find((item) =>
+        (student && item.memberIds?.includes(student.id)) ||
+        (reviewTeam && item.name === reviewTeam) ||
+        item.id === fallbackTeams[boardId]?.id
+      );
+      if (team?.origin === "self") return;
+      if (team) {
+        assigned = {
+          name: team.name,
+          project: team.project,
+          members: (team.memberIds || []).map((id) => classState.students.find((item) => item.id === id)?.name).filter(Boolean)
+        };
+      }
+    } catch {}
+    assigned ||= fallbackTeams[boardId] || (reviewTeam ? { name: reviewTeam, project: reviewProject || projectName, members: reviewStudent ? [reviewStudent] : [] } : null);
+    if (!assigned) return;
+    const block = document.getElementById("classTeamShare");
+    block.hidden = false;
+    document.getElementById("classTeamName").textContent = assigned.name;
+    document.getElementById("classTeamProject").textContent = assigned.project;
+    const people = document.getElementById("classTeamMembers");
+    people.replaceChildren(...assigned.members.map((name) => {
+      const avatar = document.createElement("span");
+      avatar.className = "class-team-member";
+      avatar.textContent = name.slice(-2, -1) || name[0];
+      avatar.title = `${name} · 관리자 배정`;
+      return avatar;
+    }));
+  };
+  renderClassTeamShare();
   const mePop = document.getElementById("mePop");
   const presentPop = document.getElementById("presentPop");
   const presentMode = document.getElementById("presentMode");
+  const presentLoading = document.getElementById("presentLoading");
+  const presentLoadingStatus = document.getElementById("presentLoadingStatus");
   const closePops = () => {
     sharePop.hidden = true;
     mePop.hidden = true;
@@ -2569,7 +3278,7 @@
     document.getElementById("presentStep").textContent = `${presentIndex + 1}/${state.nodes.length}`;
     document.getElementById("presentCount").textContent = `${3 + remotes.size}명`;
   };
-  const startPresent = (fromCurrent) => {
+  const enterPresent = (fromCurrent) => {
     closePops();
     document.body.classList.add("is-presenting");
     presentMode.hidden = false;
@@ -2581,6 +3290,23 @@
     }
     syncPresentLabel();
     focusNode(state.nodes[presentIndex]);
+  };
+  let presentLoadingTimer = 0;
+  const startPresent = (fromCurrent) => {
+    closePops();
+    window.clearTimeout(presentLoadingTimer);
+    presentLoading.hidden = false;
+    presentLoadingStatus.textContent = "장면을 불러오는 중";
+    requestAnimationFrame(() => presentLoading.classList.add("is-visible"));
+    window.setTimeout(() => { presentLoadingStatus.textContent = "노드 흐름을 연결하는 중"; }, 800);
+    window.setTimeout(() => { presentLoadingStatus.textContent = "재생 준비 완료"; }, 1900);
+    presentLoadingTimer = window.setTimeout(() => {
+      presentLoading.classList.remove("is-visible");
+      window.setTimeout(() => {
+        presentLoading.hidden = true;
+        enterPresent(fromCurrent);
+      }, 240);
+    }, 2800);
   };
   const stopPresent = () => {
     document.body.classList.remove("is-presenting");
@@ -2616,14 +3342,44 @@
     sessionStorage.setItem("avora-peer", id);
     return id;
   })();
-  const meProfile = { name: "지수", short: "지", color: "#7c3aed" };
-  document.querySelector("#meBtn .avatar").textContent = meProfile.short;
-  document.querySelector("#mePop p").textContent = meProfile.name;
-  document.getElementById("meBtn").title = `${meProfile.name} · 나`;
+  const meProfile = {
+    name: "Jisu Lee",
+    short: "지",
+    email: "js97lee@gmail.com",
+    uuid: "a7f3c2e1-9b4d-4e8a-b1c0-6d5e4f3a2b1c",
+    color: "#7c3aed",
+    credits: 100,
+  };
+  const paintMe = () => {
+    document.getElementById("meAvatar").textContent = meProfile.short;
+    document.getElementById("meHeadAvatar").textContent = meProfile.short;
+    document.getElementById("meName").textContent = meProfile.name;
+    document.getElementById("meEmail").textContent = meProfile.email;
+    document.getElementById("creditCount").textContent = String(meProfile.credits);
+    document.getElementById("meBtn").title = `${meProfile.name} · 나`;
+  };
+  paintMe();
+  document.getElementById("copyUuid")?.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    try { await navigator.clipboard.writeText(meProfile.uuid); } catch {}
+    const prev = btn.childNodes[0].textContent;
+    btn.childNodes[0].textContent = "복사됨";
+    setTimeout(() => { btn.childNodes[0].textContent = prev || "UUID"; }, 1000);
+  });
+  document.querySelector("[data-me-pref='lang']")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const el = document.getElementById("meLangLabel");
+    el.textContent = el.textContent === "한국어" ? "English" : "한국어";
+  });
+  document.querySelector("[data-me-pref='theme']")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const el = document.getElementById("meThemeLabel");
+    el.textContent = el.textContent === "다크" ? "라이트" : "다크";
+  });
   const renderRemotes = () => {
     extras.querySelectorAll("[data-remote]").forEach((el) => el.remove());
     liveBox.querySelectorAll("[data-remote]").forEach((el) => el.remove());
-    const meBtnWrap = extras.querySelector(".me-wrap");
     remotes.forEach((peer) => {
       const av = document.createElement("button");
       av.type = "button";
@@ -2631,7 +3387,7 @@
       av.className = "avatar a-green";
       av.title = `${peer.name} · 접속 중`;
       av.textContent = peer.short;
-      extras.insertBefore(av, meBtnWrap);
+      extras.appendChild(av);
       if (peer.wx != null) {
         const cur = document.createElement("div");
         cur.className = "live-cursor";
@@ -2641,7 +3397,8 @@
         liveBox.appendChild(cur);
       }
     });
-    document.getElementById("presentCount").textContent = `${3 + remotes.size}명`;
+    const count = document.getElementById("presentCount");
+    if (count) count.textContent = `${3 + remotes.size}명`;
     placeCursors();
   };
   if ("BroadcastChannel" in window) {
@@ -2704,6 +3461,69 @@
     renderLookGrid();
     renderAll();
   };
+  document.getElementById("starryToggle")?.addEventListener("click", () => {
+    starryAgent?.classList.toggle("is-minimized");
+  });
+  const starryContact = document.getElementById("starryContact");
+  const starryContactPop = document.getElementById("starryContactPop");
+  const starryContactInput = document.getElementById("starryContactInput");
+  const starryContactGuide = document.getElementById("starryContactGuide");
+  const starryContactCount = document.getElementById("starryContactCount");
+  const openStarryContact = () => {
+    if (!starryContactPop) return;
+    starryAgent?.classList.remove("is-minimized");
+    starryContactPop.hidden = false;
+    starryContact?.setAttribute("aria-expanded", "true");
+    starryContactGuide.textContent = "현재 프로젝트 화면과 함께 관리자에게 전달됩니다.";
+    window.setTimeout(() => starryContactInput?.focus(), 0);
+  };
+  const closeStarryContact = () => {
+    if (!starryContactPop) return;
+    starryContactPop.hidden = true;
+    starryContact?.setAttribute("aria-expanded", "false");
+  };
+  starryContact?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (starryContactPop?.hidden) openStarryContact();
+    else closeStarryContact();
+  });
+  starryContact?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    openStarryContact();
+  });
+  document.getElementById("starryContactClose")?.addEventListener("click", closeStarryContact);
+  starryContactPop?.addEventListener("click", (event) => event.stopPropagation());
+  document.addEventListener("click", closeStarryContact);
+  starryContactInput?.addEventListener("input", () => {
+    starryContactCount.textContent = `${starryContactInput.value.length} / 500`;
+  });
+  document.getElementById("starryContactForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const message = starryContactInput.value.trim();
+    if (!message) return;
+    let sender = { email: "student@avora.local" };
+    let inquiries = [];
+    try { sender = JSON.parse(localStorage.getItem("avora.nodeSignedIn") || "null") || sender; } catch {}
+    try { inquiries = JSON.parse(localStorage.getItem("avora.admin-inquiries.v1") || "[]"); } catch {}
+    inquiries.unshift({
+      id: `inquiry-${Date.now()}`,
+      message,
+      project: projectName,
+      boardId,
+      team: reviewTeam || "",
+      student: reviewStudent || "",
+      sender: sender.email || "student@avora.local",
+      status: "new",
+      createdAt: new Date().toISOString(),
+    });
+    localStorage.setItem("avora.admin-inquiries.v1", JSON.stringify(inquiries.slice(0, 100)));
+    starryContactInput.value = "";
+    starryContactCount.textContent = "0 / 500";
+    starryContactGuide.textContent = "관리자에게 전달했어요. 답변이 오면 Starry가 알려드릴게요.";
+    updateStarry("문의 전송 완료", false, "smile");
+    window.setTimeout(() => updateStarry(), 1800);
+  });
 
   renderAddMenu();
   renderAll();

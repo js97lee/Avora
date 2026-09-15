@@ -20,6 +20,18 @@
 }
 
 * { box-sizing: border-box; }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139,92,246,.78) transparent;
+}
+*::-webkit-scrollbar { width: 5px; height: 5px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(139,92,246,.72);
+}
+*::-webkit-scrollbar-thumb:hover { background: #a78bfa; }
+*::-webkit-scrollbar-corner { background: transparent; }
 html, body { margin: 0; min-height: 100%; }
 body {
   color: var(--ink);
@@ -630,7 +642,7 @@ html:has(body.is-app) { height: 100%; overflow: hidden; background: #070709; }
 body.is-inner .fig-toolbar,
 .fig-toolbar[hidden] { display: none; }
 .proj-empty-ico { color: rgba(255,255,255,.28); }
-body.is-inner .fig-body { max-width: 1120px; padding-top: 18px; }
+body.is-inner .fig-body { max-width: 1320px; padding-top: 18px; }
 .pill-btn {
   height: 34px; padding: 0 12px; border-radius: 999px;
   border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04);
@@ -813,24 +825,37 @@ body.is-inner .fig-body { max-width: 1120px; padding-top: 18px; }
 .proj-body { padding: 22px 28px 32px; overflow: auto; flex: 1; }
 .proj-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 22px 16px;
-  max-width: 1080px;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 18px;
 }
 body.is-inner .proj-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  max-width: 1120px;
-  gap: 22px 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 @media (max-width: 1280px) {
-  body.is-inner .proj-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-@media (max-width: 980px) {
   body.is-inner .proj-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
-.proj-card { display: block; min-width: 0; text-align: left; background: none; border: 0; color: inherit; cursor: pointer; }
+@media (max-width: 980px) {
+  body.is-inner .proj-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.proj-card {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
 .proj-card[hidden] { display: none; }
 .proj-thumb {
+  display: block;
+  width: 100%;
   aspect-ratio: 3 / 2;
   height: auto;
   border-radius: 1.15rem;
@@ -878,7 +903,12 @@ body.is-inner .proj-grid {
 .more-menu button:hover { background: rgba(255,255,255,.05); }
 
 .drive-body { max-width: 1080px; }
-.fig-body { max-width: 1320px; padding-top: 10px; }
+.fig-body {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-top: 10px;
+}
 .fig-toolbar {
   display: flex;
   align-items: center;
@@ -889,8 +919,20 @@ body.is-inner .proj-grid {
 .fig-toolbar-right { display: inline-flex; align-items: center; gap: 8px; flex: none; }
 .fig-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: center;
   gap: 28px 18px;
+}
+@media (min-width: 981px) {
+  .fig-grid,
+  body.is-inner .proj-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 980px) {
+  .fig-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .fig-grid,
+  body.is-inner .proj-grid { grid-template-columns: 1fr; }
 }
 .fig-grid.is-list {
   grid-template-columns: 1fr;
@@ -898,29 +940,38 @@ body.is-inner .proj-grid {
   max-width: 920px;
 }
 .fig-card {
+  appearance: none;
   display: flex;
   flex-direction: column;
+  align-self: start;
+  width: 100%;
   min-width: 0;
+  padding: 0;
   text-align: left;
   color: inherit;
-  border-radius: 12px;
-  background: #2a2a2e;
-  overflow: hidden;
-  border: 1px solid transparent;
+  border-radius: 0;
+  background: none;
+  overflow: visible;
+  border: 0;
 }
-.fig-card:hover { background: #323238; }
-.fig-card.is-selected { box-shadow: 0 0 0 2px rgba(13, 153, 255, .7); }
+.fig-card:hover { background: none; }
+.fig-card.is-selected { box-shadow: none; }
+.fig-card.is-selected .fig-thumb { box-shadow: 0 0 0 2px rgba(13, 153, 255, .7); }
 .fig-thumb {
   display: block;
-  aspect-ratio: 16 / 10;
-  background: #1a1a1e;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  background: #1c1c20;
   overflow: hidden;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(255,255,255,.08);
 }
+.fig-card:hover .fig-thumb { border-color: rgba(167,139,250,.4); }
 .fig-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .fig-thumb-empty {
   width: 100%; height: 100%;
   display: grid; place-items: center;
-  color: #f6c177;
+  color: #a78bfa;
   font-size: 1.6rem;
 }
 .fig-thumb-blank { background: #000; }
@@ -934,35 +985,37 @@ body.is-inner .proj-grid {
 .fig-card-start.is-selected { box-shadow: none; }
 .fig-card-start.is-selected .proj-thumb { box-shadow: 0 0 0 2px rgba(13, 153, 255, .7); }
 .fig-grid.is-list .fig-card-start {
-  flex-direction: column;
-  align-items: stretch;
-  background: none;
-  border-radius: 0;
+  flex-direction: row;
+  align-items: center;
+  background: rgba(42, 42, 46, 0.7);
+  border-radius: 10px;
 }
 .fig-grid.is-list .fig-card-start .proj-thumb {
-  width: 100%;
-  margin: 0;
-  aspect-ratio: 3 / 2;
-  border-radius: 1.15rem;
+  width: 88px;
+  margin: 6px 0 6px 6px;
+  aspect-ratio: 16 / 10;
+  flex: none;
+  border-radius: 8px;
 }
 .fig-thumb-empty svg { width: 40px; height: 40px; }
 .fig-meta {
   position: relative;
   display: flex;
   align-items: flex-start;
+  width: 100%;
   gap: 8px;
-  padding: 10px 12px 12px;
+  padding: 10px 2px 0;
 }
 .fig-type {
   width: 22px; height: 22px; border-radius: 6px; flex: none;
   display: grid; place-items: center;
   background: #7c3aed; color: #fff; margin-top: 1px;
 }
-.fig-type.is-folder { background: #e8b86d; color: #3a2a00; }
+.fig-type.is-folder { background: rgba(124,58,237,.2); color: #c4b5fd; }
 .fig-copy { min-width: 0; flex: 1; padding-right: 20px; }
 .fig-copy strong {
   display: block;
-  font-size: .82rem;
+  font-size: .86rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   white-space: nowrap;
@@ -1121,7 +1174,7 @@ body.is-inner .proj-grid {
 .drive-folder-icon {
   width: 64px;
   height: 52px;
-  color: #f6c177;
+  color: #a78bfa;
 }
 .drive-file-thumb {
   width: 64px;

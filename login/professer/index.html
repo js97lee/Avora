@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>관리자 로그인 · 아보라</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
+  <link rel="stylesheet" href="professer-login.css?v=3" />
+</head>
+<body>
+  <main class="prof-login-shell">
+    <a class="back-home" href="../../home.html" aria-label="아보라 홈으로 돌아가기">← 홈으로</a>
+    <section class="login-card">
+      <div class="login-form-side">
+        <img class="login-logo" src="../../assets/app/avora-logo.png" alt="AVORA" />
+        <span class="role-badge">ADMIN</span>
+        <h1>관리자 로그인</h1>
+        <p class="login-lead">팀 구성과 제작 운영 현황을<br />하나의 보드에서 관리하세요.</p>
+
+        <form id="professorLoginForm">
+          <label>
+            <span>학교 이메일</span>
+            <input name="email" type="email" autocomplete="email" placeholder="name@university.ac.kr" required />
+          </label>
+          <label>
+            <span>비밀번호</span>
+            <input name="password" type="password" autocomplete="current-password" placeholder="8자 이상 입력" minlength="8" required />
+          </label>
+          <div class="login-options">
+            <label class="remember"><input name="remember" type="checkbox" checked /> 로그인 상태 유지</label>
+            <button type="button">비밀번호 찾기</button>
+          </div>
+          <button class="login-submit" type="submit">관리자 보드로 로그인</button>
+        </form>
+
+        <div class="login-divider"><span>또는</span></div>
+        <button class="demo-login" id="demoLogin" type="button">데모 관리자 계정으로 둘러보기</button>
+        <p class="student-link">일반 사용자이신가요? <a href="../../home.html?login=1">사용자 로그인</a></p>
+      </div>
+
+      <aside class="login-visual" aria-label="관리자 보드 기능 소개">
+        <div class="visual-copy">
+          <span>AVORA ADMIN</span>
+          <h2>결과뿐 아니라<br /><b>운영 과정</b>을 관리하세요.</h2>
+          <p>팀별 프롬프트 변화와 기여도를 실시간으로 확인합니다.</p>
+        </div>
+        <div class="preview-card">
+          <div class="preview-head"><span>AI 영상 제작 스튜디오</span><em>2026 · 2학기</em></div>
+          <div class="preview-metrics"><i><b>4</b><small>운영 팀</small></i><i><b>14</b><small>사용자</small></i><i><b>128</b><small>프롬프트</small></i></div>
+          <div class="preview-team">
+            <span class="preview-number">01</span>
+            <div><b>프레임 메이커스</b><small>브랜드 숏폼 광고 제작</small></div>
+            <span class="preview-avatars">지 · 민 · 하</span>
+          </div>
+          <div class="preview-bars"><i style="width:88%"></i><i style="width:68%"></i><i style="width:48%"></i></div>
+        </div>
+        <div class="visual-glow"></div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="login-toast" id="loginToast" role="status" aria-live="polite">관리자 보드를 준비하고 있습니다…</div>
+  <script>
+    (() => {
+      const AUTH_KEY = "avora.nodeSignedIn";
+      const enter = (email, name) => {
+        localStorage.setItem(AUTH_KEY, JSON.stringify({
+          email,
+          name,
+          role: "professor",
+          at: Date.now()
+        }));
+        document.getElementById("loginToast").classList.add("is-on");
+        window.setTimeout(() => location.href = "../../professor-board/", 420);
+      };
+      document.getElementById("professorLoginForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const email = String(new FormData(event.currentTarget).get("email") || "").trim();
+        enter(email, email.split("@")[0] || "관리자");
+      });
+      document.getElementById("demoLogin").addEventListener("click", () => {
+        enter("admin@avora.ai", "아보라 관리자");
+      });
+    })();
+  </script>
+</body>
+</html>

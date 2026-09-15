@@ -20,7 +20,7 @@
 
   if (!isLanding() && !session()) {
     setNext(file() + location.search + location.hash);
-    location.replace("home.html?login=1");
+    location.replace("index.html?login=1");
     return;
   }
 
@@ -57,13 +57,29 @@
             </div>
             <p id="authMessage" class="auth-message"></p>
             <button id="workspaceAccessButton" class="auth-workspace-btn" type="button">워크스페이스 들어가기</button>
+            <a class="auth-professor-link" href="login/professer/">
+              <span>관리자 계정이신가요?</span>
+              <strong>관리자 로그인 →</strong>
+            </a>
             <div class="auth-footer">
               <p class="auth-hint">마이 프로젝트와 노드 캔버스를 쓰려면 로그인하세요.</p>
+              <p class="auth-legal">
+                계속 진행하면 <a href="privacy.html">개인정보처리방침</a>,
+                <a href="terms.html">이용약관</a>,
+                <a href="content-policy.html">콘텐츠 운영정책</a> 및
+                <a href="privacy-data-deletion.html">개인정보 삭제 안내</a>에 동의한 것으로 간주됩니다.
+              </p>
             </div>
           </div>
           <aside class="auth-modal-right" aria-hidden="true">
             <div class="auth-art">
-              <img src="assets/app/shots/open.png" alt="" />
+              <video src="assets/landing/auth-loop.mp4" muted loop autoplay playsinline preload="metadata"></video>
+              <div class="auth-art-shade"></div>
+              <div class="auth-art-copy">
+                <span>AVORA WORKFLOW</span>
+                <strong>아이디어에서 완성 영상까지,<br />하나의 흐름으로 연결하세요.</strong>
+                <p>스크립트 · 이미지 · 비디오 노드를 팀과 함께 만듭니다.</p>
+              </div>
             </div>
           </aside>
         </div>
@@ -112,7 +128,7 @@
   const openAuth = (next) => {
     if (next) setNext(next);
     if (!isLanding()) {
-      location.href = "home.html?login=1";
+      location.href = "index.html?login=1";
       return;
     }
     ensureModal();
@@ -127,14 +143,14 @@
   };
 
   const enter = (email) => {
-    localStorage.setItem(AUTH_KEY, JSON.stringify({ email, at: Date.now() }));
+    localStorage.setItem(AUTH_KEY, JSON.stringify({ email, role: "student", at: Date.now() }));
     location.href = takeNext();
   };
 
   const signOut = () => {
     localStorage.removeItem(AUTH_KEY);
     sessionStorage.removeItem(NEXT_KEY);
-    location.href = "home.html";
+    location.href = "index.html";
   };
 
   const goAuthed = (url) => {

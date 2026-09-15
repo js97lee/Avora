@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>마이 프로젝트 · 아보라</title>
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/eunchurn/NanumSquareNeo@0.0.6/nanumsquareneovar.css" />
-  <link rel="stylesheet" href="site.css?v=nav10" />
-  <link rel="stylesheet" href="auth.css?v=nav4" />
-  <script src="auth.js"></script>
+  <link rel="stylesheet" href="site.css?v=nav18" />
+  <link rel="stylesheet" href="auth.css?v=landing4" />
+  <script src="auth.js?v=landing4"></script>
 </head>
 <body class="is-app">
   <div class="app-shell">
@@ -16,7 +16,7 @@
     <div class="app-main">
       <header class="proj-top">
         <div class="proj-top-left">
-          <a class="proj-brand" href="home.html" aria-label="아보라 홈">
+          <a class="proj-brand" href="index.html" aria-label="아보라 홈">
             <img src="assets/app/avora-logo.png" alt="AVORA" />
           </a>
           <a class="proj-back" id="projBack" href="boards.html" hidden>‹ 뒤로</a>
@@ -105,7 +105,7 @@
             <button class="drive-add-btn" id="createFolderButton" type="button" hidden title="새 프로젝트" aria-label="새 프로젝트 만들기">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
             </button>
-          </div>
+            </div>
         </div>
         <nav class="drive-breadcrumb" id="driveBreadcrumb" aria-label="폴더 경로" hidden></nav>
         <div id="driveFolderGrid" class="fig-grid" data-view="grid" aria-live="polite"></div>
@@ -152,21 +152,38 @@
         folders: [
           { id: "f-main", parentId: "root", name: "새 프로젝트", board: "new", updatedAt: Date.now(), shared: false },
           { id: "f-blank", parentId: "root", name: "Blank", board: "blank", updatedAt: Date.now() - 1000, shared: false },
+          { id: "f-sample", parentId: "root", name: "Sample 프로젝트", board: "sample", updatedAt: Date.now() - 2000, shared: false },
         ],
         files: [],
       });
+
+      const ensureSampleProject = (data) => {
+        if (!data.folders.some((folder) => folder.id === "f-sample" || folder.board === "sample")) {
+          data.folders.push({
+            id: "f-sample",
+            parentId: "root",
+            name: "Sample 프로젝트",
+            board: "sample",
+            updatedAt: Date.now() - 2000,
+            shared: false,
+          });
+        }
+        return data;
+      };
 
       const load = () => {
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
           if (!raw) {
-            const initial = seed();
+            const initial = ensureSampleProject(seed());
             localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
             return initial;
           }
           const parsed = JSON.parse(raw);
           if (!parsed || !Array.isArray(parsed.folders) || !Array.isArray(parsed.files)) return seed();
-          return parsed;
+          const migrated = ensureSampleProject(parsed);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+          return migrated;
         } catch (_) {
           return seed();
         }
@@ -437,8 +454,10 @@
             <span>+</span>
             <b>제작 시작</b>
           </div>
-          <div class="proj-meta">
-            <h3>새 비디오 프로젝트 만들기</h3>
+          <div class="fig-meta">
+            <span class="fig-copy">
+              <strong>새 비디오 프로젝트 만들기</strong>
+            </span>
           </div>
         `;
         return a;
@@ -449,8 +468,10 @@
           <span>+</span>
           <b>제작 시작</b>
         </div>
-        <div class="proj-meta">
-          <h3>새 비디오 프로젝트 만들기</h3>
+        <div class="fig-meta">
+          <span class="fig-copy">
+            <strong>새 비디오 프로젝트 만들기</strong>
+          </span>
         </div>
       `;
 
@@ -497,7 +518,6 @@
         btn.innerHTML = `
           <span class="fig-thumb">${cover ? `<img src="${cover}" alt="" />` : `<span class="fig-thumb-empty">${ICO.folder}</span>`}</span>
           <span class="fig-meta">
-            <span class="fig-type is-folder" aria-hidden="true">${ICO.folder}</span>
             <span class="fig-copy">
               <strong>${folder.name}</strong>
               <em>${fmtAgo(folder.updatedAt)} 수정</em>
@@ -524,7 +544,6 @@
         a.innerHTML = `
           <span class="fig-thumb">${file.thumb ? `<img src="${file.thumb}" alt="" />` : ""}</span>
           <span class="fig-meta">
-            <span class="fig-type" aria-hidden="true">${ICO.canvas}</span>
             <span class="fig-copy">
               <strong>${file.name}</strong>
               <em>${fmtAgo(file.updatedAt)} 수정</em>
@@ -579,7 +598,10 @@
 
         const rootFolders = (predicate) => store.folders
           .filter((f) => f.parentId === "root" && (!predicate || predicate(f)))
-          .sort((a, b) => b.updatedAt - a.updatedAt);
+          .sort((a, b) =>
+            Number(b.board === "blank") - Number(a.board === "blank")
+            || b.updatedAt - a.updatedAt
+          );
 
         let folders = [];
         let files = [];
@@ -701,6 +723,6 @@
       }
     })();
   </script>
-  <script src="app.js?v=nav7"></script>
+  <script src="app.js?v=nav8"></script>
 </body>
 </html>

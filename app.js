@@ -1,4 +1,14 @@
 (() => {
+  document.querySelectorAll("[data-history-back]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      if (!document.referrer) return;
+      try {
+        if (new URL(document.referrer).origin !== location.origin || history.length <= 1) return;
+        event.preventDefault();
+        history.back();
+      } catch {}
+    });
+  });
   const railHost = document.querySelector("[data-app-rail]");
   if (!railHost) return;
 
