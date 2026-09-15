@@ -152,21 +152,24 @@
         folders: [
           { id: "f-main", parentId: "root", name: "새 프로젝트", board: "new", updatedAt: Date.now(), shared: false },
           { id: "f-blank", parentId: "root", name: "Blank", board: "blank", updatedAt: Date.now() - 1000, shared: false },
-          { id: "f-sample", parentId: "root", name: "Sample 프로젝트", board: "sample", updatedAt: Date.now() - 2000, shared: false },
+          { id: "f-sample", parentId: "root", name: "Sample · 단풍이 머문 자리", board: "sample", updatedAt: Date.now() - 2000, shared: false },
         ],
         files: [],
       });
 
       const ensureSampleProject = (data) => {
-        if (!data.folders.some((folder) => folder.id === "f-sample" || folder.board === "sample")) {
+        const sample = data.folders.find((folder) => folder.id === "f-sample" || folder.board === "sample");
+        if (!sample) {
           data.folders.push({
             id: "f-sample",
             parentId: "root",
-            name: "Sample 프로젝트",
+            name: "Sample · 단풍이 머문 자리",
             board: "sample",
             updatedAt: Date.now() - 2000,
             shared: false,
           });
+        } else if (sample.name === "Sample 프로젝트") {
+          sample.name = "Sample · 단풍이 머문 자리";
         }
         return data;
       };

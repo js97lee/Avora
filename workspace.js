@@ -11,8 +11,8 @@
   });
   const BLANK = "assets/app/blank.svg";
   const SIZE = {
-    image: { w: 320, h: 468, portY: 188 },
-    video: { w: 560, h: 520, portY: 188 },
+    image: { w: 320, h: 563, portY: 188 },
+    video: { w: 560, h: 615, portY: 188 },
     audio: { w: 320, h: 390, portY: 130 },
     text: { w: 320, h: 420, portY: 150 },
     upscale: { w: 420, h: 640, portY: 240 },
@@ -66,7 +66,12 @@
     { id: "angle", label: "다각도" },
     { id: "light", label: "조명" },
     { id: "grid9", label: "9분할" },
-    { id: "edit", label: "기본 편집" },
+    { id: "upscale", label: "고화질" },
+    { id: "expand", label: "화면 확장" },
+    { id: "redraw", label: "리드로우" },
+    { id: "erase", label: "지우기" },
+    { id: "remove-bg", label: "누끼" },
+    { id: "crop", label: "자르기" },
     { id: "split", label: "그리드 분할" },
     { id: "annotate", label: "주석" },
     { id: "flip", label: "회전·미러" },
@@ -216,6 +221,45 @@
     const cur = stackIdOf(n);
     return `<select class="stack-pick${n.compact ? " is-sm" : ""}" data-stack="${n.id}" aria-label="${NODE_TITLE[n.type] || n.type} 세부 기능">${list.map((s) => `<option value="${s.id}"${s.id === cur ? " selected" : ""}>${s.label}</option>`).join("")}</select>`;
   };
+  const ASPECT_RATIOS = ["16:9", "9:16", "1:1", "4:3", "3:4", "21:9"];
+  const aspectOf = (n) => n.aspect || (n.type === "video" ? "16:9" : "1:1");
+  const aspectPick = (n) => `
+    <select class="aspect-pick${n.compact ? " is-sm" : ""}" data-aspect="${n.id}" aria-label="${NODE_TITLE[n.type] || n.type} 화면 비율">
+      ${ASPECT_RATIOS.map((ratio) => `<option value="${ratio}"${ratio === aspectOf(n) ? " selected" : ""}>${ratio}</option>`).join("")}
+    </select>`;
+  const mediaPicks = (n) => `<span class="node-meta-controls">${stackPick(n)}${aspectPick(n)}</span>`;
+  const optionList = (items, current) => items.map((item) => `<option value="${item}"${item === current ? " selected" : ""}>${item}</option>`).join("");
+  const generatorSettings = (n) => {
+    if (!n.generator) {
+      n.generator = n.type === "video"
+        ? { model: "Avora Motion", resolution: "1080P", count: "1", duration: "5초", toggles: [] }
+        : { model: "Avora Image", resolution: "2K", count: "1", duration: "", toggles: [] };
+    }
+    return n.generator;
+  };
+  const generationPanel = (n) => {
+    const settings = generatorSettings(n);
+    const video = n.type === "video";
+    const fields = [
+      ["model", "모델", video ? ["Avora Motion", "Kling", "Veo", "Seedance"] : ["Avora Image", "Flux", "Nano Banana", "Midjourney"]],
+      ["resolution", "해상도", video ? ["720P", "1080P", "4K"] : ["1K", "2K", "4K", "6K"]],
+      ["count", "생성 수", ["1", "2", "3", "4"]],
+      ...(video ? [["duration", "길이", ["3초", "5초", "10초"]]] : []),
+    ];
+    const presets = video
+      ? [["reference", "멀티 레퍼런스"], ["first-last", "첫·끝 프레임"], ["camera", "카메라 무빙"], ["audio", "오디오 연동"]]
+      : [["style", "스타일"], ["camera", "카메라"], ["reference", "멀티 레퍼런스"], ["negative", "네거티브"]];
+    return `
+      <section class="generation-panel">
+        <header><b>생성 설정</b><span>${video ? "VIDEO" : "IMAGE"} GENERATOR</span></header>
+        <div class="generation-fields">
+          ${fields.map(([key, label, options]) => `<label><span>${label}</span><select data-gen-setting="${key}" data-id="${n.id}">${optionList(options, settings[key])}</select></label>`).join("")}
+        </div>
+        <div class="generation-presets">
+          ${presets.map(([key, label]) => `<button type="button" class="${settings.toggles.includes(key) ? "is-on" : ""}" data-gen-toggle="${key}" data-id="${n.id}">${label}</button>`).join("")}
+        </div>
+      </section>`;
+  };
   const TITLES = {
     photo: "광합성 실험 가이드",
     campus: "캠퍼스 오리엔테이션",
@@ -224,7 +268,7 @@
     water: "물의 순환",
     new: "프로젝트 00",
     blank: "프로젝트 00",
-    sample: "Sample 프로젝트",
+    sample: "Sample · 단풍이 머문 자리",
   };
   const searchParams = new URLSearchParams(location.search);
   const landingPrompt = (searchParams.get("prompt") || "").trim();
@@ -274,63 +318,189 @@
   };
 
   const buildSampleWorkspace = () => {
-    const pad = 32;
-    const gap = 36;
-    const categories = [
-      { type: "text", label: "텍스트", prompt: "15초 브랜드 필름의 핵심 메시지를 명료하게 정리해 주세요." },
-      { type: "script", label: "스크립트", prompt: "낯선 도시에서 자신의 목소리를 발견하는 주인공의 30초 이야기를 구성해 주세요." },
-      { type: "image", label: "이미지", prompt: "비가 그친 새벽 도심, 보라색 네온과 젖은 아스팔트, 시네마틱 와이드 샷." },
-      { type: "video", label: "비디오", prompt: "인물을 따라 천천히 돌리 인하며 네온 반사가 흐르는 5초 시네마틱 영상." },
-      { type: "edit", label: "스마트 편집", prompt: "주인공은 유지하고 배경의 불필요한 행인과 간판을 자연스럽게 정리해 주세요." },
-      { type: "director", label: "디렉터 콘솔", prompt: "감정이 고조되는 순간을 35mm 렌즈와 느린 돌리 인으로 연출합니다." },
-      { type: "analyze", label: "스마트 분석", prompt: "현재 장면의 구도, 카메라, 컬러와 개선 포인트를 분석해 주세요." },
-      { type: "audio", label: "오디오", prompt: "차분하지만 긴장감 있는 내레이션과 빗소리 기반의 앰비언스를 생성해 주세요." },
-      { type: "ref", label: "참조", prompt: "이 이미지를 캐릭터와 룩의 일관성 참조로 사용합니다." },
-      { type: "upscale", label: "고화질", prompt: "최종 영상을 4K 마스터 품질로 업스케일합니다." },
+    const groups = [
+      { id: "sample-g-plan", no: "00", title: "이야기 설계 · 요구사항을 기승전결로 바꾸기", x: 8, y: 620, w: 1200, h: 760 },
+      { id: "sample-g-act1", no: "01 · 기", title: "낙엽 우체통에서 시작된 만남", x: 1304, y: 620, w: 1900, h: 760 },
+      { id: "sample-g-act2", no: "02 · 승", title: "강아지 ‘단풍’과 가까워지는 두 사람", x: 3300, y: 620, w: 1900, h: 760 },
+      { id: "sample-g-act3", no: "03 · 전", title: "사라진 목걸이와 오해의 반전", x: 5296, y: 620, w: 1900, h: 760 },
+      { id: "sample-g-act4", no: "04 · 결", title: "복선 회수와 은행나무 아래 첫 고백", x: 7292, y: 620, w: 2300, h: 760 },
     ];
-    const groups = [];
-    const nodes = [];
-    let groupX = 8;
-    categories.forEach(({ type, label, prompt }, categoryIndex) => {
-      const modes = NODE_STACKS[type] || [{ id: "master", label: "4K Upscale", hint: "최종 출력 화질 개선" }];
-      const size = SIZE[type] || SIZE.image;
-      const columns = size.w >= 500 ? 3 : 4;
-      const rows = Math.ceil(modes.length / columns);
-      const groupWidth = pad * 2 + columns * size.w + (columns - 1) * gap;
-      const groupHeight = 128 + rows * size.h + Math.max(0, rows - 1) * gap;
-      const group = {
-        id: `sample-g-${type}`,
-        no: String(categoryIndex + 1).padStart(2, "0"),
-        title: `${label} 노드 · ${modes.length}개 유즈케이스`,
-        x: groupX,
-        y: 24,
-        w: groupWidth,
-        h: groupHeight,
-      };
-      groups.push(group);
-      modes.forEach((mode, index) => {
-        const column = index % columns;
-        const row = Math.floor(index / columns);
-        nodes.push({
-          id: `sample-${type}-${mode.id}`,
-          type,
-          title: `${label} · ${mode.label}`,
-          compact: false,
-          x: pad + column * (size.w + gap),
-          y: 48 + row * (size.h + gap),
-          prompt: `${mode.label}: ${prompt}`,
-          ready: type === "ref",
-          src: type === "ref" ? "assets/app/shots/open.png" : "",
-          mode: mode.id,
-          shots: type === "director" ? SHOTS.map((shot) => ({ ...shot })) : undefined,
-          folder: type === "audio" ? "audio" : type === "image" || type === "ref" ? "scene" : "new",
-          shot: mode.label,
-          group: group.id,
-        });
-      });
-      groupX += groupWidth + 64;
-    });
-    return { groups, nodes, edges: [] };
+    const guide = (step, use, input, output) => ({ step, use, input, output });
+    const storyShots = [
+      { t: "기 · 우연한 만남", d: "낙엽 우체통 앞", src: "assets/app/sample-story/act1-meeting.png" },
+      { t: "승 · 함께 찾기", d: "단풍을 따라 캠퍼스 산책", src: "assets/app/sample-story/act2-walk.png" },
+      { t: "전 · 오해와 발견", d: "목걸이의 정체가 드러남", src: "assets/app/sample-story/act3-reveal.png" },
+      { t: "결 · 약속", d: "은행나무 아래 고백", src: "assets/app/sample-story/act4-ending.png" },
+    ];
+    const nodes = [
+      {
+        id: "sample-ref-haeun", type: "ref", mode: "character", title: "공통 참조 · 서하은", x: 32, y: 36,
+        ready: true, src: "assets/app/sample-story/ref-haeun.png", prompt: "서하은, 22세 문예창작과. 베이지 코트, 버건디 머플러, 조용하지만 관찰력이 좋다.",
+        shot: "주인공 서하은", folder: "scene",
+        guide: guide("공통 A", "모든 장면에서 주인공의 얼굴과 의상을 고정합니다.", "정면 캐릭터 이미지 + 외형 설명", "뒤에 연결된 이미지·영상의 서하은 일관성"),
+      },
+      {
+        id: "sample-ref-doyun", type: "ref", mode: "character", title: "공통 참조 · 한도윤", x: 420, y: 36,
+        ready: true, src: "assets/app/sample-story/ref-doyun.png", prompt: "한도윤, 23세 사진학과. 네이비 야상, 필름 카메라, 다정하지만 표현이 서툴다.",
+        shot: "상대역 한도윤", folder: "scene",
+        guide: guide("공통 B", "상대역의 얼굴·의상·소품을 장면 전체에 재사용합니다.", "캐릭터 이미지 + 의상/소품 키워드", "한도윤과 필름 카메라의 연속성"),
+      },
+      {
+        id: "sample-ref-dog", type: "ref", mode: "object", title: "공통 참조 · 강아지 단풍", x: 808, y: 36,
+        ready: true, src: "assets/app/sample-story/ref-danpoong.png", prompt: "갈색 믹스견 ‘단풍’. 빨간 체크 목줄과 은행잎 모양 이름표. 이야기의 복선을 운반한다.",
+        shot: "강아지 단풍", folder: "scene",
+        guide: guide("공통 C", "강아지와 복선 소품을 모든 시퀀스가 함께 참고합니다.", "강아지 외형 + 빨간 목줄 + 은행잎 이름표", "매 장면 동일한 단풍과 복선 소품"),
+      },
+      {
+        id: "sample-text-brief", type: "text", mode: "structure", title: "01 · 사용자 요구 정리", x: 40, y: 60, group: "sample-g-plan",
+        ready: true, folder: "new",
+        prompt: "장르: 가을 대학생 캠퍼스 로맨스\n필수: 기승전결, 강아지 ‘단풍’ 등장, 초반 소품 복선과 결말 회수\n톤: 포근한 필름룩, 설렘 70% + 잔잔한 유머 30%\n러닝타임: 60초",
+        guide: guide("01", "자연어 요구를 제작 조건으로 고정해 누락을 막습니다.", "가을 캠퍼스 로맨스 / 강아지 / 복선 / 기승전결", "장르·필수 요소·톤·길이가 정리된 브리프"),
+      },
+      {
+        id: "sample-script-treatment", type: "script", mode: "treatment", title: "02 · 기승전결 트리트먼트", x: 430, y: 60, group: "sample-g-plan",
+        ready: true, shots: storyShots, folder: "new",
+        prompt: "제목 〈단풍이 머문 자리〉\n기: 하은은 낙엽 우체통에서 은행잎 이름표를 줍고 단풍과 도윤을 만난다.\n승: 셋은 이름표 주인을 찾으며 가까워지고, 도윤은 하은의 사진을 몰래 남긴다.\n전: 단풍이 사라져 둘은 서로를 탓하지만, 단풍이 오래된 사진관으로 이끈다.\n결: 이름표는 도윤이 어린 시절 단풍에게 달아준 것. 하은이 주운 뒷면의 ‘은행나무 아래에서’ 문구가 회수되고 두 사람은 그곳에서 마음을 확인한다.",
+        guide: guide("02", "브리프를 장면 순서가 있는 한 편의 이야기로 확장합니다.", "01 제작 브리프", "제목·기승전결·복선 회수가 포함된 트리트먼트"),
+      },
+      {
+        id: "sample-script-act1", type: "script", mode: "scene", title: "03 · 기: 첫 만남 씬", x: 40, y: 60, group: "sample-g-act1",
+        ready: true, shots: storyShots, folder: "new",
+        prompt: "EXT. 캠퍼스 낙엽 우체통 — 늦은 오후\n하은이 은행잎 모양 이름표를 줍는다. 단풍이 달려와 이름표 냄새를 맡고, 뒤늦게 도윤이 나타난다.\n하은: “이거, 네가 찾던 거야?”\n도윤: “아뇨. 그런데 단풍이는 맞다고 하네요.”",
+        guide: guide("03", "트리트먼트의 ‘기’를 촬영 가능한 씬과 대사로 만듭니다.", "02 트리트먼트의 첫 만남", "장소·행동·대사가 있는 씬"),
+      },
+      {
+        id: "sample-image-grid", type: "image", mode: "grid9", title: "04 · 첫 만남 9컷 탐색", x: 650, y: 60, group: "sample-g-act1",
+        ready: true, src: "assets/app/sample-story/act1-meeting.png", prompt: "가을 캠퍼스 낙엽 우체통, 서하은이 은행잎 이름표를 든 순간, 단풍과 한도윤 등장, 따뜻한 16mm 필름룩.",
+        gridImages: [
+          ["EWS", "assets/app/sample-story/act1-meeting.png"],
+          ["WS", "assets/app/sample-story/act1-meeting.png"],
+          ["MS", "assets/app/sample-story/act1-dialogue.png"],
+          ["MCU", "assets/app/sample-story/act1-dialogue.png"],
+          ["CU", "assets/app/sample-story/act1-clue.png"],
+          ["ECU", "assets/app/sample-story/act1-clue.png"],
+          ["LOW", "assets/app/sample-story/act1-meeting.png"],
+          ["HIGH", "assets/app/sample-story/act1-dialogue.png"],
+          ["OTS", "assets/app/sample-story/act1-dialogue.png"],
+        ],
+        shot: "첫 만남 9-Cut", folder: "scene",
+        guide: guide("04", "한 장면을 9개 구도로 비교해 가장 좋은 쇼트를 고릅니다.", "03 씬 + 공통 캐릭터/강아지 참조", "EWS부터 OTS까지 9개 카메라 구도"),
+      },
+      {
+        id: "sample-director-camera", type: "director", mode: "camera", title: "05 · 첫 만남 카메라", x: 1040, y: 60, group: "sample-g-act1",
+        ready: true, src: "assets/app/sample-story/act1-dialogue.png", shots: storyShots, folder: "new",
+        prompt: "이름표를 든 하은의 손에서 시작해 단풍을 거쳐 도윤의 시선으로 이동. 35mm, 아이레벨, 느린 돌리 인.",
+        guide: guide("05", "선택한 구도에 렌즈·높이·각도를 수치로 지정합니다.", "04의 MCU/OTS 후보", "35mm · Eye Level · Dolly In 촬영 설정"),
+      },
+      {
+        id: "sample-video-act1", type: "video", mode: "i2v", title: "06 · 첫 만남 영상", x: 1480, y: 60, group: "sample-g-act1",
+        ready: true, src: "assets/app/sample-story/act1-meeting.png", prompt: "하은의 손에 든 은행잎 이름표 클로즈업에서 단풍이 프레임 인. 카메라가 고개를 드는 하은을 따라 도윤에게 천천히 돌리 인. 5초.",
+        shot: "ACT 1 영상", folder: "scene",
+        guide: guide("06", "이미지와 카메라 설정을 실제 움직이는 쇼트로 변환합니다.", "04 이미지 + 05 카메라 설정", "5초 첫 만남 영상 클립"),
+      },
+      {
+        id: "sample-image-sheet", type: "image", mode: "character-sheet", title: "07 · 캐릭터 일관성 시트", x: 40, y: 60, group: "sample-g-act2",
+        ready: true, src: "assets/app/sample-story/ref-haeun.png", prompt: "서하은과 한도윤의 가을 캠퍼스 의상 턴어라운드, 단풍과 산책할 때의 미소·놀람·집중 표정.",
+        shot: "Character Sheet", folder: "scene",
+        guide: guide("07", "여러 쇼트에서 얼굴·의상·표정이 바뀌지 않도록 기준표를 만듭니다.", "공통 A/B 캐릭터 참조", "4방향 턴어라운드 + 표정 4종"),
+      },
+      {
+        id: "sample-audio-campus", type: "audio", mode: "ambience", title: "08 · 가을 캠퍼스 환경음", x: 430, y: 60, group: "sample-g-act2",
+        ready: true, prompt: "마른 낙엽 밟는 소리, 멀리서 들리는 동아리 공연, 단풍의 목줄 방울. 대사를 방해하지 않는 따뜻한 스테레오 앰비언스.",
+        shot: "캠퍼스 Ambience", folder: "audio",
+        guide: guide("08", "장소의 계절감과 강아지의 존재를 소리로 이어줍니다.", "승 시퀀스 장소와 행동", "낙엽·공연·목줄 방울이 섞인 12초 환경음"),
+      },
+      {
+        id: "sample-video-walk", type: "video", mode: "camera", title: "09 · 산책 몽타주", x: 820, y: 60, group: "sample-g-act2",
+        ready: true, src: "assets/app/sample-story/act2-walk.png", prompt: "단풍을 사이에 두고 걷는 하은과 도윤. 처음엔 어색한 간격이 점점 가까워진다. 측면 트래킹 후 웃는 두 사람으로 오빗, 7초.",
+        shot: "ACT 2 몽타주", folder: "scene",
+        guide: guide("09", "카메라 이동으로 관계가 가까워지는 감정을 보여줍니다.", "07 캐릭터 시트 + 08 환경음", "Tracking → Orbit 7초 몽타주"),
+      },
+      {
+        id: "sample-analyze-emotion", type: "analyze", mode: "character", title: "10 · 감정 연속성 검사", x: 1450, y: 60, group: "sample-g-act2",
+        ready: true, folder: "new",
+        analysis: ["하은: 경계 → 편안한 미소", "도윤: 긴장 → 자연스러운 시선", "단풍: 두 사람 사이를 계속 연결", "권장 다음 장면: 목걸이 방울을 인서트로 강조"],
+        guide: guide("10", "생성된 영상의 감정 변화와 다음 복선 쇼트를 검사합니다.", "09 산책 몽타주", "감정 곡선 + 복선 인서트 추천"),
+      },
+      {
+        id: "sample-analyze-clue", type: "analyze", mode: "object", title: "11 · 복선 오브젝트 분석", x: 40, y: 60, group: "sample-g-act3",
+        ready: true, folder: "new",
+        analysis: ["탐지: 은행잎 이름표 3회 노출", "뒷면 문구: ‘은행나무 아래에서’", "서사 기능: 단풍의 과거와 고백 장소 연결", "회수 시점 권장: 마지막 8초"],
+        guide: guide("11", "앞 장면에 심은 소품이 관객에게 보였는지 확인합니다.", "06·09 영상 속 이름표", "노출 횟수·문구·결말 회수 시점"),
+      },
+      {
+        id: "sample-edit-clue", type: "edit", mode: "replace", title: "12 · 이름표 인서트 보정", x: 450, y: 60, group: "sample-g-act3",
+        ready: true, src: "assets/app/sample-story/act1-clue.png", prompt: "이름표 뒷면 글씨를 ‘은행나무 아래에서’로 교체. 손과 배경은 유지하고 글자만 자연스럽게 선명하게.",
+        shot: "복선 인서트", folder: "scene",
+        guide: guide("12", "전체 장면을 다시 만들지 않고 필요한 소품만 수정합니다.", "11에서 찾은 이름표 프레임", "문구가 읽히는 수정 인서트 컷"),
+      },
+      {
+        id: "sample-director-light", type: "director", mode: "lighting", title: "13 · 반전 장면 조명", x: 860, y: 60, group: "sample-g-act3",
+        ready: true, src: "assets/app/sample-story/act3-reveal.png", shots: storyShots, folder: "new",
+        prompt: "오래된 사진관. 창문 키라이트 4300K, 약한 쿨 필, 단풍의 이름표에 웜 림라이트. 오해가 풀리며 얼굴이 밝아진다.",
+        guide: guide("13", "조명의 방향과 비율로 오해에서 이해로 바뀌는 감정을 설계합니다.", "사진관 반전 씬", "Key/Fill/Rim 위치와 2:1 조명비"),
+      },
+      {
+        id: "sample-video-reveal", type: "video", mode: "startend", title: "14 · 반전 Start → End", x: 1300, y: 60, group: "sample-g-act3",
+        ready: true, src: "assets/app/sample-story/act3-missing.png", prompt: "START: 어두운 사진관에서 이름표를 바라보는 하은. END: 어린 도윤과 단풍의 사진 옆에서 미소 짓는 두 사람. 6초 랙포커스.",
+        shot: "ACT 3 반전", folder: "scene",
+        guide: guide("14", "시작·끝 프레임을 고정해 반전의 변화가 정확히 보이게 합니다.", "12 인서트 + 13 조명", "이름표에서 과거 사진으로 이어지는 6초 클립"),
+      },
+      {
+        id: "sample-script-dialogue", type: "script", mode: "dialogue", title: "15 · 결말 대사", x: 40, y: 60, group: "sample-g-act4",
+        ready: true, shots: storyShots, folder: "new",
+        prompt: "하은: “이름표가 약속 장소를 기억하고 있었네.”\n도윤: “단풍이는 기억했는데, 나는 다시 올 용기가 없었어요.”\n하은: “그럼 오늘부터는 같이 기억해요.”\n단풍이 두 사람 사이에 앉고 목줄 방울이 한 번 울린다.",
+        guide: guide("15", "복선을 말로 설명하지 않으면서 감정과 의미를 회수합니다.", "14 반전의 진실", "고백으로 이어지는 절제된 대사 + 강아지 행동"),
+      },
+      {
+        id: "sample-image-ending", type: "image", mode: "t2i", title: "16 · 엔딩 키프레임", x: 650, y: 60, group: "sample-g-act4",
+        ready: true, src: "assets/app/sample-story/act4-ending.png", prompt: "황금빛 은행나무 아래 서하은과 한도윤, 둘 사이에 앉은 단풍. 하은의 손에는 은행잎 이름표, 따뜻한 역광, 35mm 필름 스틸.",
+        shot: "엔딩 키프레임", folder: "scene",
+        guide: guide("16", "결말의 인물·강아지·복선 소품을 한 프레임에 확정합니다.", "15 대사 + 공통 A/B/C 참조", "일관성이 잠긴 엔딩 이미지"),
+      },
+      {
+        id: "sample-audio-ending", type: "audio", mode: "music", title: "17 · 엔딩 음악", x: 1040, y: 60, group: "sample-g-act4",
+        ready: true, prompt: "어쿠스틱 기타와 잔잔한 피아노, 72 BPM. 마지막 목줄 방울 뒤에 메인 테마가 완성되는 따뜻한 캠퍼스 로맨스 엔딩.",
+        shot: "Ending Music", folder: "audio",
+        guide: guide("17", "마지막 복선 회수와 고백의 여운을 음악으로 완성합니다.", "15 대사의 타이밍 + 목줄 방울", "12초 엔딩 BGM과 효과음 큐"),
+      },
+      {
+        id: "sample-video-ending", type: "video", mode: "lipsync", title: "18 · 대사·영상 결합", x: 1430, y: 60, group: "sample-g-act4",
+        ready: true, src: "assets/app/sample-story/act4-ending.png", prompt: "엔딩 키프레임에 하은과 도윤의 대사를 립싱크. 단풍은 두 사람을 번갈아 보고 마지막에 카메라를 본다. 8초.",
+        shot: "ACT 4 엔딩", folder: "scene",
+        guide: guide("18", "확정 이미지에 대사와 표정을 맞춰 최종 엔딩 쇼트를 만듭니다.", "16 이미지 + 15 대사 + 17 음악", "립싱크가 적용된 8초 엔딩 영상"),
+      },
+      {
+        id: "sample-upscale-final", type: "upscale", title: "19 · 최종 4K 마스터", x: 2060, y: 60, group: "sample-g-act4",
+        ready: true, src: "assets/app/sample-story/act4-ending.png", prompt: "전체 60초 영상을 4K로 업스케일하고 프레임·색상·음량을 최종 정리합니다.",
+        shot: "4K Master", folder: "scene",
+        guide: guide("19", "완성된 편집본의 해상도와 재생 품질을 납품 규격으로 올립니다.", "기·승·전·결 최종 영상", "4K · 24fps · 스테레오 최종 마스터"),
+      },
+    ];
+    const edges = [
+      { from: "sample-ref-haeun", to: "sample-image-grid" },
+      { from: "sample-ref-doyun", to: "sample-image-grid" },
+      { from: "sample-ref-dog", to: "sample-image-grid" },
+      { from: "sample-text-brief", to: "sample-script-treatment" },
+      { from: "sample-script-treatment", to: "sample-script-act1" },
+      { from: "sample-script-act1", to: "sample-image-grid" },
+      { from: "sample-image-grid", to: "sample-director-camera" },
+      { from: "sample-director-camera", to: "sample-video-act1" },
+      { from: "sample-video-act1", to: "sample-image-sheet" },
+      { from: "sample-image-sheet", to: "sample-audio-campus" },
+      { from: "sample-audio-campus", to: "sample-video-walk" },
+      { from: "sample-video-walk", to: "sample-analyze-emotion" },
+      { from: "sample-analyze-emotion", to: "sample-analyze-clue" },
+      { from: "sample-analyze-clue", to: "sample-edit-clue" },
+      { from: "sample-edit-clue", to: "sample-director-light" },
+      { from: "sample-director-light", to: "sample-video-reveal" },
+      { from: "sample-video-reveal", to: "sample-script-dialogue" },
+      { from: "sample-script-dialogue", to: "sample-image-ending" },
+      { from: "sample-image-ending", to: "sample-audio-ending" },
+      { from: "sample-audio-ending", to: "sample-video-ending" },
+      { from: "sample-video-ending", to: "sample-upscale-final" },
+    ];
+    return { groups, nodes, edges };
   };
   const LOOKS = {
     palette: [
@@ -384,6 +554,8 @@
   const state = {
     selectedId: isBlank ? "" : isSample ? sampleWorkspace.nodes[0]?.id || "" : "sc-01",
     plusFrom: null,
+    connecting: null,
+    canvasTool: "select",
     cam: { x: isFresh ? 48 : 24, y: isFresh ? 72 : 48, scale: isFresh ? 0.78 : isSample ? 0.32 : 0.42 },
     dragging: null,
     panning: false,
@@ -405,9 +577,12 @@
     stackView: false,
     dockTab: "canvas",
     dockOpen: false,
+    timelineTarget: 30,
     spawnAt: null,
     movingGroup: null,
     resizing: null,
+    cameraAdjust: null,
+    lightAdjust: null,
     groups: isBlank ? [] : isSample ? sampleWorkspace.groups : boardId === "new" ? [
       { id: "g1", no: "01", title: "기획 · 톤과 장르", x: 8, y: 0, w: 560, h: 700 },
     ] : [
@@ -453,11 +628,26 @@
   const starryAgent = document.getElementById("starryAgent");
   const starryStatus = document.getElementById("starryStatus");
   const starryPose = document.getElementById("starryPose");
+  const imageViewer = document.getElementById("imageViewer");
+  const imageViewerMedia = document.getElementById("imageViewerMedia");
+  const imageViewerLayer = document.getElementById("imageViewerLayer");
+  const imageViewerTitle = document.getElementById("imageViewerTitle");
+  const imageViewerNode = document.getElementById("imageViewerNode");
+  const imageViewerPrompt = document.getElementById("imageViewerPrompt");
+  const imageViewerDownload = document.getElementById("imageViewerDownload");
+  const imageViewerZoom = document.getElementById("imageViewerZoom");
   const nodeById = (id) => state.nodes.find((n) => n.id === id);
   const uid = (p) => `${p}-${Math.random().toString(36).slice(2, 6)}`;
   const sizeOf = (n) => {
-    if (n.compact && (n.type === "image" || n.type === "ref")) return { w: 132, h: 186, portY: 68 };
-    return SIZE[n.type] || SIZE.image;
+    const [aw, ah] = aspectOf(n).split(":").map(Number);
+    const ratio = aw > 0 && ah > 0 ? aw / ah : 1;
+    if (n.compact && (n.type === "image" || n.type === "ref")) {
+      return { w: 132, h: Math.round(215 + 132 / ratio - 132), portY: 68 };
+    }
+    const base = { ...(SIZE[n.type] || SIZE.image) };
+    if (n.type === "image") base.h = Math.round(base.h + base.w / ratio - 320);
+    if (n.type === "video") base.h = Math.round(base.h + base.w / ratio - 316);
+    return base;
   };
   const GROUP_PAD = 32;
   const RESIZE = {
@@ -472,10 +662,35 @@
   };
   const groupById = (id) => (state.groups || []).find((g) => g.id === id);
   const nodesInGroup = (gid) => state.nodes.filter((n) => n.group === gid);
+  const isCommonNode = (n) => !!groupById(n?.group)?.common;
+  const commonReferenceIds = () => state.nodes.filter(isCommonNode).map((n) => n.id);
+  const syncCommonReferences = (n) => {
+    if (!n) return;
+    if (isCommonNode(n)) {
+      n.commonRefs = [];
+      return;
+    }
+    n.commonRefs = commonReferenceIds();
+  };
+  const scopeOf = (n) => (!n.group || isCommonNode(n) ? "shared" : "seq");
   const layoutSampleWorkspace = () => {
     if (!isSample) return;
     const pad = 32;
     const gap = 72;
+    const shared = state.nodes.filter((node) => !node.group);
+    const sharedElements = shared.map((node) => world.querySelector(`.node[data-id="${node.id}"]`));
+    const sharedWidth = Math.max(320, ...sharedElements.map((el) => el?.offsetWidth || 0));
+    const sharedHeight = Math.max(420, ...sharedElements.map((el) => el?.offsetHeight || 0));
+    shared.forEach((node, index) => {
+      node.x = 40 + index * (sharedWidth + gap);
+      node.y = 36;
+      const el = sharedElements[index];
+      if (el) {
+        el.style.left = `${node.x}px`;
+        el.style.top = `${node.y}px`;
+      }
+    });
+    const groupY = shared.length ? sharedHeight + 180 : 24;
     let groupX = 8;
     (state.groups || []).forEach((group) => {
       const nodes = nodesInGroup(group.id);
@@ -494,7 +709,7 @@
         }
       });
       group.x = groupX;
-      group.y = 24;
+      group.y = groupY;
       group.w = pad * 2 + columns * maxWidth + Math.max(0, columns - 1) * gap;
       group.h = 104 + rows * maxHeight + Math.max(0, rows - 1) * gap;
       const groupEl = world.querySelector(`.board-group[data-group="${group.id}"]`);
@@ -628,7 +843,7 @@
     const slot = layoutSlotInGroup(g, n);
     n.x = slot.x;
     n.y = slot.y;
-    linkIntoSequence(n, g.id);
+    if (!g.common) linkIntoSequence(n, g.id);
     expandGroupToFit(g);
     return true;
   };
@@ -725,7 +940,31 @@
     n.y -= g.y;
   });
   (state.groups || []).forEach(expandGroupToFit);
-  const veil = (n) => n.busy ? `<div class="busy-veil"><span class="spin"></span><p>${n.busy}</p></div>` : "";
+  const veil = (n, variant = "") => {
+    if (!n.busy) return "";
+    if (variant === "image") return `
+      <div class="busy-veil is-card-generation">
+        <div class="card-gen-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2.8 14.2 9l6.2 2.2-6.2 2.2L12 19.6l-2.2-6.2-6.2-2.2L9.8 9 12 2.8Z"/></svg>
+          <i></i>
+        </div>
+        <p>${n.busy}</p>
+        <span>프롬프트와 참조를 조합하고 있어요</span>
+        <div class="card-gen-track"><i></i></div>
+      </div>`;
+    return `<div class="busy-veil"><span class="spin"></span><p>${n.busy}</p></div>`;
+  };
+  const sampleGuide = (n) => {
+    if (!isSample || !n.guide) return "";
+    return `
+      <section class="sample-node-guide" aria-label="${n.guide.step}단계 사용 안내">
+        <div class="sample-guide-head"><b>${n.guide.step}</b><strong>${n.guide.use}</strong></div>
+        <dl>
+          <div><dt>INPUT</dt><dd>${n.guide.input}</dd></div>
+          <div><dt>OUTPUT</dt><dd>${n.guide.output}</dd></div>
+        </dl>
+      </section>`;
+  };
   const sendBtn = (n) => `
     <button class="send-btn" type="button" data-run="generate" data-id="${n.id}" ${n.busy ? "disabled" : ""}>
       ${n.busy ? `<span class="spin spin-sm"></span>` : "↑"}
@@ -791,12 +1030,21 @@
     placeCursors();
     placeMediaTools();
   };
+  const paintCanvasTool = () => {
+    canvas.classList.toggle("is-pan-tool", state.canvasTool === "pan");
+    canvas.classList.toggle("is-select-tool", state.canvasTool === "select");
+    document.querySelectorAll("[data-canvas-tool]").forEach((button) => {
+      const active = button.dataset.canvasTool === state.canvasTool;
+      button.classList.toggle("is-on", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  };
 
   const portWorld = (n, which) => {
     const fallback = sizeOf(n);
     const el = world.querySelector(`.node[data-id="${n.id}"]`);
     if (el) {
-      const anchor = which === "out" ? el.querySelector(".plus-btn") : el;
+      const anchor = which === "out" ? el.querySelector(".plus-btn") : el.querySelector(".node-frame") || el;
       const rect = anchor?.getBoundingClientRect();
       const canvasRect = canvas.getBoundingClientRect();
       if (rect) {
@@ -818,7 +1066,7 @@
 
   const ortho = (x1, y1, x2, y2) => {
     const mid = x1 + Math.max(36, (x2 - x1) * 0.5);
-    const r = Math.min(16, Math.abs(y2 - y1) / 2, Math.max(8, Math.abs(x2 - mid) / 2));
+    const r = Math.min(8, Math.abs(y2 - y1) / 2, Math.max(4, Math.abs(x2 - mid) / 2));
     if (Math.abs(y2 - y1) < 3) return { d: `M ${x1} ${y1} H ${x2}`, mx: (x1 + x2) / 2, my: y1 };
     const s = y2 >= y1 ? 1 : -1;
     if (r < 3) return { d: `M ${x1} ${y1} H ${mid} V ${y2} H ${x2}`, mx: mid, my: (y1 + y2) / 2 };
@@ -847,15 +1095,36 @@
         <path class="edge${live ? " is-live" : ""}" d="${d}" />
         <g class="edge-cut" data-cut-edge="1" data-from="${e.from}" data-to="${e.to}" transform="translate(${mx} ${my})">
           <circle class="edge-cut-hit" r="14" />
-          <circle class="edge-cut-disk" r="11" />
-          <path class="edge-cut-mark" d="M-5 0 H5" />
+          <circle class="edge-cut-disk" r="7" />
+          <path class="edge-cut-mark" d="M-3.5 0 H3.5" />
         </g>`;
     }).join("");
-    edgesSvg.innerHTML = paths;
+    let preview = "";
+    if (state.connecting?.live) {
+      const from = nodeById(state.connecting.from);
+      if (from) {
+        const canvasRect = canvas.getBoundingClientRect();
+        const p1 = portWorld(from, "out");
+        const target = nodeById(state.connecting.targetId);
+        const p2 = target
+          ? portWorld(target, "in")
+          : { x: (state.connecting.clientX - canvasRect.left - x) / scale, y: (state.connecting.clientY - canvasRect.top - y) / scale };
+        const line = ortho(p1.x * scale + x, p1.y * scale + y, p2.x * scale + x, p2.y * scale + y);
+        preview = `<path class="edge edge-preview" d="${line.d}" />`;
+      }
+    }
+    edgesSvg.innerHTML = paths + preview;
   };
   const cutEdge = (from, to) => {
     state.edges = state.edges.filter((ed) => !(ed.from === from && ed.to === to));
     renderAll();
+  };
+  const paintConnectionTarget = (id = "") => {
+    world.querySelectorAll(".node.is-connect-target").forEach((node) => node.classList.remove("is-connect-target"));
+    world.querySelectorAll(".plus-btn.is-connecting").forEach((button) => button.classList.remove("is-connecting"));
+    if (!state.connecting?.live) return;
+    world.querySelector(`.node[data-id="${id}"]`)?.classList.add("is-connect-target");
+    world.querySelector(`.plus-btn[data-plus="${state.connecting.from}"]`)?.classList.add("is-connecting");
   };
 
   const slashRow = (n) => `
@@ -877,28 +1146,31 @@
   const imageModeVisual = (n) => {
     const mode = stackIdOf(n);
     if (mode === "grid9") {
-      const shots = [
-        ["EWS", "wide.png"], ["WS", "open.png"], ["MS", "class.png"],
-        ["MCU", "idea.png"], ["CU", "leaf.png"], ["ECU", "insert.png"],
-        ["LOW", "backlight.png"], ["HIGH", "cutaway.png"], ["OTS", "class.png"],
+      const shots = n.gridImages || [
+        ["EWS", "assets/app/shots/wide.png"], ["WS", "assets/app/shots/open.png"], ["MS", "assets/app/shots/class.png"],
+        ["MCU", "assets/app/shots/idea.png"], ["CU", "assets/app/shots/leaf.png"], ["ECU", "assets/app/shots/insert.png"],
+        ["LOW", "assets/app/shots/backlight.png"], ["HIGH", "assets/app/shots/cutaway.png"], ["OTS", "assets/app/shots/class.png"],
       ];
       return `
         <div class="mode-visual mode-grid9">
+          ${veil(n, "image")}
           ${shots.map(([label, src], index) => `
-            <figure><img src="assets/app/shots/${src}" alt="${label} 구도"><span>${String(index + 1).padStart(2, "0")}</span><figcaption>${label}</figcaption></figure>
+            <figure><img src="${src}" alt="${label} 구도"><span>${String(index + 1).padStart(2, "0")}</span><figcaption>${label}</figcaption></figure>
           `).join("")}
         </div>
-        <div class="mode-summary"><b>9개 카메라 구도</b><span>화면비 16:9 · 동일 인물/조명 잠금</span></div>`;
+        <div class="mode-summary"><b>9개 카메라 구도</b><span>화면비 ${aspectOf(n)} · 동일 인물/조명 잠금</span></div>`;
     }
     if (mode === "character-sheet") {
       const views = [["정면", "50%"], ["3/4", "42%"], ["측면", "62%"], ["후면", "74%"]];
+      const characterSrc = n.src || "assets/app/inspire/inspire-01-character.png";
       return `
         <div class="mode-visual character-sheet">
+          ${veil(n, "image")}
           <div class="character-turnaround">
-            ${views.map(([label, pos]) => `<figure><img src="assets/app/inspire/inspire-01-character.png" style="object-position:${pos} center" alt="${label}"><figcaption>${label}</figcaption></figure>`).join("")}
+            ${views.map(([label, pos]) => `<figure><img src="${characterSrc}" style="object-position:${pos} center" alt="${label}"><figcaption>${label}</figcaption></figure>`).join("")}
           </div>
           <div class="expression-strip">
-            ${["기본", "미소", "놀람", "집중"].map((label, index) => `<span><img src="assets/app/inspire/inspire-01-character.png" alt=""><em>${label}</em><i style="--exp:${index}"></i></span>`).join("")}
+            ${["기본", "미소", "놀람", "집중"].map((label, index) => `<span><img src="${characterSrc}" alt=""><em>${label}</em><i style="--exp:${index}"></i></span>`).join("")}
           </div>
         </div>
         <div class="mode-summary"><b>캐릭터 ID 잠금</b><span>의상 A · 전신 턴어라운드 · 표정 4종</span></div>`;
@@ -921,19 +1193,126 @@
       </section>`;
   };
 
-  const directorModePanel = (n) => {
-    const mode = stackIdOf(n);
-    if (mode === "camera") return `
-      <section class="node-mode-settings">
-        <div class="mode-settings-title"><b>카메라 앵글</b><span>SHOT SETUP</span></div>
-        <div class="angle-preview"><span class="angle-horizon"></span><i class="angle-subject">SUBJECT</i><b>−12°</b></div>
-        <div class="mode-field-grid">
-          <label><span>Shot Size</span><select><option>Medium Close-Up</option><option>Wide Shot</option><option>Close-Up</option></select></label>
-          <label><span>Angle</span><select><option>Low Angle</option><option>Eye Level</option><option>High Angle</option><option>Dutch Angle</option></select></label>
-          <label><span>Height</span><input value="1.2 m" /></label>
-          <label><span>Tilt</span><input value="-12°" /></label>
+  const cameraSettings = (n) => {
+    if (!n.camera) n.camera = { rotation: 315, tilt: -30, zoom: 0 };
+    return n.camera;
+  };
+  const cameraPoint = (camera) => {
+    const radians = (camera.rotation - 90) * Math.PI / 180;
+    const radius = 34 - Math.min(12, Math.max(0, camera.zoom) * .12);
+    return {
+      x: 50 + Math.cos(radians) * radius,
+      y: 50 + Math.sin(radians) * radius * .58 - camera.tilt * .18,
+    };
+  };
+  const cameraAnglePanel = (n) => {
+    const camera = cameraSettings(n);
+    const point = cameraPoint(camera);
+    return `
+      <section class="node-mode-settings camera-angle-settings">
+        <div class="mode-settings-title"><b>카메라 앵글</b><span>INTERACTIVE ORBIT</span></div>
+        <div class="camera-angle-stage">
+          <p>구체를 누른 채 드래그해 카메라 각도를 조절하세요</p>
+          <div class="camera-orbit" data-camera-orbit="${n.id}" style="--camera-x:${point.x}%;--camera-y:${point.y}%">
+            <span class="orbit-globe" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <svg class="camera-ray" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <line x1="50" y1="50" x2="${point.x}" y2="${point.y}" />
+            </svg>
+            <span class="orbit-subject"><img src="${n.src || "assets/app/inspire/inspire-01-character.png"}" alt="피사체"></span>
+            <span class="orbit-camera" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M3.5 8.5h12v9h-12zM15.5 11l5-2.5v9l-5-2.5zM6 6l2-2h4l2 2"/></svg>
+            </span>
+            <span class="orbit-axis axis-top">⌃</span><span class="orbit-axis axis-left">‹</span><span class="orbit-axis axis-right">›</span>
+          </div>
+        </div>
+        <div class="camera-angle-values">
+          <label><span>Rotation</span><input type="range" min="0" max="359" value="${camera.rotation}" data-camera-setting="rotation" data-id="${n.id}"><output data-camera-output="rotation">${camera.rotation}°</output></label>
+          <label><span>Tilt</span><input type="range" min="-60" max="60" value="${camera.tilt}" data-camera-setting="tilt" data-id="${n.id}"><output data-camera-output="tilt">${camera.tilt}°</output></label>
+          <label><span>Zoom</span><input type="range" min="0" max="100" value="${camera.zoom}" data-camera-setting="zoom" data-id="${n.id}"><output data-camera-output="zoom">${camera.zoom}</output></label>
         </div>
       </section>`;
+  };
+  const paintCameraAngle = (n) => {
+    const card = world.querySelector(`.node[data-id="${n.id}"]`);
+    const orbit = card?.querySelector("[data-camera-orbit]");
+    if (!orbit) return;
+    const camera = cameraSettings(n);
+    const point = cameraPoint(camera);
+    orbit.style.setProperty("--camera-x", `${point.x}%`);
+    orbit.style.setProperty("--camera-y", `${point.y}%`);
+    const ray = orbit.querySelector(".camera-ray line");
+    ray?.setAttribute("x2", point.x);
+    ray?.setAttribute("y2", point.y);
+    ["rotation", "tilt", "zoom"].forEach((key) => {
+      const control = card.querySelector(`[data-camera-setting="${key}"]`);
+      const output = card.querySelector(`[data-camera-output="${key}"]`);
+      if (control) control.value = camera[key];
+      if (output) output.textContent = `${camera[key]}${key === "zoom" ? "" : "°"}`;
+    });
+  };
+  const LIGHT_PRESETS = {
+    Top: { x: 50, y: 12 },
+    Front: { x: 50, y: 78 },
+    Right: { x: 84, y: 50 },
+    Left: { x: 16, y: 50 },
+    Back: { x: 50, y: 24 },
+    Bottom: { x: 50, y: 88 },
+  };
+  const lightingSettings = (n) => {
+    if (!n.lighting) n.lighting = { direction: "Bottom", x: 50, y: 88, softness: 62, brightness: 50, color: "#FFF1D6" };
+    return n.lighting;
+  };
+  const lightingControlPanel = (n, title = "Relight") => {
+    const light = lightingSettings(n);
+    return `
+      <section class="node-mode-settings relight-settings">
+        <div class="mode-settings-title"><b>${title}</b><span>LIGHT DIRECTION</span></div>
+        <div class="light-quick">
+          <span>빠른 방향</span>
+          <div>${Object.keys(LIGHT_PRESETS).map((preset) => `<button type="button" data-light-preset="${preset}" data-id="${n.id}" class="${light.direction === preset ? "is-on" : ""}">${preset}</button>`).join("")}</div>
+        </div>
+        <div class="relight-stage" data-light-orbit="${n.id}" style="--light-x:${light.x}%;--light-y:${light.y}%">
+          ${veil(n)}
+          <p>누른 채 드래그해 조명 방향을 조절하세요</p>
+          <svg class="light-beam" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <polygon points="${light.x},${light.y} 43,50 57,50" />
+            <line x1="${light.x}" y1="${light.y}" x2="50" y2="50" />
+          </svg>
+          <span class="relight-subject"><img src="${n.src || "assets/app/inspire/inspire-01-character.png"}" alt="조명 대상"></span>
+          <span class="relight-source" aria-hidden="true"><i></i></span>
+          <span class="orbit-axis axis-top">⌃</span><span class="orbit-axis axis-left">‹</span><span class="orbit-axis axis-right">›</span><span class="orbit-axis axis-bottom">⌄</span>
+        </div>
+        <div class="relight-controls">
+          <label class="light-softness"><span>Light</span><b>Soft</b><input type="range" min="0" max="100" value="${light.softness}" data-light-setting="softness" data-id="${n.id}"><b>Hard</b></label>
+          <label><span>Brightness</span><input type="range" min="0" max="100" value="${light.brightness}" data-light-setting="brightness" data-id="${n.id}"><output data-light-output="brightness">${light.brightness}%</output></label>
+          <label class="light-color"><span>Color</span><input type="color" value="${light.color}" data-light-setting="color" data-id="${n.id}"><output data-light-output="color">${light.color}</output></label>
+        </div>
+      </section>`;
+  };
+  const paintLighting = (n) => {
+    const card = world.querySelector(`.node[data-id="${n.id}"]`);
+    const stage = card?.querySelector("[data-light-orbit]");
+    if (!stage) return;
+    const light = lightingSettings(n);
+    stage.style.setProperty("--light-x", `${light.x}%`);
+    stage.style.setProperty("--light-y", `${light.y}%`);
+    const polygon = stage.querySelector(".light-beam polygon");
+    const ray = stage.querySelector(".light-beam line");
+    polygon?.setAttribute("points", `${light.x},${light.y} 43,50 57,50`);
+    ray?.setAttribute("x1", light.x);
+    ray?.setAttribute("y1", light.y);
+    card.querySelectorAll("[data-light-preset]").forEach((button) => button.classList.toggle("is-on", button.dataset.lightPreset === light.direction));
+    ["softness", "brightness", "color"].forEach((key) => {
+      const control = card.querySelector(`[data-light-setting="${key}"]`);
+      const output = card.querySelector(`[data-light-output="${key}"]`);
+      if (control) control.value = light[key];
+      if (output) output.textContent = key === "brightness" ? `${light[key]}%` : light[key];
+    });
+  };
+
+  const directorModePanel = (n) => {
+    const mode = stackIdOf(n);
+    if (mode === "camera") return cameraAnglePanel(n);
     if (mode === "lens") return `
       <section class="node-mode-settings">
         <div class="mode-settings-title"><b>렌즈 설정</b><span>FULL FRAME</span></div>
@@ -949,15 +1328,7 @@
         <div class="mode-field-grid"><label><span>Move</span><select><option>Slow Dolly In</option><option>Orbit</option><option>Handheld</option></select></label><label><span>Speed</span><select><option>0.6× Slow</option><option>1.0× Normal</option></select></label></div>
         ${rangeSetting("이동 거리", 180, 20, 400, "cm")}
       </section>`;
-    if (mode === "lighting") return `
-      <section class="node-mode-settings lighting-settings">
-        <div class="mode-settings-title"><b>3점 조명</b><span>LIGHTING PLOT</span></div>
-        <div class="light-plot">
-          <i class="light-subject">S</i><button type="button" class="light-point key">KEY<b>45°</b></button><button type="button" class="light-point fill">FILL<b>−35°</b></button><button type="button" class="light-point rim">RIM<b>135°</b></button>
-        </div>
-        <div class="mode-field-grid"><label><span>Color Temp.</span><select><option>4300K Neutral</option><option>3200K Warm</option><option>5600K Daylight</option></select></label><label><span>Key : Fill</span><select><option>2 : 1</option><option>4 : 1</option><option>8 : 1</option></select></label></div>
-        ${rangeSetting("Key 강도", 78, 0, 100, "%")}
-      </section>`;
+    if (mode === "lighting") return lightingControlPanel(n, "조명 방향");
     const generic = {
       composition: ["구도 가이드", "Rule of Thirds", "Head Room", "12%"],
       subject: ["피사체 설정", "Frame Left", "Eye Line", "Camera"],
@@ -975,24 +1346,27 @@
   };
 
   const imageHTML = (n) => n.compact ? `
-    <article class="node node-thumb" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-thumb" data-id="${n.id}" data-scope="${scopeOf(n)}" data-aspect-ratio="${aspectOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="media media-thumb ${n.ready ? "" : "media-empty"}">
-        ${veil(n)}
+        ${veil(n, "image")}
         ${n.ready ? `<img src="${n.src || BLANK}" alt=""><span class="look-wash"></span>` : ""}
       </div>
       <span class="thumb-label">${kicker("image", n.shot || n.title || stackOf(n).label)}</span>
       ${stackPick(n)}
+      ${aspectPick(n)}
       <button class="plus-btn" type="button" data-plus="${n.id}">+</button>
     </article>` : `
-    <article class="node node-image" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta">${kicker("image", "이미지")}${stackPick(n)}</div>
+    <article class="node node-image" data-id="${n.id}" data-scope="${scopeOf(n)}" data-aspect-ratio="${aspectOf(n)}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("image", "이미지")}${mediaPicks(n)}</div>
+      ${sampleGuide(n)}
       ${imageModeVisual(n) || `<div class="media media-sq ${n.ready ? "" : "media-empty"}">
-        ${veil(n)}
+        ${veil(n, "image")}
         ${n.ready ? `<img src="${n.src || BLANK}" alt=""><span class="look-wash"></span>` : `<span>${stackOf(n).hint}</span>`}
         <button class="icon-btn media-tools-trigger" type="button" data-media-tools="${n.id}" aria-label="이미지 도구 열기" title="이미지 도구">⋯</button>
       </div>`}
       ${lookLine() ? `<div class="look-strip"><span class="look-dots">${palDots(lookBy("palette", state.look.palette) || lookBy("light", state.look.light))}</span><em>${lookLine()}</em></div>` : ""}
       ${slashRow(n)}
+      ${generationPanel(n)}
       <div class="prompt-dock narrow">
         <textarea data-prompt="${n.id}" placeholder="/ 로 빠른 기능 · ${stackOf(n).hint}">${n.prompt || ""}</textarea>
         <div class="prompt-foot"><span>${stackOf(n).label}</span>${sendBtn(n)}</div>
@@ -1001,8 +1375,9 @@
     </article>`;
 
   const videoHTML = (n) => `
-    <article class="node node-video" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
-      <div class="node-meta">${kicker("video", "비디오")}${stackPick(n)}</div>
+    <article class="node node-video" data-id="${n.id}" data-scope="${scopeOf(n)}" data-aspect-ratio="${aspectOf(n)}" style="left:${n.x}px;top:${n.y}px">
+      <div class="node-meta">${kicker("video", "비디오")}${mediaPicks(n)}</div>
+      ${sampleGuide(n)}
       ${n.ready ? `
         <div class="toolbar" data-bar="${n.id}">
           <button type="button" data-run="enhance" data-id="${n.id}">고화질</button>
@@ -1016,9 +1391,10 @@
         </div>` : ""}
       <div class="media media-wide ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
-        ${n.ready ? `<span class="ai-tag">AI</span><img src="${BLANK}" alt=""><span class="look-wash"></span><div class="player-ui"><span>▶</span><span>0:00</span><span class="bar"><span></span></span><span>0:05</span></div>` : `<span class="play-mark">▶</span>`}
+        ${n.ready ? `<span class="ai-tag">AI</span><img src="${n.src || BLANK}" alt=""><span class="look-wash"></span><div class="player-ui"><span>▶</span><span>0:00</span><span class="bar"><span></span></span><span>0:05</span></div>` : `<span class="play-mark">▶</span>`}
       </div>
       ${cameraMotionPanel(n)}
+      ${generationPanel(n)}
       <div class="prompt-dock">
         <div class="prompt-tools">
           <button class="chip" type="button">+ 참고</button>
@@ -1028,7 +1404,7 @@
           <button class="chip" type="button">카메라 무빙</button>
         </div>
         <div class="prompt-body">
-          <div class="ref-thumb"><img src="${BLANK}" alt=""></div>
+          <div class="ref-thumb"><img src="${n.src || BLANK}" alt=""></div>
           <textarea data-prompt="${n.id}" placeholder="${stackOf(n).hint}">${n.prompt || ""}</textarea>
         </div>
         <div class="prompt-foot">
@@ -1040,11 +1416,12 @@
     </article>`;
 
   const upscaleHTML = (n) => `
-    <article class="node node-upscale" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-upscale" data-id="${n.id}" data-scope="${scopeOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("upscale", `고화질${n.ready ? "(완료)" : "(1080P)"}`)}</div>
+      ${sampleGuide(n)}
       <div class="media media-up ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
-        ${n.ready ? `<img src="${BLANK}" alt=""><span class="ai-tag">4K</span>` : "파라미터를 설정해 고화질 비디오 생성"}
+        ${n.ready ? `<img src="${n.src || BLANK}" alt=""><span class="ai-tag">4K</span>` : "파라미터를 설정해 고화질 비디오 생성"}
       </div>
       <div class="settings">
         <h3>비디오 고화질</h3>
@@ -1068,8 +1445,9 @@
     </article>`;
 
   const textHTML = (n) => `
-    <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-tool" data-id="${n.id}" data-scope="${scopeOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("text", "텍스트")}${stackPick(n)}</div>
+      ${sampleGuide(n)}
       <div class="media media-text ${n.ready ? "is-ready" : "media-empty"}">
         ${veil(n)}
         ${n.ready ? `<p class="title-card">${n.prompt || TEXT_PROMPT}</p>` : `<span>${stackOf(n).hint}</span>`}
@@ -1082,8 +1460,9 @@
     </article>`;
 
   const audioHTML = (n) => `
-    <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-tool" data-id="${n.id}" data-scope="${scopeOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("audio", "오디오")}${stackPick(n)}</div>
+      ${sampleGuide(n)}
       <div class="media media-audio ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
         ${n.ready ? `<span class="wave"></span><span>▶ ${stackOf(n).label} · 0:12</span>` : `<span>${stackOf(n).hint}</span>`}
@@ -1096,12 +1475,13 @@
     </article>`;
 
   const editHTML = (n) => `
-    <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-tool" data-id="${n.id}" data-scope="${scopeOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("edit", "스마트 편집 <em>BETA</em>")}${stackPick(n)}</div>
-      <div class="media media-sq ${n.ready ? "" : "media-empty"}">
+      ${sampleGuide(n)}
+      ${stackIdOf(n) === "relight" ? lightingControlPanel(n) : `<div class="media media-sq ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
-        ${n.ready ? `<span class="ai-tag">EDIT</span><img src="${BLANK}" alt="">` : `<span>${stackOf(n).hint}</span>`}
-      </div>
+        ${n.ready ? `<span class="ai-tag">EDIT</span><img src="${n.src || BLANK}" alt="">` : `<span>${stackOf(n).hint}</span>`}
+      </div>`}
       <div class="prompt-dock narrow">
         <textarea data-prompt="${n.id}" placeholder="${stackOf(n).hint}">${n.prompt || EDIT_PROMPT}</textarea>
         <div class="prompt-foot"><span>${stackOf(n).label}</span>${sendBtn(n)}</div>
@@ -1110,13 +1490,14 @@
     </article>`;
 
   const directorHTML = (n) => `
-    <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-tool" data-id="${n.id}" data-scope="${scopeOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("director", "디렉터 콘솔 <em>NEW</em>")}${stackPick(n)}</div>
+      ${sampleGuide(n)}
       ${directorModePanel(n)}
       <ol class="shot-list director-shot-summary">
         ${(n.shots || SHOTS).map((s, i) => `
           <li class="shot-row">
-            <div class="shot-thumb ${n.ready ? "" : "is-empty"}">${n.ready ? `<img src="${BLANK}" alt="">` : i + 1}</div>
+            <div class="shot-thumb ${n.ready ? "" : "is-empty"}">${n.ready ? `<img src="${s.src || BLANK}" alt="">` : i + 1}</div>
             <div><b>샷 ${i + 1}</b><span>${s.t} · ${s.d}</span></div>
           </li>`).join("")}
       </ol>
@@ -1131,15 +1512,13 @@
     </article>`;
 
   const analyzeHTML = (n) => `
-    <article class="node node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-tool" data-id="${n.id}" data-scope="${scopeOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("analyze", "스마트 분석")}${stackPick(n)}</div>
+      ${sampleGuide(n)}
       <div class="analyze-box">
         ${veil(n)}
         ${n.ready ? `
-          <p><b>5.0s</b> · 16:9 · 클로즈업</p>
-          <p>핵심 동작: 잎을 들어 질문</p>
-          <p>시선: 카메라 → 잎 → 학생</p>
-          <p>권장 다음 샷: 실험 클로즈업</p>` : `<p class="muted-copy">${stackOf(n).hint}</p>`}
+          ${(n.analysis || ["5.0s · 16:9 · 클로즈업", "핵심 동작: 잎을 들어 질문", "시선: 카메라 → 잎 → 학생", "권장 다음 샷: 실험 클로즈업"]).map((line, index) => `<p>${index === 0 ? `<b>${line}</b>` : line}</p>`).join("")}` : `<p class="muted-copy">${stackOf(n).hint}</p>`}
       </div>
       <div class="prompt-foot dock-pad">
         <span>${stackOf(n).label}</span>
@@ -1151,8 +1530,9 @@
     </article>`;
 
   const scriptHTML = (n) => `
-    <article class="node node-script node-tool" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-script node-tool" data-id="${n.id}" data-scope="${scopeOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("script", "스크립트")}${stackPick(n)}</div>
+      ${sampleGuide(n)}
       <div class="script-card ${n.ready ? "is-ready" : "is-empty"}">
         ${veil(n)}
         ${n.ready ? `
@@ -1188,11 +1568,12 @@
     </article>`;
 
   const refHTML = (n) => `
-    <article class="node node-image" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node node-image" data-id="${n.id}" data-scope="${scopeOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker("ref", "참조 노드")}${stackPick(n)}</div>
+      ${sampleGuide(n)}
       <div class="media media-sq ${n.ready ? "" : "media-empty"}">
         ${veil(n)}
-        ${n.ready ? `<img src="${BLANK}" alt=""><span class="ai-tag">REF</span>` : `<span>${stackOf(n).hint}</span>`}
+        ${n.ready ? `<img src="${n.src || BLANK}" alt=""><span class="ai-tag">REF</span>` : `<span>${stackOf(n).hint}</span>`}
         <button class="icon-btn media-tools-trigger" type="button" data-media-tools="${n.id}" aria-label="이미지 도구 열기" title="이미지 도구">⋯</button>
       </div>
       <div class="prompt-foot dock-pad">
@@ -1205,7 +1586,7 @@
     </article>`;
 
   const simpleHTML = (n) => `
-    <article class="node" data-id="${n.id}" data-scope="${n.group ? "seq" : "shared"}" style="left:${n.x}px;top:${n.y}px">
+    <article class="node" data-id="${n.id}" data-scope="${scopeOf(n)}" style="left:${n.x}px;top:${n.y}px">
       <div class="node-meta">${kicker(n.type, n.title)}</div>
       <div class="media media-sq media-empty"><span>${n.title}</span></div>
       <button class="plus-btn" type="button" data-plus="${n.id}">+</button>
@@ -1229,8 +1610,8 @@
     const kids = nodesInGroup(g.id);
     const on = state.frameEdit && state.selectedGroup === g.id;
     return `
-    <section class="board-group${on ? " is-on" : ""}" data-group="${g.id}" aria-label="작은 캔버스 ${g.title}" style="left:${g.x}px;top:${g.y}px;width:${g.w}px;height:${g.h}px">
-      <header class="board-tag" data-group-drag="${g.id}" role="button" tabindex="0" aria-label="${g.title} 작은 캔버스 이동"><b>${g.no}</b><span class="item-label">${g.title}</span></header>
+    <section class="board-group${on ? " is-on" : ""}${g.common ? " is-common" : ""}" data-group="${g.id}" aria-label="${g.common ? "공통 캔버스" : "작은 캔버스"} ${g.title}" style="left:${g.x}px;top:${g.y}px;width:${g.w}px;height:${g.h}px">
+      <header class="board-tag" data-group-drag="${g.id}" role="button" tabindex="0" aria-label="${g.title} 작은 캔버스 이동"><b>${g.common ? "∞" : g.no}</b><span class="item-label">${g.title}</span>${g.common ? `<em class="common-canvas-pill">전체 노드에 항상 적용</em>` : ""}<button type="button" class="group-run" data-run-group="${g.id}">${g.common ? "참조 갱신" : "전체 실행"}</button></header>
       <div class="board-nodes">${kids.map(nodeHTML).join("")}</div>
       ${["nw", "n", "ne", "w", "e", "sw", "s", "se"].map((dir) => `<i class="mini-handle" data-resize="${dir}" data-group="${g.id}" role="slider" aria-label="${dir} 크기 조절"></i>`).join("")}
     </section>`;
@@ -1240,6 +1621,20 @@
     const nested = new Set();
     (state.groups || []).forEach((g) => nodesInGroup(g.id).forEach((n) => nested.add(n.id)));
     world.innerHTML = renderGroups() + state.nodes.filter((n) => !nested.has(n.id)).map(nodeHTML).join("");
+    const commonCount = (state.groups || []).filter((group) => group.common).length;
+    state.nodes.forEach((node) => {
+      const element = world.querySelector(`.node[data-id="${node.id}"]`);
+      if (!element) return;
+      element.insertAdjacentHTML("afterbegin", `<span class="node-frame" aria-hidden="true"></span>`);
+      if (commonCount && !isCommonNode(node)) {
+        element.dataset.commonRef = `${commonCount}`;
+        element.insertAdjacentHTML("afterbegin", `<span class="common-ref-indicator">∞ 공통 ${commonCount}개 참조</span>`);
+      }
+    });
+    world.querySelectorAll(".plus-btn").forEach((button) => {
+      button.title = "클릭: 새 노드 만들기 · 드래그: 기존 노드에 연결";
+      button.setAttribute("aria-label", "클릭하여 새 노드 만들기, 드래그하여 기존 노드에 연결");
+    });
   };
 
   const ADD_TYPES = ["text", "image", "video", "edit", "director", "analyze", "audio", "script", "ref"];
@@ -1528,13 +1923,16 @@
   };
 
   const renderAll = () => {
+    state.nodes.forEach(syncCommonReferences);
     renderNodes();
     layoutSampleWorkspace();
     renderAssetTree();
     renderCanvasDock();
+    paintCanvasTool();
     applyLookCss();
     applyCam();
     placeMediaTools();
+    renderTimelineAudit();
     updateStarry();
   };
 
@@ -1706,8 +2104,8 @@
       const seqs = [...(state.groups || [])].sort((a, b) => Number(a.no) - Number(b.no)).map((g) => {
         const kids = sequenceNodes(g.id);
         if (!kids.length) return "";
-        return `<div class="dock-seq">
-          <button type="button" class="dock-seq-label" data-focus-group="${g.id}">${g.no} ${g.title}</button>
+        return `<div class="dock-seq${g.common ? " is-common" : ""}">
+          <button type="button" class="dock-seq-label" data-focus-group="${g.id}">${g.common ? "∞" : g.no} ${g.title}</button>
           ${kids.map(nodeDockChip).join("")}
         </div>`;
       }).join("");
@@ -1719,8 +2117,8 @@
       list.innerHTML = board + seqs;
     } else {
       list.innerHTML = (state.groups || []).map((g) => `
-        <button type="button" class="canvas-dock-item${state.selectedGroup === g.id ? " is-on" : ""}" data-focus-group="${g.id}">
-          <b>${g.no}</b><span class="item-label">${g.title}</span>
+        <button type="button" class="canvas-dock-item${state.selectedGroup === g.id ? " is-on" : ""}${g.common ? " is-common" : ""}" data-focus-group="${g.id}">
+          <b>${g.common ? "∞" : g.no}</b><span class="item-label">${g.title}</span>
         </button>`).join("");
     }
     if (addBtn) addBtn.hidden = false;
@@ -1735,7 +2133,87 @@
     document.getElementById("stackCanvases")?.setAttribute("aria-pressed", state.stackView ? "true" : "false");
   };
 
+  const formatTimelineTime = (seconds) => {
+    const value = Math.max(0, Math.round(seconds));
+    return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
+  };
+  const timelineVideos = () => {
+    const ordered = [];
+    [...(state.groups || [])]
+      .filter((group) => !group.common)
+      .sort((a, b) => Number(a.no) - Number(b.no))
+      .forEach((group) => sequenceNodes(group.id).filter((node) => node.type === "video").forEach((node) => ordered.push(node)));
+    state.nodes
+      .filter((node) => node.type === "video" && !node.group)
+      .sort((a, b) => a.x - b.x || a.y - b.y)
+      .forEach((node) => ordered.push(node));
+    return [...new Map(ordered.map((node) => [node.id, node])).values()];
+  };
+  const renderTimelineAudit = () => {
+    const panel = document.getElementById("timelineAudit");
+    const button = document.getElementById("timelineCheckBtn");
+    if (!panel || !button) return;
+    const videos = timelineVideos();
+    let cursor = 0;
+    const clips = videos.map((node, index) => {
+      const duration = Number.parseFloat(generatorSettings(node).duration) || 5;
+      const clip = { node, index, duration, start: cursor, end: cursor + duration };
+      cursor += duration;
+      return clip;
+    });
+    const total = cursor;
+    const target = Number(state.timelineTarget) || 30;
+    const pending = videos.filter((node) => !node.ready).length;
+    const ratios = new Set(videos.map(aspectOf));
+    const audioReady = state.nodes.some((node) => node.type === "audio" && node.ready);
+    const delta = total - target;
+    const checks = [
+      {
+        state: videos.length ? (Math.abs(delta) <= 1 ? "good" : Math.abs(delta) <= 5 ? "warn" : "bad") : "bad",
+        label: "목표 러닝타임",
+        detail: videos.length ? `${formatTimelineTime(total)} / ${formatTimelineTime(target)} · ${delta === 0 ? "정확히 일치" : `${Math.abs(delta)}초 ${delta > 0 ? "초과" : "부족"}`}` : "영상 클립이 없습니다",
+      },
+      { state: pending ? "warn" : "good", label: "클립 생성 상태", detail: pending ? `${pending}개 클립이 아직 생성되지 않았습니다` : "모든 영상 클립이 준비되었습니다" },
+      { state: ratios.size > 1 ? "warn" : "good", label: "화면 비율 연속성", detail: ratios.size > 1 ? `${[...ratios].join(" · ")} 비율이 혼용되었습니다` : `${[...ratios][0] || "—"} 비율로 통일되었습니다` },
+      { state: audioReady ? "good" : "warn", label: "오디오 트랙", detail: audioReady ? "사용 가능한 오디오 노드가 연결되어 있습니다" : "BGM·대사·환경음 노드를 확인하세요" },
+    ];
+    const problemCount = checks.filter((check) => check.state !== "good").length;
+    const score = videos.length ? Math.max(35, 100 - problemCount * 16 - Math.min(20, Math.round(Math.abs(delta) * 1.5))) : 0;
+    button.classList.toggle("has-warning", problemCount > 0);
+    panel.innerHTML = `
+      <header class="timeline-audit-head">
+        <div><b>타임라인 구성 점검</b><span>${videos.length}개 클립 · 총 ${formatTimelineTime(total)}</span></div>
+        <label>목표 길이
+          <select data-timeline-target>
+            ${[15, 30, 60, 90, 120].map((time) => `<option value="${time}"${time === target ? " selected" : ""}>${formatTimelineTime(time)}</option>`).join("")}
+          </select>
+        </label>
+      </header>
+      <div class="timeline-score"><strong>${score}</strong><span>${score >= 85 ? "구성이 안정적입니다" : score >= 65 ? "몇 가지 점검이 필요합니다" : "타임라인 조정이 필요합니다"}</span></div>
+      <div class="timeline-ruler"><span>00:00</span><span>${formatTimelineTime(total / 2)}</span><span>${formatTimelineTime(total)}</span></div>
+      <div class="timeline-track">
+        ${clips.length ? clips.map((clip) => `<button type="button" data-timeline-node="${clip.node.id}" style="--clip-grow:${clip.duration}" title="${clip.node.shot || clip.node.title} · ${clip.duration}초"><b>${clip.index + 1}</b><span>${clip.duration}s</span></button>`).join("") : `<p>영상 노드를 연결하면 시간 구성이 표시됩니다.</p>`}
+      </div>
+      <ol class="timeline-clip-list">
+        ${clips.map((clip) => `<li><button type="button" data-timeline-node="${clip.node.id}"><i>${clip.node.ready ? "●" : "○"}</i><b>${clip.node.shot || clip.node.title || `클립 ${clip.index + 1}`}</b><span>${formatTimelineTime(clip.start)}–${formatTimelineTime(clip.end)}</span><em>${aspectOf(clip.node)}</em></button></li>`).join("")}
+      </ol>
+      <div class="timeline-checks">
+        ${checks.map((check) => `<p class="is-${check.state}"><i>${check.state === "good" ? "✓" : "!"}</i><span><b>${check.label}</b><small>${check.detail}</small></span></p>`).join("")}
+      </div>`;
+  };
+
   const CANVAS_WORKFLOWS = {
+    common: {
+      title: "공통 캔버스 · 무드 & 톤",
+      common: true,
+      connect: false,
+      nodes: [
+        { type: "text", mode: "plain", title: "전체 제작 브리프", prompt: "전체 영상이 공통으로 따라야 할 장르, 감정, 시대, 금지 요소를 정리합니다." },
+        { type: "ref", mode: "style", title: "공통 스타일 참조", prompt: "모든 이미지와 영상이 따라야 할 화풍, 질감과 촬영 스타일을 등록합니다." },
+        { type: "director", mode: "color", title: "공통 컬러 톤", prompt: "전체 영상의 컬러 팔레트, 대비, 채도와 LUT를 고정합니다." },
+        { type: "director", mode: "lighting", title: "공통 조명", prompt: "시간대, 색온도와 키·필·림 조명 방향을 전체 장면에 적용합니다." },
+      ],
+    },
     preproduction: {
       title: "프리 프로덕션",
       nodes: [
@@ -1786,6 +2264,7 @@
       y: state.stackView ? (last ? last.y + last.h + 72 : 0) : (last ? last.y : 24),
       w: options.w || 560,
       h: options.h || 700,
+      common: !!options.common,
     };
     groups.push(g);
     if (state.stackView) {
@@ -1803,7 +2282,7 @@
     }
     const workflow = CANVAS_WORKFLOWS[templateId];
     if (!workflow) return;
-    const g = createMiniCanvas({ title: workflow.title, w: 1480, h: 720, focus: false });
+    const g = createMiniCanvas({ title: workflow.title, w: 1480, h: 720, common: workflow.common, focus: false });
     const created = [];
     workflow.nodes.forEach((spec, index) => {
       const type = spec.type;
@@ -1815,8 +2294,8 @@
         x: 0,
         y: 0,
         prompt: spec.prompt || "",
-        ready: false,
-        mode: STACK_DEFAULT[type] || "",
+        ready: !!spec.ready,
+        mode: spec.mode || STACK_DEFAULT[type] || "",
         shots: type === "director" ? SHOTS.map((shot) => ({ ...shot })) : undefined,
         folder: type === "audio" ? "audio" : type === "image" ? "scene" : "new",
         shot: spec.shot || "",
@@ -1827,7 +2306,7 @@
       node.y = slot.y;
       state.nodes.push(node);
       created.push(node);
-      if (index > 0) {
+      if (workflow.connect !== false && index > 0) {
         const source = created[Number.isInteger(spec.from) ? spec.from : index - 1];
         if (source) state.edges.push({ from: source.id, to: node.id });
       }
@@ -1888,6 +2367,7 @@
   const startJob = (id, kind, label) => {
     const n = nodeById(id);
     if (!n || n.busy) return;
+    syncCommonReferences(n);
     if (kind === "generate" && n.type === "script") kind = "script";
     const jobs = {
       generate: { label: "생성 중…", ms: 1300, fn: (x) => {
@@ -2007,13 +2487,51 @@
     renderAll();
   };
 
+  let imageViewerNodeId = "";
+  let imageViewerScale = 1;
+  const paintImageViewerZoom = () => {
+    imageViewerMedia?.style.setProperty("--viewer-scale", imageViewerScale);
+    if (imageViewerZoom) imageViewerZoom.textContent = `${Math.round(imageViewerScale * 100)}%`;
+  };
+  const openImageViewer = (n, src) => {
+    if (!imageViewer || !n || !src) return;
+    imageViewerNodeId = n.id;
+    imageViewerScale = 1;
+    imageViewerMedia.src = src;
+    imageViewerLayer.src = src;
+    imageViewerTitle.textContent = n.shot || n.title || `${NODE_TITLE[n.type] || "이미지"} 크게 보기`;
+    imageViewerNode.textContent = `${NODE_TITLE[n.type] || "이미지"} · ${stackOf(n).label} · ${aspectOf(n)}`;
+    imageViewerPrompt.textContent = n.prompt || "프롬프트 정보가 없습니다.";
+    imageViewerDownload.href = src;
+    imageViewerDownload.download = `${(n.shot || n.title || "avora-image").replace(/[\\/:*?"<>|]/g, "-")}.png`;
+    paintImageViewerZoom();
+    imageViewer.hidden = false;
+    document.body.classList.add("is-image-viewing");
+    document.getElementById("imageViewerClose")?.focus();
+  };
+  const closeImageViewer = () => {
+    if (!imageViewer) return;
+    imageViewer.hidden = true;
+    imageViewerNodeId = "";
+    document.body.classList.remove("is-image-viewing");
+  };
+
   canvas.addEventListener("pointerdown", (e) => {
     if (e.target.closest(".node") || e.target.closest(".plus-btn") || e.target.closest(".add-menu") || e.target.closest("[data-group-drag]") || e.target.closest("[data-resize]") || e.target.closest(".board-group") || e.target.closest(".item-rename") || e.target.closest("[data-cut-edge]") || e.target.closest(".media-tools")) return;
     addMenu.hidden = true;
     state.mediaToolsNode = "";
     placeMediaTools();
     clearFrameEdit();
+    if (state.canvasTool !== "pan") {
+      state.selectedId = "";
+      renderAssetTree();
+      renderCanvasDock();
+      state.panning = { x: e.clientX - state.cam.x, y: e.clientY - state.cam.y };
+      canvas.classList.add("is-panning");
+      return;
+    }
     state.panning = { x: e.clientX - state.cam.x, y: e.clientY - state.cam.y };
+    canvas.classList.add("is-panning");
   });
   canvas.addEventListener("dblclick", (e) => {
     if (reviewMode) return;
@@ -2036,6 +2554,48 @@
       addMenu.style.top = `${Math.max(60, e.clientY - 24)}px`;
     }
   });
+  canvas.addEventListener("dragover", (e) => {
+    if (reviewMode || !e.dataTransfer?.types?.includes("Files")) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    canvas.classList.add("is-file-over");
+  });
+  canvas.addEventListener("dragleave", (e) => {
+    if (!e.relatedTarget || !canvas.contains(e.relatedTarget)) canvas.classList.remove("is-file-over");
+  });
+  canvas.addEventListener("drop", (e) => {
+    canvas.classList.remove("is-file-over");
+    if (reviewMode) return;
+    const files = [...(e.dataTransfer?.files || [])];
+    if (!files.length) return;
+    e.preventDefault();
+    const point = worldFromEvent(e);
+    const group = groupAtWorld(point.x, point.y);
+    const created = [];
+    files.forEach((file, index) => {
+      const type = file.type.startsWith("image/") ? "image" : file.type.startsWith("video/") ? "video" : file.type.startsWith("audio/") ? "audio" : "";
+      if (!type) return;
+      const node = {
+        id: uid(type.slice(0, 2)),
+        type,
+        title: file.name,
+        x: Math.round(point.x + index * 28),
+        y: Math.round(point.y + index * 28),
+        prompt: file.name,
+        ready: true,
+        src: URL.createObjectURL(file),
+        mode: type === "image" ? "i2i" : type === "video" ? "i2v" : "tts",
+        folder: type === "audio" ? "audio" : "scene",
+        group: "",
+      };
+      state.nodes.push(node);
+      if (group) placeIntoGroup(node, group.id);
+      created.push(node);
+    });
+    if (!created.length) return;
+    state.selectedId = created.at(-1).id;
+    renderAll();
+  });
   edgesSvg.addEventListener("click", (e) => {
     const cut = e.target.closest("[data-cut-edge]");
     if (!cut) return;
@@ -2046,12 +2606,55 @@
   world.addEventListener("pointerdown", (e) => {
     if (reviewMode && (e.target.closest(".node") || e.target.closest(".board-group") || e.target.closest("[data-cut-edge]"))) return;
     if (e.target.closest(".item-rename")) return;
+    if (state.canvasTool === "pan" && !e.target.closest("button, textarea, select, input, [data-light-orbit], [data-camera-orbit]")) {
+      e.preventDefault();
+      e.stopPropagation();
+      addMenu.hidden = true;
+      state.panning = { x: e.clientX - state.cam.x, y: e.clientY - state.cam.y };
+      canvas.classList.add("is-panning");
+      return;
+    }
+    const lightOrbit = e.target.closest("[data-light-orbit]");
+    if (lightOrbit) {
+      e.preventDefault();
+      e.stopPropagation();
+      const n = nodeById(lightOrbit.dataset.lightOrbit);
+      if (!n) return;
+      state.lightAdjust = { id: n.id };
+      lightOrbit.classList.add("is-adjusting");
+      return;
+    }
+    const cameraOrbit = e.target.closest("[data-camera-orbit]");
+    if (cameraOrbit) {
+      e.preventDefault();
+      e.stopPropagation();
+      const n = nodeById(cameraOrbit.dataset.cameraOrbit);
+      if (!n) return;
+      const camera = cameraSettings(n);
+      state.cameraAdjust = {
+        id: n.id,
+        sx: e.clientX,
+        sy: e.clientY,
+        rotation: camera.rotation,
+        tilt: camera.tilt,
+      };
+      cameraOrbit.classList.add("is-adjusting");
+      return;
+    }
     const plus = e.target.closest("[data-plus]");
     if (plus) {
+      if (reviewMode) return;
+      e.preventDefault();
       e.stopPropagation();
-      openMenu(plus.dataset.plus, plus);
-      if (state.coach === 0) state.coach = 1;
-      placeCoach();
+      state.connecting = {
+        from: plus.dataset.plus,
+        sx: e.clientX,
+        sy: e.clientY,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        targetId: "",
+        live: false,
+      };
       return;
     }
     const handle = e.target.closest("[data-resize]");
@@ -2070,6 +2673,11 @@
         w: g.w,
         h: g.h,
       };
+      return;
+    }
+    if (e.target.closest("[data-run-group]")) {
+      e.preventDefault();
+      e.stopPropagation();
       return;
     }
     const tag = e.target.closest("[data-group-drag]");
@@ -2121,6 +2729,27 @@
   });
 
   world.addEventListener("input", (e) => {
+    const lightControl = e.target.closest("[data-light-setting]");
+    if (lightControl) {
+      const n = nodeById(lightControl.dataset.id);
+      if (n) {
+        const light = lightingSettings(n);
+        const key = lightControl.dataset.lightSetting;
+        light[key] = key === "color" ? lightControl.value.toUpperCase() : Number(lightControl.value);
+        paintLighting(n);
+      }
+      return;
+    }
+    const cameraControl = e.target.closest("[data-camera-setting]");
+    if (cameraControl) {
+      const n = nodeById(cameraControl.dataset.id);
+      if (n) {
+        const camera = cameraSettings(n);
+        camera[cameraControl.dataset.cameraSetting] = Number(cameraControl.value);
+        paintCameraAngle(n);
+      }
+      return;
+    }
     const ta = e.target.closest("[data-prompt]");
     if (ta) {
       const n = nodeById(ta.dataset.prompt);
@@ -2134,6 +2763,23 @@
   });
 
   world.addEventListener("change", (e) => {
+    const generator = e.target.closest("[data-gen-setting]");
+    if (generator) {
+      const n = nodeById(generator.dataset.id);
+      if (!n) return;
+      generatorSettings(n)[generator.dataset.genSetting] = generator.value;
+      if (!document.getElementById("timelineAudit")?.hidden) renderTimelineAudit();
+      return;
+    }
+    const aspect = e.target.closest("[data-aspect]");
+    if (aspect) {
+      const n = nodeById(aspect.dataset.aspect);
+      if (!n) return;
+      n.aspect = aspect.value;
+      if (n.group) expandGroupToFit(groupById(n.group));
+      renderAll();
+      return;
+    }
     const pick = e.target.closest("[data-stack]");
     if (!pick) return;
     const n = nodeById(pick.dataset.stack);
@@ -2143,6 +2789,47 @@
   });
 
   world.addEventListener("click", (e) => {
+    const groupRun = e.target.closest("[data-run-group]");
+    if (groupRun) {
+      const group = groupById(groupRun.dataset.runGroup);
+      if (!group) return;
+      const nodes = sequenceNodes(group.id);
+      groupRun.textContent = group.common ? "참조 반영됨" : `${nodes.length}개 실행 중`;
+      nodes.forEach((node, index) => window.setTimeout(() => startJob(node.id, "generate"), index * 180));
+      return;
+    }
+    const generatorToggle = e.target.closest("[data-gen-toggle]");
+    if (generatorToggle) {
+      const n = nodeById(generatorToggle.dataset.id);
+      if (!n) return;
+      const settings = generatorSettings(n);
+      const key = generatorToggle.dataset.genToggle;
+      settings.toggles = settings.toggles.includes(key)
+        ? settings.toggles.filter((item) => item !== key)
+        : [...settings.toggles, key];
+      renderAll();
+      return;
+    }
+    const previewSurface = e.target.closest(".media, .mode-grid9 figure, .character-turnaround figure, .expression-strip > span, .story-grid figure");
+    if (previewSurface && !e.target.closest("button")) {
+      const image = previewSurface.matches("img") ? previewSurface : previewSurface.querySelector("img");
+      const card = previewSurface.closest(".node");
+      const n = card ? nodeById(card.dataset.id) : null;
+      if (image?.src && n && ["image", "ref", "edit", "script"].includes(n.type) && !n.busy) {
+        openImageViewer(n, image.getAttribute("src") || image.src);
+        return;
+      }
+    }
+    const lightPreset = e.target.closest("[data-light-preset]");
+    if (lightPreset) {
+      const n = nodeById(lightPreset.dataset.id);
+      const preset = LIGHT_PRESETS[lightPreset.dataset.lightPreset];
+      if (n && preset) {
+        Object.assign(lightingSettings(n), { ...preset, direction: lightPreset.dataset.lightPreset });
+        paintLighting(n);
+      }
+      return;
+    }
     const mediaToolsToggle = e.target.closest("[data-media-tools]");
     if (mediaToolsToggle) {
       const id = mediaToolsToggle.dataset.mediaTools;
@@ -2220,6 +2907,40 @@
   });
 
   window.addEventListener("pointermove", (e) => {
+    if (state.lightAdjust) {
+      const n = nodeById(state.lightAdjust.id);
+      const stage = world.querySelector(`[data-light-orbit="${state.lightAdjust.id}"]`);
+      if (!n || !stage) return;
+      const rect = stage.getBoundingClientRect();
+      const light = lightingSettings(n);
+      light.x = Math.round(Math.max(8, Math.min(92, (e.clientX - rect.left) / rect.width * 100)));
+      light.y = Math.round(Math.max(8, Math.min(92, (e.clientY - rect.top) / rect.height * 100)));
+      light.direction = "Custom";
+      paintLighting(n);
+      return;
+    }
+    if (state.cameraAdjust) {
+      const n = nodeById(state.cameraAdjust.id);
+      if (!n) return;
+      const camera = cameraSettings(n);
+      camera.rotation = Math.round((state.cameraAdjust.rotation + (e.clientX - state.cameraAdjust.sx) * .8 + 360) % 360);
+      camera.tilt = Math.round(Math.max(-60, Math.min(60, state.cameraAdjust.tilt - (e.clientY - state.cameraAdjust.sy) * .45)));
+      paintCameraAngle(n);
+      return;
+    }
+    if (state.connecting) {
+      const distance = Math.hypot(e.clientX - state.connecting.sx, e.clientY - state.connecting.sy);
+      if (!state.connecting.live && distance < 5) return;
+      state.connecting.live = true;
+      state.connecting.clientX = e.clientX;
+      state.connecting.clientY = e.clientY;
+      addMenu.hidden = true;
+      const hit = document.elementFromPoint(e.clientX, e.clientY)?.closest(".node");
+      state.connecting.targetId = hit?.dataset.id && hit.dataset.id !== state.connecting.from ? hit.dataset.id : "";
+      paintConnectionTarget(state.connecting.targetId);
+      drawEdges();
+      return;
+    }
     if (state.movingGroup) {
       const g = groupById(state.movingGroup.id);
       if (!g) return;
@@ -2274,6 +2995,35 @@
     }
   });
   window.addEventListener("pointerup", (e) => {
+    if (state.lightAdjust) {
+      world.querySelector(`[data-light-orbit="${state.lightAdjust.id}"]`)?.classList.remove("is-adjusting");
+      state.lightAdjust = null;
+      return;
+    }
+    if (state.cameraAdjust) {
+      world.querySelector(`[data-camera-orbit="${state.cameraAdjust.id}"]`)?.classList.remove("is-adjusting");
+      state.cameraAdjust = null;
+      return;
+    }
+    if (state.connecting) {
+      const connection = state.connecting;
+      if (connection.live) {
+        const hit = document.elementFromPoint(e.clientX, e.clientY)?.closest(".node");
+        const targetId = hit?.dataset.id && hit.dataset.id !== connection.from ? hit.dataset.id : "";
+        const exists = targetId && state.edges.some((edge) => edge.from === connection.from && edge.to === targetId);
+        if (targetId && !exists) state.edges.push({ from: connection.from, to: targetId });
+        state.connecting = null;
+        paintConnectionTarget("");
+        renderAll();
+      } else {
+        const plus = world.querySelector(`.plus-btn[data-plus="${connection.from}"]`);
+        state.connecting = null;
+        if (plus) openMenu(connection.from, plus);
+        if (state.coach === 0) state.coach = 1;
+        placeCoach();
+      }
+      return;
+    }
     if (state.dragging) {
       const n = nodeById(state.dragging.id);
       if (n) {
@@ -2286,6 +3036,7 @@
     }
     state.dragging = null;
     state.panning = false;
+    canvas.classList.remove("is-panning");
     state.movingGroup = null;
     state.resizing = null;
   });
@@ -2306,6 +3057,39 @@
 
   document.getElementById("zoomIn").onclick = () => { state.cam.scale = Math.min(1.4, state.cam.scale * 1.1); applyCam(); };
   document.getElementById("zoomOut").onclick = () => { state.cam.scale = Math.max(0.4, state.cam.scale * 0.9); applyCam(); };
+  const timelineCheckBtn = document.getElementById("timelineCheckBtn");
+  const timelineAudit = document.getElementById("timelineAudit");
+  timelineCheckBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = timelineAudit.hidden;
+    timelineAudit.hidden = !open;
+    timelineCheckBtn.classList.toggle("is-on", open);
+    timelineCheckBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) renderTimelineAudit();
+  });
+  timelineAudit?.addEventListener("change", (e) => {
+    const target = e.target.closest("[data-timeline-target]");
+    if (!target) return;
+    state.timelineTarget = Number(target.value);
+    renderTimelineAudit();
+  });
+  timelineAudit?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const target = e.target.closest("[data-timeline-node]");
+    if (!target) return;
+    const node = nodeById(target.dataset.timelineNode);
+    if (!node) return;
+    timelineAudit.hidden = true;
+    timelineCheckBtn.classList.remove("is-on");
+    timelineCheckBtn.setAttribute("aria-expanded", "false");
+    focusNode(node);
+  });
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".timeline-tool") || timelineAudit?.hidden) return;
+    timelineAudit.hidden = true;
+    timelineCheckBtn?.classList.remove("is-on");
+    timelineCheckBtn?.setAttribute("aria-expanded", "false");
+  });
 
   document.getElementById("stackCanvases")?.addEventListener("click", () => {
     if (state.stackView) unstackCanvases();
@@ -2313,6 +3097,14 @@
   });
   document.getElementById("canvasDock")?.addEventListener("click", (e) => {
     if (e.target.closest("#stackCanvases")) return;
+    const canvasTool = e.target.closest("[data-canvas-tool]");
+    if (canvasTool) {
+      state.canvasTool = canvasTool.dataset.canvasTool;
+      state.panning = false;
+      canvas.classList.remove("is-panning");
+      paintCanvasTool();
+      return;
+    }
     const createToggle = e.target.closest("#canvasDockAdd");
     if (createToggle) {
       state.dockOpen = false;
@@ -3263,6 +4055,23 @@
   });
 
   let presentIndex = 0;
+  let activePresentScenes = [];
+  const presentScenes = () => {
+    const videos = timelineVideos().filter((node) => node.ready);
+    if (videos.length) return videos;
+    const ordered = [];
+    [...(state.groups || [])]
+      .filter((group) => !group.common)
+      .sort((a, b) => Number(a.no) - Number(b.no))
+      .forEach((group) => sequenceNodes(group.id)
+        .filter((node) => node.type === "image" && node.ready && !node.compact)
+        .forEach((node) => ordered.push(node)));
+    state.nodes
+      .filter((node) => node.type === "image" && node.ready && !node.compact && !node.group)
+      .sort((a, b) => a.x - b.x || a.y - b.y)
+      .forEach((node) => ordered.push(node));
+    return [...new Map(ordered.map((node) => [node.id, node])).values()];
+  };
   const focusNode = (n) => {
     const s = sizeOf(n);
     const at = worldOf(n);
@@ -3274,22 +4083,54 @@
     renderAll();
     world.querySelectorAll(".node").forEach((el) => el.classList.toggle("is-present-focus", el.dataset.id === n.id));
   };
+  const focusPresentScene = (n) => {
+    if (!n) return;
+    state.selectedId = n.id;
+    renderAll();
+    world.querySelectorAll(".node").forEach((el) => el.classList.toggle("is-present-focus", el.dataset.id === n.id));
+    const nodeElement = world.querySelector(`.node[data-id="${n.id}"]`);
+    const surface = nodeElement?.querySelector(":scope > .media, :scope > .mode-visual");
+    if (!nodeElement || !surface) {
+      focusNode(n);
+      return;
+    }
+    const at = worldOf(n);
+    const rect = canvas.getBoundingClientRect();
+    const width = surface.offsetWidth || sizeOf(n).w;
+    const height = surface.offsetHeight || sizeOf(n).h;
+    state.cam.scale = Math.min(2.2, Math.max(.4, (rect.width - 96) / width), Math.max(.4, (rect.height - 132) / height));
+    state.cam.x = rect.width / 2 - (at.x + surface.offsetLeft + width / 2) * state.cam.scale;
+    state.cam.y = rect.height / 2 - (at.y + surface.offsetTop + height / 2) * state.cam.scale + 18;
+    applyCam();
+  };
   const syncPresentLabel = () => {
-    document.getElementById("presentStep").textContent = `${presentIndex + 1}/${state.nodes.length}`;
+    const scene = activePresentScenes[presentIndex];
+    document.getElementById("presentStep").textContent = `${activePresentScenes.length ? presentIndex + 1 : 0}/${activePresentScenes.length}`;
+    document.getElementById("presentSceneTitle").textContent = scene?.shot || scene?.title || "재생 가능한 씬 없음";
     document.getElementById("presentCount").textContent = `${3 + remotes.size}명`;
   };
   const enterPresent = (fromCurrent) => {
     closePops();
+    activePresentScenes = presentScenes();
+    if (!activePresentScenes.length) {
+      presentLoadingStatus.textContent = "먼저 이미지 또는 영상 씬을 생성해 주세요";
+      presentLoading.hidden = false;
+      window.setTimeout(() => {
+        presentLoading.classList.remove("is-visible");
+        presentLoading.hidden = true;
+      }, 1400);
+      return;
+    }
     document.body.classList.add("is-presenting");
     presentMode.hidden = false;
     if (fromCurrent && state.selectedId) {
-      const i = state.nodes.findIndex((n) => n.id === state.selectedId);
+      const i = activePresentScenes.findIndex((n) => n.id === state.selectedId);
       presentIndex = i >= 0 ? i : 0;
     } else {
       presentIndex = 0;
     }
     syncPresentLabel();
-    focusNode(state.nodes[presentIndex]);
+    focusPresentScene(activePresentScenes[presentIndex]);
   };
   let presentLoadingTimer = 0;
   const startPresent = (fromCurrent) => {
@@ -3298,7 +4139,7 @@
     presentLoading.hidden = false;
     presentLoadingStatus.textContent = "장면을 불러오는 중";
     requestAnimationFrame(() => presentLoading.classList.add("is-visible"));
-    window.setTimeout(() => { presentLoadingStatus.textContent = "노드 흐름을 연결하는 중"; }, 800);
+    window.setTimeout(() => { presentLoadingStatus.textContent = "생성된 씬을 시간순으로 정렬하는 중"; }, 800);
     window.setTimeout(() => { presentLoadingStatus.textContent = "재생 준비 완료"; }, 1900);
     presentLoadingTimer = window.setTimeout(() => {
       presentLoading.classList.remove("is-visible");
@@ -3312,12 +4153,14 @@
     document.body.classList.remove("is-presenting");
     presentMode.hidden = true;
     world.querySelectorAll(".node").forEach((el) => el.classList.remove("is-present-focus"));
+    activePresentScenes = [];
     applyCam();
   };
   const stepPresent = (dir) => {
-    presentIndex = (presentIndex + dir + state.nodes.length) % state.nodes.length;
+    if (!activePresentScenes.length) return;
+    presentIndex = (presentIndex + dir + activePresentScenes.length) % activePresentScenes.length;
     syncPresentLabel();
-    focusNode(state.nodes[presentIndex]);
+    focusPresentScene(activePresentScenes[presentIndex]);
   };
   document.getElementById("presentBtn").onclick = () => startPresent(false);
   document.getElementById("presentPop").onclick = (e) => {
@@ -3437,6 +4280,33 @@
       });
     });
   }
+
+  imageViewer?.addEventListener("click", (e) => {
+    if (e.target === imageViewer) closeImageViewer();
+    const zoom = e.target.closest("[data-image-zoom]");
+    if (zoom) {
+      if (zoom.dataset.imageZoom === "fit") imageViewerScale = 1;
+      else imageViewerScale = Math.max(.5, Math.min(2.5, imageViewerScale + (zoom.dataset.imageZoom === "+" ? .25 : -.25)));
+      paintImageViewerZoom();
+      return;
+    }
+    const tool = e.target.closest("[data-viewer-tool]");
+    if (!tool || !imageViewerNodeId) return;
+    const sourceId = imageViewerNodeId;
+    const action = tool.dataset.viewerTool;
+    closeImageViewer();
+    state.plusFrom = sourceId;
+    if (action === "angles") spawnFrom("director", null, "camera");
+    else if (action === "upscale") spawnFrom("upscale");
+    else {
+      const mode = { edit: "cleanup", expand: "extend", remove: "background", color: "style", relight: "relight" }[action] || "cleanup";
+      spawnFrom("edit", null, mode);
+    }
+  });
+  document.getElementById("imageViewerClose")?.addEventListener("click", closeImageViewer);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && imageViewer && !imageViewer.hidden) closeImageViewer();
+  });
 
   lookModal.addEventListener("click", (e) => {
     if (e.target === lookModal) lookModal.hidden = true;

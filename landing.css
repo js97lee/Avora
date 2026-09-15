@@ -1200,6 +1200,31 @@ button.tool-pill {
   color: #a3a3a3;
   font-weight: 500;
 }
+.sns-coming {
+  margin-top: 0.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #71717a;
+  font-size: 0.66rem;
+  white-space: nowrap;
+}
+.sns-coming span {
+  color: #a78bfa;
+  font-size: 0.61rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+.sns-coming b { color: #8b8b93; font-weight: 600; }
+.sns-coming em {
+  padding: 0.18rem 0.42rem;
+  border: 1px solid rgba(167,139,250,.24);
+  border-radius: 999px;
+  background: rgba(124,58,237,.08);
+  color: #b7a4dc;
+  font-style: normal;
+  font-weight: 800;
+}
 
 .animate-fade-in { animation: fade-in 0.4s ease-out; }
 
